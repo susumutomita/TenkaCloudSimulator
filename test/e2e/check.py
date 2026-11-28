@@ -107,6 +107,15 @@ class Conformance(unittest.TestCase):
   subprocess.run([sys.executable,str(Path(__file__).with_name('ssm_batch_delete.py'))],check=True,timeout=120)
  def test_sns_sqs_native_fanout_restart_and_isolation(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sns_sqs_fanout.py'))],check=True,timeout=180)
+
+ def test_sns_notification_topic_policy(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('sns_notification_policy.py'))],check=True,timeout=180)
+
+ def test_codestar_notification_rules_and_git_delivery(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('test_codestar_notifications_environment.py'))], check=True, timeout=30)
+  subprocess.run([sys.executable, str(Path(__file__).with_name('codestar_notifications.py')), '--conformance'],
+                 env={**os.environ, 'SIMULATOR_BINARY':str(BINARY)}, check=True, timeout=180)
+
  def test_scalar_aws_json_live_response_display(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('scalar_aws_json.py'))],check=True,timeout=180)
 

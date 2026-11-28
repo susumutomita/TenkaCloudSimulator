@@ -1,0 +1,675 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AWS CodeStar Notifications",
+    "version": "2019-10-15",
+    "description": "Sign in to your local exercise and use a real repository ARN. Copy the ARN returned by Create into subsequent requests. An empty target list saves a rule. To receive branch events, supply a configured Standard SNS topic subscribed to local SQS queues."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "This simulator"
+    }
+  ],
+  "paths": {
+    "/createNotificationRule": {
+      "post": {
+        "operationId": "CreateNotificationRule",
+        "summary": "Create a local notification rule",
+        "parameters": [
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "default": "us-east-1",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationRuleRequest"
+              },
+              "example": {
+                "Name": "Branch practice",
+                "Resource": "arn:aws:codecommit:us-east-1:000000000000:practice",
+                "DetailType": "BASIC",
+                "EventTypeIds": [
+                  "codecommit-repository-branches-and-tags-created"
+                ],
+                "Targets": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native notification rule response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateNotificationRuleResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native notification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/describeNotificationRule": {
+      "post": {
+        "operationId": "DescribeNotificationRule",
+        "summary": "Describe the saved rule and its targets",
+        "parameters": [
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "default": "us-east-1",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeNotificationRuleRequest"
+              },
+              "example": {
+                "Arn": "arn:aws:codestar-notifications:us-east-1:000000000000:notificationrule/0000000000000000000000000000000000000000"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native notification rule response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeNotificationRuleResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native notification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/listNotificationRules": {
+      "post": {
+        "operationId": "ListNotificationRules",
+        "summary": "List notification rule ARNs",
+        "parameters": [
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "default": "us-east-1",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListNotificationRulesRequest"
+              },
+              "example": {
+                "MaxResults": 20
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native notification rule response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListNotificationRulesResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native notification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/updateNotificationRule": {
+      "post": {
+        "operationId": "UpdateNotificationRule",
+        "summary": "Update the saved rule",
+        "parameters": [
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "default": "us-east-1",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationRuleRequest"
+              },
+              "example": {
+                "Arn": "arn:aws:codestar-notifications:us-east-1:000000000000:notificationrule/0000000000000000000000000000000000000000",
+                "Status": "DISABLED"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native notification rule response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateNotificationRuleResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native notification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deleteNotificationRule": {
+      "post": {
+        "operationId": "DeleteNotificationRule",
+        "summary": "Delete the rule and cancel pending delivery",
+        "parameters": [
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "default": "us-east-1",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteNotificationRuleRequest"
+              },
+              "example": {
+                "Arn": "arn:aws:codestar-notifications:us-east-1:000000000000:notificationrule/0000000000000000000000000000000000000000"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native notification rule response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteNotificationRuleResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native notification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RuleArn": {
+        "type": "string",
+        "pattern": "^arn:aws:codestar-notifications:[a-z0-9-]+:000000000000:notificationrule/[a-f0-9]{40}$"
+      },
+      "Target": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "TargetType": {
+            "type": "string",
+            "enum": [
+              "SNS"
+            ]
+          },
+          "TargetAddress": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "TargetType",
+          "TargetAddress"
+        ]
+      },
+      "Filter": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Name": {
+            "type": "string",
+            "enum": [
+              "RESOURCE",
+              "CREATED_BY",
+              "EVENT_TYPE_ID",
+              "TARGET_ADDRESS"
+            ]
+          },
+          "Value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name",
+          "Value"
+        ]
+      },
+      "TargetSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "TargetType": {
+            "type": "string",
+            "enum": [
+              "SNS"
+            ]
+          },
+          "TargetAddress": {
+            "type": "string"
+          },
+          "TargetStatus": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "UNREACHABLE"
+            ]
+          }
+        }
+      },
+      "EventSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "EventTypeId": {
+            "type": "string"
+          },
+          "ServiceName": {
+            "type": "string"
+          },
+          "ResourceType": {
+            "type": "string"
+          },
+          "EventTypeName": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateNotificationRuleRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "EventTypeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "codecommit-repository-branches-and-tags-created",
+                "codecommit-repository-branches-and-tags-updated"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "DetailType": {
+            "type": "string",
+            "enum": [
+              "BASIC"
+            ]
+          },
+          "Targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 10
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "ENABLED",
+              "DISABLED"
+            ]
+          },
+          "Resource": {
+            "type": "string"
+          },
+          "ClientRequestToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "Name",
+          "Resource",
+          "EventTypeIds",
+          "Targets",
+          "DetailType"
+        ]
+      },
+      "CreateNotificationRuleResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Arn": {
+            "$ref": "#/components/schemas/RuleArn"
+          }
+        },
+        "required": [
+          "Arn"
+        ]
+      },
+      "DescribeNotificationRuleRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Arn": {
+            "$ref": "#/components/schemas/RuleArn"
+          }
+        },
+        "required": [
+          "Arn"
+        ]
+      },
+      "DescribeNotificationRuleResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Arn": {
+            "$ref": "#/components/schemas/RuleArn"
+          },
+          "Resource": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "ENABLED",
+              "DISABLED"
+            ]
+          },
+          "DetailType": {
+            "type": "string",
+            "enum": [
+              "BASIC"
+            ]
+          },
+          "CreatedBy": {
+            "type": "string"
+          },
+          "CreatedTimestamp": {
+            "type": "number"
+          },
+          "LastModifiedTimestamp": {
+            "type": "number"
+          },
+          "EventTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventSummary"
+            }
+          },
+          "Targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetSummary"
+            }
+          }
+        }
+      },
+      "ListNotificationRulesRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Filter"
+            },
+            "maxItems": 10
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        }
+      },
+      "ListNotificationRulesResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "NotificationRules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "Arn": {
+                  "$ref": "#/components/schemas/RuleArn"
+                },
+                "Id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "Arn",
+                "Id"
+              ]
+            }
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateNotificationRuleRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Arn": {
+            "$ref": "#/components/schemas/RuleArn"
+          },
+          "Name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "EventTypeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "codecommit-repository-branches-and-tags-created",
+                "codecommit-repository-branches-and-tags-updated"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "DetailType": {
+            "type": "string",
+            "enum": [
+              "BASIC"
+            ]
+          },
+          "Targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 10
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "ENABLED",
+              "DISABLED"
+            ]
+          }
+        },
+        "required": [
+          "Arn"
+        ]
+      },
+      "UpdateNotificationRuleResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "DeleteNotificationRuleRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Arn": {
+            "$ref": "#/components/schemas/RuleArn"
+          }
+        },
+        "required": [
+          "Arn"
+        ]
+      },
+      "DeleteNotificationRuleResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Arn": {
+            "$ref": "#/components/schemas/RuleArn"
+          }
+        },
+        "required": [
+          "Arn"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "__type",
+          "Message"
+        ]
+      }
+    }
+  }
+}

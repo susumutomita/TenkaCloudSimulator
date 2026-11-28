@@ -118,6 +118,16 @@ func (s *SNSStore) publishQueues(ctx context.Context, queues *SQSStore, topic SN
 		return "", err
 	}
 	defer tx.Rollback()
+	id, err := snsPublishQueuesTx(tx, topic, message, subject, authorize)
+	if err != nil {
+		return "", err
+	}
+	return id, tx.Commit()
+}
+
+// The notification outbox uses the same native publication and queue receipts
+// as direct Publish, committing them together with its own delivery record.
+func snsPublishQueuesTx(tx *sql.Tx, topic SNSTopic, message, subject string, authorize func(string) error) (string, error) {
 	rows, err := tx.Query("SELECT arn,topic_arn,protocol,endpoint FROM aws_sns_subscriptions WHERE topic_arn=? ORDER BY arn", topic.ARN)
 	if err != nil {
 		return "", err
@@ -206,5 +216,5 @@ func (s *SNSStore) publishQueues(ctx context.Context, queues *SQSStore, topic SN
 	if fifo, err := snsRequireTopic(tx, topic.ARN); err != nil || fifo {
 		return "", fmt.Errorf("SNS topic changed during publication: %v", err)
 	}
-	return id, tx.Commit()
+	return id, nil
 }

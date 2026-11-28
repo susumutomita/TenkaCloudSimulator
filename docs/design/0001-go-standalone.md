@@ -1,5 +1,7 @@
 # Go単一バイナリの設計
 
+[AWS CodeStar Notifications](../aws-codestar-notifications.md) は、CodeCommit のブランチ更新と配信待ち記録を同じチームの SQLite トランザクションに保存する。ワーカーは SNS トピックのサービスポリシーとルール作成者の現在のキュー権限を確認し、SNS 配信記録、SQS メッセージ、重複防止記録をまとめて確定する。再起動後は未配信の記録から再開する。Cloudscape と Scalar は同じ公開 REST JSON 操作を使用し、コンソールは書き込み後にルールの保存内容を再取得する。
+
 [AWS CodeCommit](../aws-codecommit.md) は、チーム別の SQLite にリポジトリごとの Git オブジェクトとブランチを保存する。ファイル更新では、親コミットの照合、オブジェクトの追加、ブランチ先端と既定ブランチの更新を同じトランザクションで行う。Go の実装が Git オブジェクトを直接符号化する。
 
 `cmd/simulator`はCLI、numeric loopback listener、token-file、shutdownを所有する。`internal/server`は埋込Cloudscape/Scalar、local token境界、能力表、identity control APIを提供する。`internal/provider`はprovider dispatch、`internal/core`はprovider中立のSQLite object stateと限定identity-policy評価。`internal/aws`はS3 REST/XML、SSM JSON 1.1、CloudFormation Query/XMLとAWS所有テーブルを持つ。
@@ -17,6 +19,8 @@ Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licenses
 [AWS Auto Scaling Plans のコンソール](../autoscaling-plans.md)は選択リージョンの共有 JSON API でプランを作成し、既存の DynamoDB テーブルに対する読み込みまたは書き込みの容量範囲を更新する。プラン状態は Scaling Plans から、実際の両方の容量は DynamoDB DescribeTable から読み戻す。プランの削除後もテーブルと容量は維持される。
 
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
+
+SNS の `SetTopicAttributes` は Standard トピックに CodeStar Notifications 専用の発行ポリシーを保存する。取得時はトピックとポリシー、購読数を同じ SQLite スナップショットから読み取る。ポリシーの物理識別子は同じトピックの更新では保持し、削除後に同名で作り直すと新しくなる。[SNS ポリシー](../sns.md#codestar-notifications-topic-policies)。
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 

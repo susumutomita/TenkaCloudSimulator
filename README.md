@@ -105,8 +105,9 @@ console, CloudFormation adapter or Challenge integration.
   List versions through the native read-only API or compare saved definitions in the console.
   This does not execute the documents.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
-  [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
+  [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscriptions, native SQS fanout and scoped notification topic policies),
   [CloudWatch Logs](docs/cloudwatch-logs.md).
+- [CodeStar Notifications](docs/aws-codestar-notifications.md) delivers local CodeCommit branch changes through Standard SNS topics to subscribed SQS queues. Manage rules in the English or Japanese Cloudscape console.
 - [CodeCommit](docs/aws-codecommit.md) stores local Git files, commits and branch tips in the owning repository.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).

@@ -138,7 +138,7 @@ func (q *request) codeCommitContent() (map[string]any, error) {
 	case "PutFile":
 		result, err = q.gitPut(g, r)
 	case "CreateBranch":
-		err = q.gitCreateBranch(g)
+		err = q.gitCreateBranch(g, r)
 	case "ListBranches":
 		result, err = q.gitBranches(g, r)
 	case "GetBranch":
@@ -184,7 +184,7 @@ func gitCommitID(id string) error {
 	return nil
 }
 
-func (q *request) gitCreateBranch(g gitStore) error {
+func (q *request) gitCreateBranch(g gitStore, r row) error {
 	name, id := gitString(q.input["branchName"]), gitString(q.input["commitId"])
 	if err := gitBranchName(name); err != nil {
 		return err
@@ -195,7 +195,10 @@ func (q *request) gitCreateBranch(g gitStore) error {
 	if _, err := g.commit(id, "CommitDoesNotExistException"); err != nil {
 		return err
 	}
-	return g.createRef(name, id)
+	if err := g.createRef(name, id); err != nil {
+		return err
+	}
+	return q.recordRef(g, r, name, "", id)
 }
 
 func (q *request) gitBranches(g gitStore, r row) (map[string]any, error) {
@@ -384,5 +387,18 @@ func (q *request) gitPut(g gitStore, r row) (map[string]any, error) {
 	if err = g.checkBudget(); err != nil {
 		return nil, err
 	}
+	if err = q.recordRef(g, r, branch, previous, commit); err != nil {
+		return nil, err
+	}
 	return map[string]any{"commitId": commit, "treeId": c.tree, "blobId": blob}, nil
+}
+
+// ErrCodeCommitRefCapacity signals exhaustion of durable event admission.
+var ErrCodeCommitRefCapacity = errors.New("The local pending notification capacity is exhausted. Try again after deliveries drain.")
+
+func (q *request) recordRef(g gitStore, r row, branch, previous, commit string) error {
+	if q.e.cfg.RecordCodeCommitRef == nil {
+		return nil
+	}
+	return q.e.cfg.RecordCodeCommitRef(q.ctx, g.tx, CodeCommitRefChange{Region: r.Region, RepositoryARN: r.ARN, RepositoryID: r.ID, Branch: branch, OldCommit: previous, Commit: commit})
 }

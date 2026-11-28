@@ -30266,6 +30266,2222 @@
           "expect_invariant": "PeerFrame"
         }
       ]
+    },
+    {
+      "id": "SNSNotificationPolicyLifetime",
+      "model": "formal/SNSNotificationPolicyLifetime.tla",
+      "config": "formal/SNSNotificationPolicyLifetime.cfg",
+      "bounds": "One evolving logical ARN in one database, a populated same-ARN peer in another database (its generation is 1), missing/Standard/FIFO, generations 1 and 2 in the primary store, five representative accepted policy documents, seven write and five resolver outcomes, one previously captured local grant. New policy allocation beyond the finite bound is disabled; policy edits and all remaining operations remain available.",
+      "properties": [
+        "TypeOK",
+        "SetAdmission",
+        "SetRefusalPreservesStore",
+        "NewGeneration",
+        "EditKeepsGeneration",
+        "PolicyBytesExact",
+        "DeleteFrame",
+        "PeerFrame",
+        "GetReadback",
+        "ReadsPreserveStore",
+        "ResolverAdmission",
+        "ResolverGeneration",
+        "ResolverDecision",
+        "CapturedCurrentGrant",
+        "CaptureExact",
+        "RestartPreservesStore"
+      ],
+      "limits": "Representative policy strings distinguish exact readback, two different Allow encodings, Deny, and both Allow/Deny orders. The model abstracts the JSON grammar, SQL transaction, Query protocol, IAM and context into decisions. The peer is a fixed live scope. Captured-grant comparison describes a consuming worker obligation; delivery, outbox/retry, SQS, cancellation timing, raw SQL faults, unbounded identifier allocation and actual process/SDK behavior require separate implementation evidence.",
+      "source_scope": [
+        "internal/aws/sns.go",
+        "internal/aws/sns_store.go",
+        "internal/aws/sns_topic_policy.go",
+        "internal/aws/sns_topic_policy_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "SetOnMissingTopic",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic # \"fifo\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "SetOnFIFOTopic",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic # \"missing\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "SkipSetIAM",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcceptInvalidInput",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcceptForeignARN",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeFailedCommit",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"canceled\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeCancellation",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"failedCommit\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeElapsedDeadline",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "PersistRejectedInput",
+          "edits": [
+            {
+              "old": "row' = IF accepted THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "new": "row' = IF accepted \\/ (m = \"invalid\" /\\ topic = \"standard\") THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetRefusalPreservesStore"
+        },
+        {
+          "id": "ReuseAllocatorOnInsert",
+          "edits": [
+            {
+              "old": "THEN high + 1 ELSE row.gen",
+              "new": "THEN (IF high = 0 THEN 1 ELSE high) ELSE row.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NewGeneration"
+        },
+        {
+          "id": "ReplaceIdentityOnEdit",
+          "edits": [
+            {
+              "old": "THEN high + 1 ELSE row.gen",
+              "new": "THEN high + 1 ELSE (IF row.gen < MaxGen THEN row.gen + 1 ELSE row.gen)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifySameBytes",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (doc = row.doc) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifyRevocation",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (Grant(row.doc) /\\ ~Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifyRepair",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (~Grant(row.doc) /\\ Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "NormalizeDistinctAllowBytes",
+          "edits": [
+            {
+              "old": "THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "new": "THEN [gen |-> gen, doc |-> IF doc = \"allowB\" THEN \"allowA\" ELSE doc] ELSE row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PolicyBytesExact"
+        },
+        {
+          "id": "LeavePolicyOnDelete",
+          "edits": [
+            {
+              "old": "row' = IF removed THEN Absent ELSE row",
+              "new": "row' = row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "ResetAllocatorOnDelete",
+          "edits": [
+            {
+              "old": "high' = high\n          /\\ last' = Notice(\"delete\"",
+              "new": "high' = IF removed THEN 0 ELSE high\n          /\\ last' = Notice(\"delete\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "ClearPeerOnDelete",
+          "edits": [
+            {
+              "old": "peer' = peer",
+              "new": "peer' = IF removed THEN Absent ELSE peer",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "DeleteOnFailedCommit",
+          "edits": [
+            {
+              "old": "removed == m = \"ok\"",
+              "new": "removed == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "LeakDeniedGetPolicy",
+          "edits": [
+            {
+              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
+              "new": "visible == row.doc",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetReadback"
+        },
+        {
+          "id": "LoseSecondAllowOnRead",
+          "edits": [
+            {
+              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
+              "new": "visible == IF ok /\\ row.doc # \"allowB\" THEN row.doc ELSE \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetReadback"
+        },
+        {
+          "id": "TreatCallerAsInternal",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"caller\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "IgnoreLookupARN",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"foreignARN\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "AcceptCorruptSavedRow",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ (m = \"ok\" \\/ (m = \"badRow\" /\\ row.gen > 0))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "IgnoreReadFailure",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"readError\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "ResolveMissingTopic",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic # \"fifo\" /\\ m = \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "ResolveFIFOTopic",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic # \"missing\" /\\ m = \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "OmitDeniedRowGeneration",
+          "edits": [
+            {
+              "old": "IF readable THEN row.gen ELSE 0",
+              "new": "IF readable /\\ Grant(row.doc) THEN row.gen ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverGeneration"
+        },
+        {
+          "id": "PreferLeadingAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"allowDeny\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "PreferTrailingAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"denyAllow\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "TreatDenyAsAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"deny\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "SynthesizeMissingGrant",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"none\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "DenyMatchingServiceGrant",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "ClearPolicyOnCorruptRead",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<topic, row, high, peer, captured>>\n\nCapture ==",
+              "new": "/\\ row' = IF m = \"badRow\" THEN Absent ELSE row\n       /\\ UNCHANGED <<topic, high, peer, captured>>\n\nCapture ==",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadsPreserveStore"
+        },
+        {
+          "id": "CaptureWrongGeneration",
+          "edits": [
+            {
+              "old": "captured' = row.gen",
+              "new": "captured' = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureExact"
+        },
+        {
+          "id": "AcceptPeerWithEqualGeneration",
+          "edits": [
+            {
+              "old": "OwnTicket(source) == source = \"own\"",
+              "new": "OwnTicket(source) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "ReuseCaptureAcrossRecreation",
+          "edits": [
+            {
+              "old": "generation = row.gen /\\ Grant(row.doc)",
+              "new": "row.gen # 0 /\\ Grant(row.doc)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "UseRevokedCapture",
+          "edits": [
+            {
+              "old": "generation = row.gen /\\ Grant(row.doc)",
+              "new": "generation = row.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "LosePolicyOnRestart",
+          "edits": [
+            {
+              "old": "Restart ==\n    /\\ row' = row",
+              "new": "Restart ==\n    /\\ row' = Absent",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesStore"
+        },
+        {
+          "id": "LoseAllocatorOnRestart",
+          "edits": [
+            {
+              "old": "Restart ==\n    /\\ row' = row\n    /\\ high' = high",
+              "new": "Restart ==\n    /\\ row' = row\n    /\\ high' = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesStore"
+        }
+      ]
+    },
+    {
+      "id": "CodeStarBranchNotificationDelivery",
+      "model": "formal/CodeStarBranchNotificationDelivery.tla",
+      "config": "formal/CodeStarBranchNotificationDelivery.cfg",
+      "bounds": "One team database, one tracked Git branch initially missing or at its first commit, one existing commit usable by CreateBranch, one native or untrusted write request, and one matching rule with zero, one or two target topics. The model distinguishes zero, one or two remaining outbox slots, two per-target subscriptions/queues, initial and replacement generations, a stored rule creator and a distinct Git writer. The worker may retry either target independently across ticks or restarts. The tracked rule can be enabled, disabled or deleted. List requests observe one representative candidate row and an exclusive cursor bound.",
+      "properties": [
+        "ListReadFrame",
+        "ListReadResult",
+        "RetryEligibility",
+        "TypeOK",
+        "GitAdmission",
+        "GitAtomicFailure",
+        "GitCommitExact",
+        "EventExact",
+        "WorkerDecision",
+        "AtMostOnce",
+        "PublicationAtomic",
+        "FailureHasNoPublication",
+        "TargetRetirement",
+        "PeerAndGitFrame",
+        "RestartExact",
+        "RuleChangeAtomic"
+      ],
+      "limits": "The model checks safety for one event and a finite set of single-condition observations per operation. One receipt per target represents one event identity. Matching and immutable identities abstract exact ARNs, repository UUIDs, subscription IDs, event JSON, Git objects and SQLite foreign keys. A captured publisher must use the same current rule-owner policy snapshot for both queues. Temporary denies defer a target; changed captured identities cannot publish it. A tick represents elapsed native retry time without a real clock or fairness guarantee. Local limits of 2,048 pending targets and 20 destinations are represented by capacity boundaries and two queues. Actual SDK, two team databases, concurrent SQLite writes, cancellation timing, cryptographic identities, rule request validation, full IAM and external delivery are outside this finite check. The read projection distinguishes service selection, store availability, ordinary actor, wildcard IAM List permission, region, matching filter and scoped cursor. A read preserves the actual modeled Git and publication frame even after denial, disabling or deletion. Native routing and request parsing, token HMAC/encoding and multi-page issuance, complete filter grammar and other rule API admission remain separate checks.",
+      "source_scope": [
+        "internal/aws/catalog/codecommit_content.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/codestarnotifications/rules.go",
+        "internal/aws/codestarnotifications/store.go",
+        "internal/aws/codestarnotifications/outbox.go",
+        "internal/aws/codestarnotifications/delivery.go",
+        "internal/aws/notification_gateway.go",
+        "internal/aws/sns_topic_policy.go",
+        "internal/aws/sns_sqs_fanout.go",
+        "internal/server/server.go",
+        "internal/aws/notification_delivery_test.go",
+        "internal/aws/codestarnotifications/list.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/aws/notification_gateway_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "TrustSyntheticProducer",
+          "edits": [
+            {
+              "old": "Origin(op) == op \\in {\"PutFile\", \"CreateBranch\"}",
+              "new": "Origin(op) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "ReplaceExistingBranch",
+          "edits": [
+            {
+              "old": "CAS(op) == op # \"CreateBranch\" \\/ old = 0",
+              "new": "CAS(op) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "SkipGitWriterIAM",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "CommitStaleRef",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"iamDeny\", \"commitFault\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "AcknowledgeFailedGitCommit",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "AcknowledgeGitDeadline",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "RequireDeveloperQueuePermission",
+          "edits": [
+            {
+              "old": "/\\ GitAllowed(m) /\\ Cardinality",
+              "new": "/\\ GitAllowed(m) /\\ m # \"writerNoQueue\" /\\ Cardinality",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "IgnoreBacklogCapacity",
+          "edits": [
+            {
+              "old": "Cardinality(targets) <= Slots(m)",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "RejectExactlyFullAdmission",
+          "edits": [
+            {
+              "old": "Cardinality(targets) <= Slots(m)",
+              "new": "Cardinality(targets) < Slots(m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "RequireCapacityWithoutMatchedRules",
+          "edits": [
+            {
+              "old": "Cardinality(targets) <= Slots(m)",
+              "new": "Cardinality(targets) <= Slots(m) /\\ Slots(m) > 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "IgnoreSourceRegion",
+          "edits": [
+            {
+              "old": "Source(m).region = \"east\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "AdoptRecreatedSourceUUID",
+          "edits": [
+            {
+              "old": "Source(m).uuid = 1",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "CaptureDisabledRule",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"disabled\", \"filtered\", \"noTargets\", \"fullWithoutMatch\"}",
+              "new": "                  /\\ m \\notin {\"filtered\", \"noTargets\", \"fullWithoutMatch\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "IgnoreRuleEventFilter",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"disabled\", \"filtered\", \"noTargets\", \"fullWithoutMatch\"}",
+              "new": "                  /\\ m \\notin {\"disabled\", \"noTargets\", \"fullWithoutMatch\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "PersistRefOnFailedGit",
+          "edits": [
+            {
+              "old": "ref' = IF ok THEN 2 ELSE ref",
+              "new": "ref' = IF ok \\/ m = \"commitFault\" THEN 2 ELSE ref",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAtomicFailure"
+        },
+        {
+          "id": "LeaveContentAfterRefusal",
+          "edits": [
+            {
+              "old": "wroteObjects' = (ok /\\ op = \"PutFile\")",
+              "new": "wroteObjects' = ((ok \\/ m = \"deadline\") /\\ op = \"PutFile\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAtomicFailure"
+        },
+        {
+          "id": "CreateBranchWritesNewContent",
+          "edits": [
+            {
+              "old": "wroteObjects' = (ok /\\ op = \"PutFile\")",
+              "new": "wroteObjects' = ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "LoseSecondMatchedTarget",
+          "edits": [
+            {
+              "old": "pending' = IF ok THEN targets ELSE pending",
+              "new": "pending' = IF ok THEN targets \\cap {\"a\"} ELSE pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "AppendAfterGitRefusal",
+          "edits": [
+            {
+              "old": "pending' = IF ok THEN targets ELSE pending",
+              "new": "pending' = IF ok \\/ m = \"commitFault\" THEN targets ELSE pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAtomicFailure"
+        },
+        {
+          "id": "MislabelNewRef",
+          "edits": [
+            {
+              "old": "Kind == IF old = 0 THEN \"referenceCreated\" ELSE \"referenceUpdated\"",
+              "new": "Kind == \"referenceUpdated\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "MislabelAdvancedRef",
+          "edits": [
+            {
+              "old": "Kind == IF old = 0 THEN \"referenceCreated\" ELSE \"referenceUpdated\"",
+              "new": "Kind == \"referenceCreated\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "DropPreviousCommitFromUpdate",
+          "edits": [
+            {
+              "old": "kind |-> Kind, previous |-> old",
+              "new": "kind |-> Kind, previous |-> 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "AdoptNewQueueThroughStaleSubscription",
+          "edits": [
+            {
+              "old": "ValidBinding(m) == OriginalQueue(m) = QueueAtCapture(m)",
+              "new": "ValidBinding(m) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "RefuseRepairedNewSubscription",
+          "edits": [
+            {
+              "old": "ValidBinding(m) == OriginalQueue(m) = QueueAtCapture(m)",
+              "new": "ValidBinding(m) == OriginalQueue(m) = QueueAtCapture(m) /\\ QueueAtCapture(m) = 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "IgnoreRuleGeneration",
+          "edits": [
+            {
+              "old": "envelope.life[t].rule = Current(t,m).rule",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreSourceGenerationAtDelivery",
+          "edits": [
+            {
+              "old": "envelope.life[t].repo = Current(t,m).repo",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreTopicGeneration",
+          "edits": [
+            {
+              "old": "envelope.life[t].topicGen = Current(t,m).topicGen",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "RebindRecreatedOwner",
+          "edits": [
+            {
+              "old": "envelope.life[t].owner = Current(t,m).owner",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreReplacedSubscription",
+          "edits": [
+            {
+              "old": "envelope.life[t].sub1 = Current(t,m).sub1",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AdoptFirstRecreatedQueue",
+          "edits": [
+            {
+              "old": "envelope.life[t].queue1 = Current(t,m).queue1",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AdoptSecondRecreatedQueue",
+          "edits": [
+            {
+              "old": "envelope.life[t].queue2 = Current(t,m).queue2",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "KeepDisabledRule",
+          "edits": [
+            {
+              "old": "RuleCurrent(t,m) == /\\ m # \"ruleDisabled\"",
+              "new": "RuleCurrent(t,m) == /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "PublishWithoutRecipients",
+          "edits": [
+            {
+              "old": "envelope.validTopology /\\ m # \"noRecipients\"",
+              "new": "envelope.validTopology",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreInvalidCapturedTopology",
+          "edits": [
+            {
+              "old": "envelope.validTopology /\\ m # \"noRecipients\"",
+              "new": "m # \"noRecipients\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "BypassCurrentSNSServiceGrant",
+          "edits": [
+            {
+              "old": "ServiceAllows(m) == m # \"topicDeny\"",
+              "new": "ServiceAllows(m) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreFirstQueueDeny",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"ownerDenyFirst\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreSecondQueueDeny",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"ownerDenySecond\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "UseGitWriterQueueAuthority",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"writerOnly\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "MixOwnerPolicyRevisions",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"splitRevisions\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "CancelInsteadOfDeferringDeniedGrant",
+          "edits": [
+            {
+              "old": "\"afterFirstQueue\" -> \"defer\"",
+              "new": "\"afterFirstQueue\" -> \"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AcceptReadFault",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreReceiptFailure",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"readFault\", \"commitFailure\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AcceptFailedWorkerCommit",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "DeliverAfterWorkerDeadline",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "SkipPublicationRollback",
+          "edits": [
+            {
+              "old": "first' = Bump(first, t, deliver)",
+              "new": "first' = Bump(first, t, deliver \\/ (m = \"afterFirstQueue\" /\\ result = \"defer\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "PublishOnGrantRefusal",
+          "edits": [
+            {
+              "old": "sns' = Bump(sns, t, deliver)",
+              "new": "sns' = Bump(sns, t, deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "SkipSecondQueue",
+          "edits": [
+            {
+              "old": "second' = Bump(second, t, deliver)",
+              "new": "second' = second",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "SkipSNSAudit",
+          "edits": [
+            {
+              "old": "sns' = Bump(sns, t, deliver)",
+              "new": "sns' = sns",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "SkipDurableReceipt",
+          "edits": [
+            {
+              "old": "receipts' = IF deliver THEN receipts \\cup {t} ELSE receipts",
+              "new": "receipts' = receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "DropPendingAfterDeniedQueue",
+          "edits": [
+            {
+              "old": "remove == deliver \\/ result = \"cancel\"",
+              "new": "remove == deliver \\/ result = \"cancel\" \\/ (result = \"defer\" /\\ m = \"ownerDenySecond\")",
+              "count": 1
+            },
+            {
+              "old": "delayed' = IF result = \"defer\" THEN delayed \\cup {t} ELSE delayed",
+              "new": "delayed' = IF result = \"defer\" /\\ m # \"ownerDenySecond\" THEN delayed \\cup {t} ELSE delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TargetRetirement"
+        },
+        {
+          "id": "MarkPeerDelivered",
+          "edits": [
+            {
+              "old": "receipts' = IF deliver THEN receipts \\cup {t} ELSE receipts",
+              "new": "receipts' = IF deliver THEN Targets ELSE receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "ClearOtherPendingTarget",
+          "edits": [
+            {
+              "old": "pending' = IF remove THEN pending \\ {t} ELSE pending",
+              "new": "pending' = IF remove THEN {} ELSE pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerAndGitFrame"
+        },
+        {
+          "id": "LeaveDeliveredIntentPending",
+          "edits": [
+            {
+              "old": "remove == deliver \\/ result = \"cancel\"",
+              "new": "remove == result = \"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TargetRetirement"
+        },
+        {
+          "id": "SkipRetryDelay",
+          "edits": [
+            {
+              "old": "delayed' = IF result = \"defer\" THEN delayed \\cup {t} ELSE delayed",
+              "new": "delayed' = delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TargetRetirement"
+        },
+        {
+          "id": "RetryImmediately",
+          "edits": [
+            {
+              "old": "t \\in pending \\ delayed",
+              "new": "t \\in pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryEligibility"
+        },
+        {
+          "id": "ReplayPreviouslyDeliveredTarget",
+          "edits": [
+            {
+              "old": "t \\in pending \\ delayed",
+              "new": "t \\in (pending \\ delayed) \\cup receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryEligibility"
+        },
+        {
+          "id": "DropPendingOnRestart",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ delayed' = delayed",
+              "new": "pending' = pending \\cap delayed /\\ receipts' = receipts /\\ delayed' = delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartExact"
+        },
+        {
+          "id": "ForgetReceiptOnRestart",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ delayed' = delayed",
+              "new": "pending' = pending /\\ receipts' = {} /\\ delayed' = delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "DuplicateCommittedPublication",
+          "edits": [
+            {
+              "old": "IF yes THEN [count EXCEPT ![t] = @ + 1] ELSE count",
+              "new": "IF yes THEN [count EXCEPT ![t] = @ + 2] ELSE count",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtMostOnce"
+        },
+        {
+          "id": "PublishCompleteFrameDespiteTemporaryDeny",
+          "edits": [
+            {
+              "old": "sns' = Bump(sns, t, deliver)",
+              "new": "sns' = Bump(sns, t, (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")))",
+              "count": 1
+            },
+            {
+              "old": "first' = Bump(first, t, deliver)",
+              "new": "first' = Bump(first, t, (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")))",
+              "count": 1
+            },
+            {
+              "old": "second' = Bump(second, t, deliver)",
+              "new": "second' = Bump(second, t, (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")))",
+              "count": 1
+            },
+            {
+              "old": "receipts' = IF deliver THEN receipts \\cup {t} ELSE receipts",
+              "new": "receipts' = IF (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")) THEN receipts \\cup {t} ELSE receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureHasNoPublication"
+        },
+        {
+          "id": "RetainPendingAfterRuleUpdate",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode \\in {\"changeFailed\", \"update\"} THEN pending ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "RetainPendingAfterRuleDisable",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode \\in {\"changeFailed\", \"disable\"} THEN pending ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "RetainPendingAfterRuleDelete",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode \\in {\"changeFailed\", \"delete\"} THEN pending ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "LosePendingAfterFailedRuleChange",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode = \"changeFailed\" THEN delayed ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "ListClaimsForeignSelector",
+          "edits": [
+            {
+              "old": "ListSelected(m) == m # \"otherService\"",
+              "new": "ListSelected(m) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RefuseSignedList",
+          "edits": [
+            {
+              "old": "ListSelected(m) == m # \"otherService\"",
+              "new": "ListSelected(m) == m # \"otherService\" /\\ m # \"signedRoute\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RefuseServiceHintList",
+          "edits": [
+            {
+              "old": "ListSelected(m) == m # \"otherService\"",
+              "new": "ListSelected(m) == m # \"otherService\" /\\ m # \"serviceHint\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListWithoutActor",
+          "edits": [
+            {
+              "old": "ListCaller(m) == m \\notin {\"missingActor\", \"unsupportedSession\"}",
+              "new": "ListCaller(m) == m \\notin {\"unsupportedSession\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListAllowsUnsupportedSession",
+          "edits": [
+            {
+              "old": "ListCaller(m) == m \\notin {\"missingActor\", \"unsupportedSession\"}",
+              "new": "ListCaller(m) == m \\notin {\"missingActor\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListDespiteWildcardDeny",
+          "edits": [
+            {
+              "old": "ListAllowance(m) == m \\notin {\"wildcardDeny\", \"onlyScopedAllow\"}",
+              "new": "ListAllowance(m) == m \\notin {\"onlyScopedAllow\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AllowRuleARNInsteadOfWildcard",
+          "edits": [
+            {
+              "old": "ListAllowance(m) == m \\notin {\"wildcardDeny\", \"onlyScopedAllow\"}",
+              "new": "ListAllowance(m) == m \\notin {\"wildcardDeny\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AcceptAnotherActorCursor",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AcceptAnotherRegionCursor",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AcceptAnotherFilterCursor",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"invalidLimit\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IgnorePageLimit",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IgnoreInvalidListFilter",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ReturnWrongFilter",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\", \"nextPageExhausted\"}",
+              "new": "                  /\\ m \\notin {\"differentFilterMiss\", \"nextPageExhausted\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IgnoreDistinctFilterGroup",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\", \"nextPageExhausted\"}",
+              "new": "                  /\\ m \\notin {\"filterMiss\", \"nextPageExhausted\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RepeatRowAfterCursor",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\", \"nextPageExhausted\"}",
+              "new": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListMalformedWire",
+          "edits": [
+            {
+              "old": "m = \"otherWire\" -> \"invalid\"",
+              "new": "FALSE -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListWithoutStore",
+          "edits": [
+            {
+              "old": "m = \"unconfiguredStore\" -> \"unavailable\"",
+              "new": "FALSE -> \"unavailable\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListForeignRule",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"foreignRegion\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "HideDisabledRule",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState = \"enabled\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListDeletedRule",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "LimitListToRuleOwner",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"differentActorAllowed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IntersectRepeatedFilterValues",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"sameFilterAlternative\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RejectMatchingScopedCursor",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"validScopedPage\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ClearPendingOnDeniedList",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "new": "pending' = (IF m = \"wildcardDeny\" THEN {} ELSE pending) /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadFrame"
+        },
+        {
+          "id": "LosePriorReceiptOnInvalidList",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "new": "pending' = pending /\\ receipts' = (IF m = \"tokenOtherActor\" THEN {} ELSE receipts) /\\ ruleState' = ruleState",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadFrame"
+        },
+        {
+          "id": "DeleteRuleDuringList",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "new": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = (IF m = \"signedRoute\" THEN \"absent\" ELSE ruleState)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadFrame"
+        }
+      ]
+    },
+    {
+      "id": "NotificationRuleConsole",
+      "model": "formal/NotificationRuleConsole.tla",
+      "config": "formal/NotificationRuleConsole.cfg",
+      "bounds": "Two trusted mount scopes representing route/region/identity. The read trial permits three asynchronous requests, a first or continuation page and two distinct rule ARNs. The write trial permits two physical sends, three operation kinds, one opaque saved body and Create token, one scope switch and a retained old write reply. Each step distinguishes the specifically observed acknowledgement, authoritative saved/absent state or failed read.",
+      "properties": [
+        "TypeOK",
+        "ReadFrame",
+        "CanceledRead",
+        "ScopeReset",
+        "LateWriteFrame",
+        "WriteLock",
+        "AckState",
+        "SavedState",
+        "RecoveryState",
+        "ExactReplay"
+      ],
+      "limits": "Read and mutation trials separately check the shared component control rules; they do not enumerate concurrent browser tasks. Unknown Create can use only explicit replay with the original inputs in the same mount. An exact refresh of a known ARN resolves current state without proving the original write committed. Current denial on a list continuation clears both the previously visible page and its continuation. A retryable failure may retain the acknowledged page; a retired request cannot clear current state. A known-ARN read or definitive response unlocks a new user command; a new Create uses a fresh symbolic token. Accepted response shapes and matching fields represent the native client decoder and Describe readback; a native Update acknowledgement is empty and retains the submitted ARN. Tokens and ARNs are symbolic: no proof of token generation, idempotent server storage, exact HTTP/React execution, CSS/keyboard accessibility, SDK interoperability, native queue delivery or wall-clock behavior. Navigation/capability and embedded bundle bindings cover only entry into and retirement of a scoped view.",
+      "source_scope": [
+        "tools/console/src/codestar-notifications.jsx",
+        "tools/console/src/codestar-notifications.mjs",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "AcceptRetiredReadSameMount",
+          "edits": [
+            {
+              "old": "Current(q) == q.id = ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == q.scope = ui.scope",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "AcceptPriorPrincipalSameTicket",
+          "edits": [
+            {
+              "old": "Current(q) == q.id = ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == q.id = ui.active",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "ShowDeniedRead",
+          "edits": [
+            {
+              "old": "publish == current /\\ status = \"ok\"",
+              "new": "publish == current /\\ (status = \"ok\" \\/ (status = \"denied\" /\\ q.kind \\in {\"detailA\",\"detailB\"}))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "ShowForeignDetailARN",
+          "edits": [
+            {
+              "old": "publish == current /\\ status = \"ok\"",
+              "new": "publish == current /\\ status \\in {\"ok\",\"wrongARN\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "PublishMalformedRead",
+          "edits": [
+            {
+              "old": "publish == current /\\ status = \"ok\"",
+              "new": "publish == current /\\ status \\in {\"ok\",\"malformed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "PublishFailedRead",
+          "edits": [
+            {
+              "old": "publish == current /\\ status = \"ok\"",
+              "new": "publish == current /\\ status \\in {\"ok\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "ShowDetailBForA",
+          "edits": [
+            {
+              "old": "ELSE q.kind\nAnswerRead",
+              "new": "ELSE IF q.kind = \"detailA\" THEN \"detailB\" ELSE q.kind\nAnswerRead",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "DiscardFirstPageWhileAppending",
+          "edits": [
+            {
+              "old": "ReadValue(q) == IF q.kind = \"nextPage\" THEN \"bothPages\" ELSE q.kind",
+              "new": "ReadValue(q) == IF q.kind = \"nextPage\" THEN \"firstPage\" ELSE q.kind",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "LeaveCanceledReadActive",
+          "edits": [
+            {
+              "old": "ui' = [ui EXCEPT !.active = 0, !.readState = \"idle\"]",
+              "new": "ui' = ui",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanceledRead"
+        },
+        {
+          "id": "CarryFormerRenderedData",
+          "edits": [
+            {
+              "old": "!.waiting = ui.waiting, !.sends = ui.sends,",
+              "new": "!.view = IF ui.view # \"none\" THEN ui.view ELSE @, !.waiting = ui.waiting, !.sends = ui.sends,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeReset"
+        },
+        {
+          "id": "CarryFormerCreateToken",
+          "edits": [
+            {
+              "old": "!.waiting = ui.waiting, !.sends = ui.sends,",
+              "new": "!.token = IF ui.stage = \"unknownCreate\" THEN ui.token ELSE @, !.waiting = ui.waiting, !.sends = ui.sends,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeReset"
+        },
+        {
+          "id": "CarryFormerPayload",
+          "edits": [
+            {
+              "old": "!.waiting = ui.waiting, !.sends = ui.sends,",
+              "new": "!.body = IF ui.stage = \"unknownCreate\" THEN ui.body ELSE @, !.waiting = ui.waiting, !.sends = ui.sends,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeReset"
+        },
+        {
+          "id": "CarryPriorUnknownCreate",
+          "edits": [
+            {
+              "old": "!.waiting = ui.waiting, !.sends = ui.sends,",
+              "new": "!.stage = IF ui.stage = \"unknownCreate\" THEN ui.stage ELSE @, !.waiting = ui.waiting, !.sends = ui.sends,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeReset"
+        },
+        {
+          "id": "PublishLateWriteOnNewScope",
+          "edits": [
+            {
+              "old": "[ui EXCEPT !.retired = FALSE]",
+              "new": "[ui EXCEPT !.retired = FALSE, !.verified = TRUE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LateWriteFrame"
+        },
+        {
+          "id": "StartWhileWriteInFlight",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"sending\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "StartBeforeDurableRead",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"checking\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "StartDuringKnownUncertainty",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"known\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "StartDuringUnknownCreate",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"unknownCreate\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "TreatSuccessAckAsVerified",
+          "edits": [
+            {
+              "old": "!.stage = next, !.arn = IF status",
+              "new": "!.stage = next, !.verified = (status = \"ok\"), !.arn = IF status",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckState"
+        },
+        {
+          "id": "TreatLostWriteAsAcknowledged",
+          "edits": [
+            {
+              "old": "CASE status = \"ok\" -> \"checking\"",
+              "new": "CASE status \\in {\"ok\",\"lost\"} -> \"checking\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckState"
+        },
+        {
+          "id": "TrustMalformedAcknowledgement",
+          "edits": [
+            {
+              "old": "CASE status = \"ok\" -> \"checking\"",
+              "new": "CASE status \\in {\"ok\",\"badAck\"} -> \"checking\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckState"
+        },
+        {
+          "id": "ForgetPriorCreateOnRejectedRetry",
+          "edits": [
+            {
+              "old": "status = \"rejected\" /\\ ~ui.retried -> \"rejected\"",
+              "new": "status = \"rejected\" -> \"rejected\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckState"
+        },
+        {
+          "id": "InventARNForUnknownCreate",
+          "edits": [
+            {
+              "old": "THEN \"unknownCreate\" ELSE \"known\"",
+              "new": "THEN \"known\" ELSE \"known\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckState"
+        },
+        {
+          "id": "LoseKnownAffectedARN",
+          "edits": [
+            {
+              "old": "THEN \"unknownCreate\" ELSE \"known\"",
+              "new": "THEN \"unknownCreate\" ELSE \"unknownCreate\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckState"
+        },
+        {
+          "id": "LoseTypedCreateARN",
+          "edits": [
+            {
+              "old": "IF status = \"ok\" THEN \"A\" ELSE @",
+              "new": "IF status = \"ok\" /\\ ui.op # \"create\" THEN \"A\" ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AckState"
+        },
+        {
+          "id": "VerifyDeleteWhenRuleSurvives",
+          "edits": [
+            {
+              "old": "THEN fact = \"missing\" ELSE fact = \"fieldsMatch\"",
+              "new": "THEN fact \\in {\"missing\",\"fieldsMatch\"} ELSE fact = \"fieldsMatch\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedState"
+        },
+        {
+          "id": "VerifyDeleteOnReadFailure",
+          "edits": [
+            {
+              "old": "THEN fact = \"missing\" ELSE fact = \"fieldsMatch\"",
+              "new": "THEN fact \\in {\"missing\",\"failed\"} ELSE fact = \"fieldsMatch\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedState"
+        },
+        {
+          "id": "VerifyWrongSavedFields",
+          "edits": [
+            {
+              "old": "ELSE fact = \"fieldsMatch\"",
+              "new": "ELSE fact \\in {\"fieldsMatch\",\"fieldsDiffer\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedState"
+        },
+        {
+          "id": "VerifySiblingARN",
+          "edits": [
+            {
+              "old": "ELSE fact = \"fieldsMatch\"",
+              "new": "ELSE fact \\in {\"fieldsMatch\",\"wrongARN\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedState"
+        },
+        {
+          "id": "VerifyMissingUpdate",
+          "edits": [
+            {
+              "old": "ELSE fact = \"fieldsMatch\"",
+              "new": "ELSE fact \\in {\"fieldsMatch\",\"missing\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedState"
+        },
+        {
+          "id": "VerifyDeniedReadback",
+          "edits": [
+            {
+              "old": "ELSE fact = \"fieldsMatch\"",
+              "new": "ELSE fact \\in {\"fieldsMatch\",\"denied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedState"
+        },
+        {
+          "id": "OverrideUnknownCreateWithMatchedName",
+          "edits": [
+            {
+              "old": "ui.stage = \"known\" /\\ Recovers(fact)",
+              "new": "(ui.stage = \"known\" /\\ Recovers(fact)) \\/ (ui.stage = \"unknownCreate\" /\\ fact = \"sameName\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "RecoverFromList",
+          "edits": [
+            {
+              "old": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\"}",
+              "new": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\",\"list\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "RecoverFromOtherARN",
+          "edits": [
+            {
+              "old": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\"}",
+              "new": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\",\"otherDetail\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "RecoverFromSibling404",
+          "edits": [
+            {
+              "old": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\"}",
+              "new": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\",\"other404\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "RecoverFromDenied",
+          "edits": [
+            {
+              "old": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\"}",
+              "new": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\",\"denied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "RecoverFromFailure",
+          "edits": [
+            {
+              "old": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\"}",
+              "new": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "RefuseExactKnown404",
+          "edits": [
+            {
+              "old": "Recovers(fact) == fact \\in {\"sameDetail\",\"same404\"}",
+              "new": "Recovers(fact) == fact = \"sameDetail\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "CallRecoveryAConfirmedWrite",
+          "edits": [
+            {
+              "old": "!.stage = IF recovered THEN \"observed\" ELSE @,",
+              "new": "!.stage = IF recovered THEN \"observed\" ELSE @, !.verified = recovered,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryState"
+        },
+        {
+          "id": "ReplayAutomatically",
+          "edits": [
+            {
+              "old": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m = \"explicitIdentical\"",
+              "new": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m \\in {\"explicitIdentical\",\"automatic\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "ReplayAlteredBody",
+          "edits": [
+            {
+              "old": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m = \"explicitIdentical\"",
+              "new": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m \\in {\"explicitIdentical\",\"changedBody\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "ReplayAlteredToken",
+          "edits": [
+            {
+              "old": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m = \"explicitIdentical\"",
+              "new": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m \\in {\"explicitIdentical\",\"changedToken\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "ReplayInOtherScope",
+          "edits": [
+            {
+              "old": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m = \"explicitIdentical\"",
+              "new": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m \\in {\"explicitIdentical\",\"wrongScope\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "RepeatKnownWriteInsteadOfRefresh",
+          "edits": [
+            {
+              "old": "MayReplay(m) == ui.stage = \"unknownCreate\"",
+              "new": "MayReplay(m) == ui.stage \\in {\"known\",\"unknownCreate\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "DiscardExplicitRetry",
+          "edits": [
+            {
+              "old": "MayReplay(m) == ui.stage = \"unknownCreate\" /\\ m = \"explicitIdentical\"",
+              "new": "MayReplay(m) == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "GenerateFreshTokenForRetry",
+          "edits": [
+            {
+              "old": "!.retried = TRUE] ELSE ui",
+              "new": "!.retried = TRUE, !.token = \"replacement\"] ELSE ui",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "ReserializeNewBodyForRetry",
+          "edits": [
+            {
+              "old": "!.retried = TRUE] ELSE ui",
+              "new": "!.retried = TRUE, !.body = \"edited\"] ELSE ui",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "KeepPreviouslyAllowedPageAfterDenial",
+          "edits": [
+            {
+              "old": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "new": "deniedList == current /\\ q.kind \\in {\"firstPage\"} /\\ status = \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "ClearCurrentViewOnObsoletePageDenial",
+          "edits": [
+            {
+              "old": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "new": "deniedList == q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "ClearAuthorizedPageOnRetryableError",
+          "edits": [
+            {
+              "old": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "new": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status \\in {\"denied\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "RetainDeniedContinuationToken",
+          "edits": [
+            {
+              "old": "!.cursor = IF deniedList THEN FALSE ELSE IF publish",
+              "new": "!.cursor = IF deniedList THEN @ ELSE IF publish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "KeepObsoleteRowsButClearDeniedCursor",
+          "edits": [
+            {
+              "old": "!.view = IF deniedList THEN \"none\" ELSE IF publish",
+              "new": "!.view = IF deniedList THEN @ ELSE IF publish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "LeaveKnownRecoveryLocked",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "LeaveVerifiedWriteLocked",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"observed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "LeaveDefiniteRejectionLocked",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"done\",\"observed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "ReuseOldCreateTokenForNewCommand",
+          "edits": [
+            {
+              "old": "IF ui.sends = 0 THEN \"T\" ELSE \"T2\"",
+              "new": "IF ui.sends = 0 \\/ (k = \"create\" /\\ ui.op = \"create\" /\\ ui.stage \\in {\"done\",\"observed\",\"rejected\"} /\\ ui.token = \"T\" /\\ ui.body = \"original\") THEN \"T\" ELSE \"T2\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "ReuseOldBodyForNewCommand",
+          "edits": [
+            {
+              "old": "IF ui.sends = 0 THEN \"original\" ELSE \"newBody\"",
+              "new": "IF ui.sends = 0 \\/ (k = \"create\" /\\ ui.op = \"create\" /\\ ui.stage \\in {\"done\",\"observed\",\"rejected\"} /\\ ui.token = \"T\" /\\ ui.body = \"original\") THEN \"original\" ELSE \"newBody\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "RenderDeniedAsAuthoritativeEmpty",
+          "edits": [
+            {
+              "old": "IF deniedList THEN \"none\" ELSE IF publish",
+              "new": "IF deniedList THEN \"emptyPage\" ELSE IF publish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "TreatDeniedContinuationAsCompleted",
+          "edits": [
+            {
+              "old": "IF status \\in {\"empty\",\"ok\"} THEN \"ready\" ELSE \"unavailable\"",
+              "new": "IF status \\in {\"empty\",\"ok\"} \\/ (deniedList /\\ q.kind = \"nextPage\") THEN \"ready\" ELSE \"unavailable\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "TreatAuthorizedEmptyAsUnavailable",
+          "edits": [
+            {
+              "old": "IF status \\in {\"empty\",\"ok\"} THEN \"ready\" ELSE \"unavailable\"",
+              "new": "IF status = \"ok\" THEN \"ready\" ELSE \"unavailable\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        }
+      ]
     }
   ]
 }

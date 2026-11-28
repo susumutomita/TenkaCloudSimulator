@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -64,6 +63,15 @@ func snsQueueEndpoint(endpoint string) (region, queue string, ok bool) {
 		return "", "", false
 	}
 	return parts[3], parts[5], true
+}
+
+func snsTopicRegion(arn string) (string, bool) {
+	parts := strings.Split(arn, ":")
+	if len(parts) != 6 || parts[0] != "arn" || parts[1] != "aws" || parts[2] != "sns" || parts[4] != "000000000000" ||
+		(!snsTopicName.MatchString(parts[5]) && !snsFIFOTopicName.MatchString(parts[5])) {
+		return "", false
+	}
+	return parts[3], true
 }
 
 // snsSubscriptionScope derives the IAM topic ARN before reading stored state.
@@ -323,6 +331,7 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		"ListTopics":                {"NextToken"},
 		"DeleteTopic":               {"TopicArn"},
 		"GetTopicAttributes":        {"TopicArn"},
+		"SetTopicAttributes":        {"TopicArn", "AttributeName", "AttributeValue"},
 		"Subscribe":                 {"TopicArn", "Protocol", "Endpoint", "ReturnSubscriptionArn"},
 		"GetSubscriptionAttributes": {"SubscriptionArn"},
 		"Unsubscribe":               {"SubscriptionArn"},
@@ -474,12 +483,12 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		snsResponse(w, action, result)
 	case "DeleteTopic":
 		arn := form.Get("TopicArn")
-		parts := strings.Split(arn, ":")
-		if len(parts) != 6 || parts[0] != "arn" || parts[1] != "aws" || parts[2] != "sns" || parts[4] != "000000000000" || (!snsTopicName.MatchString(parts[5]) && !snsFIFOTopicName.MatchString(parts[5])) {
+		topicRegion, valid := snsTopicRegion(arn)
+		if !valid {
 			snsError(w, ssmFailure{"InvalidParameterException", "TopicArn must be a simulator SNS topic ARN."})
 			return
 		}
-		if parts[3] != region {
+		if topicRegion != region {
 			snsError(w, ssmFailure{"NotFoundException", "Topic does not exist in this region."})
 			return
 		}
@@ -491,30 +500,36 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		snsResponse(w, action, nil)
-	case "GetTopicAttributes":
+	case "SetTopicAttributes", "GetTopicAttributes":
 		arn := form.Get("TopicArn")
-		topic, ok := topicByARN(arn)
-		if !ok {
-			return
-		}
 		if !authorize(arn) {
 			return
 		}
-		subs, err := g.SNS.ListSubscriptionsByTopic(r.Context(), arn)
+		if action == "SetTopicAttributes" {
+			topicRegion, valid := snsTopicRegion(arn)
+			if !valid {
+				snsError(w, ssmFailure{"InvalidParameterException", "TopicArn must be a simulator SNS topic ARN."})
+				return
+			}
+			if topicRegion != region {
+				snsError(w, ssmFailure{"NotFoundException", "Topic does not exist in this region."})
+				return
+			}
+			if form.Get("AttributeName") != "Policy" {
+				snsError(w, ssmFailure{"InvalidParameterException", "Only the notification service Policy attribute is supported."})
+				return
+			}
+			if err := g.SNS.setNotificationPolicy(r.Context(), arn, form.Get("AttributeValue")); err != nil {
+				snsError(w, err)
+				return
+			}
+			snsResponse(w, action, nil)
+			return
+		}
+		entries, err := g.SNS.topicAttributes(r.Context(), region, arn)
 		if err != nil {
 			snsError(w, err)
 			return
-		}
-		entries := []snsAttributeEntry{
-			{"TopicArn", topic.ARN},
-			{"Owner", "000000000000"},
-			{"DisplayName", topic.DisplayName},
-			{"SubscriptionsConfirmed", strconv.Itoa(len(subs))},
-			{"SubscriptionsPending", "0"},
-			{"SubscriptionsDeleted", "0"},
-		}
-		if topic.FIFO {
-			entries = append(entries, snsAttributeEntry{"FifoTopic", "true"})
 		}
 		snsResponse(w, action, snsAttributesResult{Attributes: entries})
 	case "Subscribe":

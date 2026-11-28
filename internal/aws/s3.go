@@ -25,6 +25,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/codestarnotifications"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cognitoidp"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/simpledb"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -37,6 +38,7 @@ var sequence atomic.Uint64
 var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 
 type Gateway struct {
+	Notifications          *codestarnotifications.Store
 	CognitoUserPools       *cognitoidp.Store
 	CognitoResourceAccount string
 	SimpleDB               *simpledb.Store

@@ -15,12 +15,18 @@ import (
 // It returns the simulator decision string, where only "allowed" permits.
 type Authorizer func(ctx context.Context, principal, action, resource string) (string, error)
 
+type CodeCommitRefChange struct {
+	Region, RepositoryARN, RepositoryID, Branch, OldCommit, Commit string
+}
+
 // Config is trusted composition input supplied by the AWS provider.
 type Config struct {
-	Regions          []string
-	Account          string
-	DefaultPrincipal string
-	Authorize        Authorizer
+	// RecordCodeCommitRef records a real branch change before the Git commit.
+	RecordCodeCommitRef func(context.Context, *sql.Tx, CodeCommitRefChange) error
+	Regions             []string
+	Account             string
+	DefaultPrincipal    string
+	Authorize           Authorizer
 	// AuthorizeSnapshot returns one evaluator for an operation with several
 	// dependent IAM checks. Every membership page requests a fresh evaluator.
 	AuthorizeSnapshot func(context.Context, string) (func(action, resource string) string, error)
@@ -448,6 +454,10 @@ func (e *Engine) region(r *http.Request, b *binding) (string, error) {
 // operation (a Query request whose Action is not yet known) uses the
 // protocol's common error for the failure family.
 func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
+	if errors.Is(err, ErrCodeCommitRefCapacity) {
+		writeError(w, b.model, "ServiceUnavailable", http.StatusServiceUnavailable, err.Error())
+		return
+	}
 	var f *fault
 	if !errors.As(err, &f) {
 		f = &fault{kind: "internal", message: "Simulator catalog state operation failed."}
