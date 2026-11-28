@@ -88,6 +88,9 @@ class Conformance(unittest.TestCase):
  def test_autoscaling_plans_native_sdk_capacity_isolation_and_restart(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("autoscaling_plans.py"))],check=True,timeout=180)
 
+ def test_autoscaling_plans_console_capacity_workflow(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("autoscaling_plans_console.py")),"--sdk"],check=True,timeout=180)
+
  def test_route53_reference_contract_detectors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_openapi.py"))],check=True,timeout=60)
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_reference_adapters.py"))],check=True,timeout=60)
@@ -734,6 +737,39 @@ def handler(event,context):
 
  def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
+
+ def test_resource_groups_console_saved_query_and_ecr_members(self):
+  with BINARY.open('rb') as source:
+   binary_hash = hashlib.file_digest(source, 'sha256').hexdigest()
+  subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_query_console.py')), '--with-sdk'],
+                 env={**os.environ, 'SIMULATOR_BINARY': str(BINARY), 'SIMULATOR_BINARY_SHA256': binary_hash}, check=True, timeout=180)
+
+ def test_resource_groups_scalar_reads_reopened_query_and_real_tag_membership(self):
+  with sync_playwright() as playwright:
+   chromium = os.environ.get('CHROMIUM_EXECUTABLE') or playwright.chromium.executable_path
+  with BINARY.open('rb') as source:
+   digest = hashlib.file_digest(source, 'sha256').hexdigest()
+  subprocess.run([sys.executable, str(Path(__file__).with_name('resource_groups_scalar.py'))],
+                 env={**os.environ, 'SIMULATOR_BINARY': str(BINARY), 'SIMULATOR_BINARY_SHA256': digest,
+                      'CHROMIUM_EXECUTABLE': chromium}, check=True, timeout=180)
+
+ def test_service_quotas_reads_applied_b2bi_profile_limit(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_profiles.py'))], check=True, timeout=120)
+
+ def test_service_quotas_discovery_defaults_applied_and_wildcard_iam(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_discovery.py'))], check=True, timeout=120)
+
+ def test_service_quotas_scalar_uses_the_same_native_request_history(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_scalar.py'))], check=True, timeout=300)
+
+ def test_service_quotas_console_request_history_and_recovery(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_console.py'))], check=True, timeout=300)
+
+ def test_named_resource_group_membership_tracks_live_ecr_tags(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_ecr_members.py'))], check=True, timeout=120)
+
+ def test_gcp_trace_v1_official_client_two_teams_append_views_restart(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_trace_sdk.py'))], check=True, timeout=180)
 
  def test_gcp_catalog_discovery_client_two_teams_owner_restart_and_cleanup(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_fixtures.py'))], check=True, timeout=600)

@@ -11,6 +11,10 @@ No Google account was signed into and no real cloud resource was created. The
 React/CSS implementation is independent source; Kumo is architectural reference
 only, with no copied upstream service code or new dependencies.
 
+## Trace explorer
+
+The **Trace** service opens the project owner’s Trace explorer. Set a time range to list saved traces, open a trace ID to inspect its span observations, and use the page controls for longer results. [Cloud Trace v1 operations and limits](gcp-trace.md)
+
 ## Shell, language and integration
 
 ```jsx

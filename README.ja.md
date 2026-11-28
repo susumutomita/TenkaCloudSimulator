@@ -91,7 +91,7 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
   [未接続ネットワーク ACL と IPv4 ルールの設定 API](docs/ec2-detached-network-acls.md)、
   [Elastic Load Balancing](docs/elb.md)（Lambda ターゲット）、
   [Route 53](docs/route53.md)。
-- **スケーリング：** [ローカルDynamoDBテーブル向けAuto Scaling plans](docs/autoscaling-plans.md)。
+- **スケーリング：** [コンソールでスケーリングプランを作成し、DynamoDB テーブルの容量を確認する](docs/autoscaling-plans.md)。
 - **構成の作成：** [CloudFormation](docs/cloudformation-rest.md)、
   [SSM値パラメータ](docs/cloudformation-ssm-parameters.md)、
   [native IAM profile](docs/cloudformation-iam-profiles.md)、

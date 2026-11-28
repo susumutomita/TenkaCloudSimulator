@@ -243,11 +243,8 @@ func (b *binding) describe() Descriptor {
 		d.Tagging[string(op.Kind)] = od
 	}
 	for _, res := range b.spec.Resources {
-		rd := ResourceDescriptor{Kind: res.Kind, ARNMember: res.ARNMember, NameMember: res.NameMember, IDMember: res.IDMember, Parent: res.Parent, Limit: res.Limit, Ops: map[string]OpDescriptor{},
+		rd := ResourceDescriptor{Kind: res.Kind, ARNMember: res.ARNMember, NameMember: res.NameMember, IDMember: res.IDMember, Parent: res.Parent, Limit: res.liveLimit(), Ops: map[string]OpDescriptor{},
 			ARNWire: b.resourceWire(res, res.ARNMember), NameWire: b.resourceWire(res, res.NameMember), IDWire: b.resourceWire(res, res.IDMember)}
-		if rd.Limit == 0 {
-			rd.Limit = defaultKindLimit
-		}
 		if res.Token != "" {
 			rd.TokenWire = b.resourceWire(res, res.Token)
 		}

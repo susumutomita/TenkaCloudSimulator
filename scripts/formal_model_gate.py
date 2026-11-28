@@ -1329,6 +1329,20 @@ BASE_INVARIANTS['AutoScalingPlanTargets'] = {'TypeOK', 'BoundedWhileOwned', 'Onl
 REQUIRED_MUTANTS['AutoScalingPlanTargets'] = {'OmitAuthorization', 'OmitValidation', 'SkipCapacityBound', 'ClampLowerOnly', 'StealOwnership', 'RevertOnDelete', 'WriteOtherTeam', 'ExposePendingState', 'ReuseTableGeneration', 'RejectWritesCapacity', 'RejectClaimsOwner'}
 REQUIRED_SOURCE_SCOPES['AutoScalingPlanTargets'] = {'internal/aws/autoscalingplans_store.go', 'internal/aws/autoscalingplans_http.go', 'internal/aws/autoscalingplans_dispatch.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
 
+# Console request ownership is independent of the native transaction model.
+BASE_MODELS.add('ScalingPlanConsole')
+BASE_INVARIANTS['ScalingPlanConsole'] = {
+    'TypeOK', 'OnlyCurrentReplyPublishes', 'SuccessRequiresAck', 'RetryRequiresNamedRefresh',
+}
+REQUIRED_MUTANTS['ScalingPlanConsole'] = {
+    'PublishRetiredRead', 'UnknownAsAcknowledged', 'ResendUncertainWrite', 'ListUnlocksWrite',
+}
+REQUIRED_SOURCE_SCOPES['ScalingPlanConsole'] = {
+    'internal/server/server.go', 'internal/server/web/app.js',
+    'tools/console/src/autoscaling-plans.jsx', 'tools/console/src/autoscaling-plans.mjs',
+    'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx',
+}
+
 # Independent EC2 read-only discovery admission contract. These fixed sets must
 # not be derived from the mutable registry, which this gate validates.
 BASE_MODELS.add('EC2SecurityGroupConsoleEpoch')
@@ -4817,6 +4831,303 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
     'internal/core/store.go', 'internal/core/store_connection_test.go',
 }
 
+BASE_MODELS.add('CloudTraceObservations')
+BASE_INVARIANTS['CloudTraceObservations'] = {
+    'TypeOK', 'FirstPageOrdered', 'PendingInvisible', 'AdmitEligible', 'CallerBound',
+    'ValidBatchOnly', 'ProjectBound', 'PeerUnchanged', 'AllObservationsCommitted',
+    'RollbackUnchanged', 'GetCurrent', 'NextBound', 'NextStableKey', 'NextStableBody',
+}
+REQUIRED_MUTANTS['CloudTraceObservations'] = {
+    'ArrivalOrderedPage', 'ExposePendingPrefix', 'RejectValidRepeat', 'AdmitWrongOwner',
+    'AdmitWrongProject', 'SkipFinalValidation', 'CountOnlyFirstObservation',
+    'ShareCommitWithPeer', 'CommitPrefix', 'CoalesceIdenticalObservations',
+    'CancelPublishesPrefix', 'RefusalPublishesPrefix', 'GetUsesCursorHighWater',
+    'GetDropsRepeatedSpans', 'AllowPeerContinuation', 'AcceptForeignCursor',
+    'ReuseCursorForOtherView', 'IncludeNewTraceOnNextPage', 'RepeatLastTraceOnNextPage',
+    'ProjectCurrentSpanBodies', 'ExposeMinimalSpanBodies',
+}
+REQUIRED_SOURCE_SCOPES['CloudTraceObservations'] = {
+    'internal/gcp/trace/store.go', 'internal/gcp/trace/model.go', 'internal/gcp/trace/http.go',
+    'internal/server/cloud_storage.go', 'internal/gcp/internal/jsonwire/unicode.go',
+}
+
+
+# Fixed checks for locally stored customer cases and staged attachments.
+BASE_MODELS.add('SupportCaseLifecycle')
+BASE_INVARIANTS['SupportCaseLifecycle'] = {
+    'TypeOK',
+    'PeerFrame',
+    'StageContract',
+    'SubmissionContract',
+    'ResolutionContract',
+    'ReadProjection',
+    'RestartAndClock',
+}
+REQUIRED_SOURCE_SCOPES['SupportCaseLifecycle'] = {
+    'internal/aws/s3.go',
+    'internal/aws/ssm.go',
+    'internal/aws/support_gateway.go',
+    'internal/aws/supportcases/mutate.go',
+    'internal/aws/supportcases/read.go',
+    'internal/aws/supportcases/store.go',
+    'internal/server/server.go',
+}
+SUPPORT_CASE_CONTROLS = [
+    ('ExtendExpiryOnAppend', '!.expires = IF new THEN minute + 60 ELSE @', '!.expires = minute + 60', 'StageContract'),
+    ('ShortenOriginalHour', '!.expires = IF new THEN minute + 60 ELSE @', '!.expires = IF new THEN minute + 59 ELSE @', 'StageContract'),
+    ('AppendAtExpiry', 'eligible == IF new THEN db.expires = 0 ELSE Live', 'eligible == IF new THEN db.expires = 0 ELSE db.expires > 0 /\\ minute <= db.expires', 'StageContract'),
+    ('AllowFourthFile', 'valid == eligible /\\ db.staged + batch <= 3', 'valid == eligible /\\ db.staged + batch <= 4', 'StageContract'),
+    ('AppendLostFiles', '!.staged = @ + batch, !.expires', '!.staged = batch, !.expires', 'StageContract'),
+    ('StageAfterCancellation', 'success == Authorized(g) /\\ valid /\\ Commit(g)', 'success == Authorized(g) /\\ valid /\\ (Commit(g) \\/ g = "cancel")', 'StageContract'),
+    ('PersistFirstFileOfInvalidBatch', 'IF success THEN written ELSE db', 'IF success THEN written ELSE IF valid /\\ batch = 2 /\\ g = "late invalid" THEN [db EXCEPT !.staged = @ + 1] ELSE db', 'StageContract'),
+    ('CreateWithoutInitialBody', '!.messages = Append(@,Body(text,count))', '!.messages = IF creating THEN @ ELSE Append(@,Body(text,count))', 'SubmissionContract'),
+    ('DuplicateInitialMessage', '!.messages = Append(@,Body(text,count))', '!.messages = IF creating THEN <<Body(text,count),Body(text,count)>> ELSE Append(@,Body(text,count))', 'SubmissionContract'),
+    ('ReplaceInitialWithReply', '!.messages = Append(@,Body(text,count))', '!.messages = IF creating THEN Append(@,Body(text,count)) ELSE <<Body(text,count)>>', 'SubmissionContract'),
+    ('DropCommittedFile', 'count == IF setID = "none" THEN 0 ELSE db.staged', 'count == 0', 'SubmissionContract'),
+    ('AcceptExpiredAttachment', 'validSet == setID = "none" \\/ (setID = "local" /\\ Live)', 'validSet == setID = "none" \\/ (setID = "local" /\\ db.expires > 0 /\\ minute <= db.expires)', 'SubmissionContract'),
+    ('AcceptMissingAttachmentSet', 'validSet == setID = "none" \\/', 'validSet == setID \\in {"none","missing"} \\/', 'SubmissionContract'),
+    ('AcceptPeerAttachmentSet', 'validSet == setID = "none" \\/', 'validSet == setID \\in {"none","foreign"} \\/', 'SubmissionContract'),
+    ('CreateCaseAfterDenial', 'success == Authorized(g) /\\ validCase /\\ validSet /\\ Commit(g)', 'success == (Authorized(g) \\/ (creating /\\ g = "denied")) /\\ validCase /\\ validSet /\\ Commit(g)', 'SubmissionContract'),
+    ('ReplyAfterResolve', 'validCase == IF creating THEN db.status = "absent" ELSE db.status = "opened"', 'validCase == IF creating THEN db.status = "absent" ELSE db.status # "absent"', 'SubmissionContract'),
+    ('ReplyThroughForeignScope', 'success == Authorized(g) /\\ validCase /\\ validSet /\\ Commit(g)', 'success == (Authorized(g) \\/ (~creating /\\ g = "foreign")) /\\ validCase /\\ validSet /\\ Commit(g)', 'SubmissionContract'),
+    ('CreateSurvivesLateAttachmentFailure', 'IF success THEN changed ELSE db', 'IF success THEN changed ELSE IF creating /\\ validCase /\\ setID = "local" /\\ Live /\\ g = "late invalid" THEN [db EXCEPT !.status = "opened"] ELSE db', 'SubmissionContract'),
+    ('ReplySurvivesLateAttachmentFailure', 'IF success THEN changed ELSE db', 'IF success THEN changed ELSE IF ~creating /\\ validCase /\\ setID = "local" /\\ Live /\\ g = "late invalid" THEN [db EXCEPT !.messages = Append(@,Body("reply",0))] ELSE db', 'SubmissionContract'),
+    ('CommitCancelledSubmission', 'IF success THEN changed ELSE db', 'IF success \\/ (validCase /\\ validSet /\\ g = "cancel") THEN changed ELSE db', 'SubmissionContract'),
+    ('CommitFailedSubmission', 'IF success THEN changed ELSE db', 'IF success \\/ (validCase /\\ validSet /\\ g = "fault") THEN changed ELSE db', 'SubmissionContract'),
+    ('ResolveMissingCase', 'success == Authorized(g) /\\ db.status # "absent" /\\ Commit(g)', 'success == Authorized(g) /\\ Commit(g)', 'ResolutionContract'),
+    ('ResolveAfterDenial', 'success == Authorized(g) /\\ db.status # "absent" /\\ Commit(g)', 'success == (Authorized(g) \\/ g = "denied") /\\ db.status # "absent" /\\ Commit(g)', 'ResolutionContract'),
+    ('ResolveDropsCommunications', 'updated == [Clean EXCEPT !.status = "resolved"]', 'updated == [Clean EXCEPT !.status = "resolved", !.messages = <<>>]', 'ResolutionContract'),
+    ('ResolveForgesAgentReply', 'updated == [Clean EXCEPT !.status = "resolved"]', 'updated == [Clean EXCEPT !.status = "resolved", !.messages = Append(@,Body("agent",0))]', 'ResolutionContract'),
+    ('ResolveMutatesPeer', 'updated == [Clean EXCEPT !.status = "resolved"]', 'updated == [Clean EXCEPT !.status = "resolved", !.peer.status = "resolved"]', 'PeerFrame'),
+    ('FailedUploadMutatesPeer', 'IF success THEN written ELSE db', 'IF success THEN written ELSE IF g = "fault" /\\ valid THEN [db EXCEPT !.peer.staging = 0] ELSE db', 'PeerFrame'),
+    ('ExposeResolvedByDefault', '(flag /\\ db.status = "resolved")', 'db.status = "resolved"', 'ReadProjection'),
+    ('HideExplicitResolved', '(flag /\\ db.status = "resolved")', 'FALSE', 'ReadProjection'),
+    ('IncludeSuppressedCommunications', 'IF shown /\\ op \\in {"cases","messages"} THEN history', 'IF shown /\\ op \\in {"cases","summary","messages"} THEN history', 'ReadProjection'),
+    ('SuppressDefaultCommunications', 'IF shown /\\ op \\in {"cases","messages"} THEN history', 'IF shown /\\ op = "messages" THEN history', 'ReadProjection'),
+    ('DiscloseAttachmentWithoutPermission', 'canRead == Authorized(g)', 'canRead == Authorized(g) \\/ (op = "file" /\\ g = "denied")', 'ReadProjection'),
+    ('DisclosePeerCase', 'canRead == Authorized(g)', 'canRead == Authorized(g) \\/ (op \\in {"cases","summary"} /\\ present /\\ g = "foreign")', 'ReadProjection'),
+    ('LoadFileFromExpiredSet', 'file |-> IF op = "file" THEN db.messages[slot].files[ownFile] ELSE 0', 'file |-> IF op = "file" /\\ Live THEN db.messages[slot].files[ownFile] ELSE 0', 'ReadProjection'),
+    ('ReadMutatesStoredMessages', "/\\ db' = db\n    /\\ last' = Mark(op,g,db", '/\\ db\' = IF op = "messages" /\\ present THEN [db EXCEPT !.messages = <<>>] ELSE db\n    /\\ last\' = Mark(op,g,db', 'ReadProjection'),
+    ('RestartDropsAttachedMessage', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = (IF \\E i \\in 1..Len(db.messages): Len(db.messages[i].files) > 0 THEN [db EXCEPT !.messages = <<>>] ELSE db)", 'RestartAndClock'),
+    ('RestartExtendsDeadline', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = (IF Live THEN [db EXCEPT !.expires = minute + 60] ELSE db)", 'RestartAndClock'),
+]
+REQUIRED_MUTANTS['SupportCaseLifecycle'] = {entry[0] for entry in SUPPORT_CASE_CONTROLS}
+
+
+# Independent local CloudFront delivery and invalidation controls. Keep these
+# literal sets separate from the mutable model registry they protect.
+BASE_MODELS.add('CloudFrontLocalCache')
+BASE_INVARIANTS['CloudFrontLocalCache'] = {
+    'TypeOK', 'FreshJointAuthority', 'ExactHitIdentity', 'MissReadsOrigin',
+    'FailureRollsBack', 'RefusalUnchanged', 'StaleETagUnchanged',
+    'UpdateClearsCache', 'InvalidationClearsCache', 'RestartPreserves', 'PeerUnchanged',
+}
+REQUIRED_MUTANTS['CloudFrontLocalCache'] = {
+    'MissingObjectGrant', 'MissingDistributionGrant', 'WrongOriginLifetime',
+    'CrossActorHit', 'ExpiredHit', 'IgnoreETag', 'UpdateRetainsCache',
+    'InvalidationRetainsCache', 'FailedInvalidationEvicts',
+}
+REQUIRED_SOURCE_SCOPES['CloudFrontLocalCache'] = {
+    'internal/aws/cloudfront_distribution.go', 'internal/aws/cloudfront_distribution_store.go',
+    'internal/aws/cloudfront_distribution_http.go', 'internal/aws/cloudfront_distribution_list.go',
+    'internal/aws/cloudfront_vpc_origin.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+    'internal/aws/cloudfront_distribution_interrupt_test.go',
+}
+
+BASE_MODELS.add('CloudFrontConsoleEpoch')
+BASE_INVARIANTS['CloudFrontConsoleEpoch'] = {'StableUnknownCaller', 'ProtectedDownload', 'CurrentReceipt', 'TypeOK', 'OneCurrentWrite', 'ExplicitWriteConfirmation', 'CurrentContent', 'AcknowledgedReceipt'}
+REQUIRED_MUTANTS['CloudFrontConsoleEpoch'] = {'UnconfirmedWrite', 'PublishOldRead', 'RetainOldContent', 'ReplayDifferentCaller', 'OldReadUnlocksWrite', 'FreshCallerWhileUnknown', 'UnknownAcknowledged', 'UnsafeContent', 'PublishOldReceipt'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'] = {'internal/aws/cloudfront_distribution_http.go', 'tools/console/src/cloudfront-local.jsx', 'tools/console/src/cloudfront-local.mjs', 'internal/server/web/app.js', 'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'].add('tools/console/src/console-home.jsx')
+
+
+# Native B2BI quota discovery uses a computed read projection, not stored CRUD.
+BASE_MODELS.add('ServiceQuotaDiscovery')
+BASE_INVARIANTS['ServiceQuotaDiscovery'] = {'TypeOK', 'RestartPreservesFrame', 'ReadPreservesFrame', 'PeerPreserved', 'ReadProjectionCorrect'}
+REQUIRED_MUTANTS['ServiceQuotaDiscovery'] = {'AppliedUsesPublishedDefault', 'AppliedGetRequiresWildcard', 'ResourceLevelIgnored', 'PeerCapacityReturned', 'UnavailableRegionAdvertised', 'UnknownServiceProjected', 'UnknownQuotaProjected', 'SingleRowInventsCursor', 'ReadChangesSelectedUsage', 'ReadChangesPeerUsage', 'AppliedReportsRemaining', 'ForeignTokenAccepted', 'DefaultUsesApplied', 'WildcardReadsUseQuotaARN', 'DefaultInventsQuotaARN', 'UnrelatedActionAllowed', 'ExplicitDenyIgnored', 'AbsentBindingFallsBackToDefault'}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaDiscovery'] = {'internal/aws/catalog/engine.go', 'internal/aws/catalog/services_business.go', 'internal/aws/catalog/semantics.go', 'internal/aws/catalog/service_quotas.go'}
+
+
+BASE_MODELS.add('ServiceQuotaRequests')
+BASE_INVARIANTS['ServiceQuotaRequests'] = {
+    'TypeOK',
+    'Admissions',
+    'CommitFrame',
+    'StoredFields',
+    'Capacity',
+    'Visibility',
+    'Lookup',
+    'PageScope',
+    'PrivateStage',
+    'ContenderFrame',
+    'RestartFrame',
+}
+REQUIRED_MUTANTS['ServiceQuotaRequests'] = {
+    'AdmitDenied',
+    'AdmitNonIncrease',
+    'AdmitOversize',
+    'AdmitWrongLevel',
+    'AdmitUnsupportedScope',
+    'AllowAnotherPending',
+    'RefuseIndependentRegion',
+    'RefuseOtherTeamDueToPeer',
+    'CountOnlyThisRegion',
+    'CountBothTeamDatabases',
+    'MissAQueuedPendingWinner',
+    'RejectContenderAfterRollback',
+    'RivalErasesPrivateStage',
+    'PublishSpeculativeData',
+    'KeepCanceledRequest',
+    'KeepTimedOutRequest',
+    'KeepFaultedRequest',
+    'KeepMismatchedReadback',
+    'KeepFailedCommit',
+    'LoseCommittedButUnacknowledged',
+    'AcknowledgeWithoutRow',
+    'ReportIdAfterLostReply',
+    'KeepPrivateRowAfterCancellation',
+    'DeletePeerHistoryWhenCommitting',
+    'RaiseAppliedQuotaOnRequest',
+    'RequestConsumesProfileSlot',
+    'TurnFalseIntoPending',
+    'ApproveOmitted',
+    'CreateSyntheticSupportCase',
+    'StoreWrongApplicant',
+    'StoreAppliedInsteadOfDesired',
+    'ReturnAnotherTeamId',
+    'ReturnOnlyAvailableSlots',
+    'BlockLastProfileSlot',
+    'CannotReuseReleasedProfile',
+    'OtherScopeGet',
+    'AgeOutDirectRequest',
+    'DiscloseDeniedLookup',
+    'ListOlderThanNinetyDays',
+    'DropAtCurrentInstant',
+    'ReturnOldestFirst',
+    'DropExactNinetiethDay',
+    'AgeOutByQuota',
+    'LeakFutureGeneralAfterClockRollback',
+    'DropFutureByQuotaAfterClockRollback',
+    'HideFutureExactLookupAfterClockRollback',
+    'ListPeerRegion',
+    'ListOtherDatabase',
+    'IgnoreTerminalFilter',
+    'IgnorePendingFilter',
+    'ReportUnobservedApproval',
+    'ReportResourceScopedQuota',
+    'ReportOtherServiceQuota',
+    'IgnoreListAuthority',
+    'ContinueWithoutFreshAuthority',
+    'AcceptOtherScopeCursor',
+    'AcceptOtherActorCursor',
+    'AcceptOtherOperationCursor',
+    'AcceptChangedFilterCursor',
+    'AcceptPriorProcessCursor',
+    'AcceptBadToken',
+    'RepeatBoundaryRow',
+    'UseTimestampInCursor',
+    'EmitLastPageCursor',
+    'LoseRealContinuation',
+    'DiscardHistoryOnReopen',
+    'RetainCursorAuthorityOnRestart',
+    'PruneByGeneralAgeOnRead',
+    'RequireWildcardForRequest',
+    'RequireWildcardForByquota',
+    'UseNamedQuotaForGeneral',
+    'UseNamedQuotaForGet',
+    'AdmitOtherQuotaARN',
+    'OverrideExplicitRequestDeny',
+    'AcceptNamedGrantOnGenericContinuation',
+}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaRequests'] = {
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/models/service-quotas.json',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/catalog/service_quota_requests.go',
+    'internal/aws/catalog/service_quotas.go',
+}
+
+
+BASE_MODELS.add('ServiceQuotaRequestConsole')
+BASE_INVARIANTS['ServiceQuotaRequestConsole'] = {
+    'SingleIntent',
+    'NoAutomaticWrite',
+    'NativeFrame',
+    'SavedExactlyOnce',
+    'Acknowledgement',
+    'FreshRecovery',
+    'ObservedOnly',
+    'SeparateIntent',
+    'RetiredRead',
+    'ScopeCleared',
+    'BlockedRetry',
+    'FreshCapacity',
+    'VisibleLookup',
+    'VisibleMount',
+}
+REQUIRED_MUTANTS['ServiceQuotaRequestConsole'] = {
+    'SubmitUnknownAgain',
+    'SendWithoutAppliedCapacity',
+    'SubmitWithWrongPrincipal',
+    'SendFromWrongMountedGeneration',
+    'CommitToAnotherRegion',
+    'CollapseTwoTerminalIDs',
+    'RepeatPendingAfterSeparateIntent',
+    'LoseEarlierSameAmountHolder',
+    'AcknowledgeAnUnstoredRow',
+    'TreatSavedTransportLossAsConfirmed',
+    'TreatUnknownLossAsRefusal',
+    'TreatDefinitiveRefusalAsUnknown',
+    'ConfirmBadBody',
+    'ConfirmWrongAmount',
+    'ConfirmWrongStatus',
+    'ConfirmWrongArn',
+    'BindOldIdenticalRowToLostSubmit',
+    'PublishRetiredAckAcrossScope',
+    'PublishOldUnknownAcrossRemount',
+    'KeepArmedWhileNewRecoveryBegins',
+    'KeepArmedAcrossCapacityClear',
+    'ArmFromOrdinaryByQuota',
+    'ArmFromGeneral',
+    'ArmFromFiltered',
+    'ArmFromResource',
+    'ArmFromNext',
+    'ArmFromAuto',
+    'ArmFromInspect',
+    'ArmFromCapacity',
+    'ArmAfterDenied',
+    'ArmAfterFailed',
+    'ArmAfterWrongOwner',
+    'ArmAfterMalformed',
+    'RetainArmAfterPermissionLoss',
+    'InferFromCurrentMatchingAmount',
+    'GroupReadShowsPeerRow',
+    'PermitEvenWhenExplicitReadFailed',
+    'SeparateClickSendsAgain',
+    'RecoverySilentlyResends',
+    'BackfillCaseDuringRecovery',
+    'TreatSavedHistoryAsConfirmedOutcome',
+    'BlindRetryAfterLostAck',
+    'ReleaseOnBlockedClick',
+    'CarryUnknownAcrossNewMount',
+    'SameTileRetiredSuccessArmsNewMount',
+    'StaleDenialErasesNewlyArmedView',
+    'RetainAppliedCapacityAfter403',
+    'ReopenEditorWithoutFreshCapacity',
+    'DisplayFirstPageAsRealContinuation',
+    'KeepPriorLookupAfterNativeDenial',
+    'GuessLostLookupFromHistory',
+    'ShowQuotaInHiddenView',
+    'ReturningToViewInheritsOldPermit',
+}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaRequestConsole'] = {
+    'tools/console/src/catalog.jsx',
+    'tools/console/src/main.jsx',
+    'tools/console/src/service-quotas.jsx',
+    'tools/console/src/service-quotas.mjs',
+    'internal/server/web/app.js',
+}
+
 
 # Pin the KMS effective-grant controls independently of the editable registry.
 BASE_MODELS.add('KMSRoleGrantLifecycle')
@@ -4992,6 +5303,10 @@ def load_registry(root, relative='formal/models.json'):
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
         require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
+        if name == 'SupportCaseLifecycle':
+            expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
+                        for mid, old, new, inv in SUPPORT_CASE_CONTROLS]
+            require(model['mutants'] == expected, 'Support case controls changed')
         if name == 'KMSScheduledDeletion':
             expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
                         for mid, old, new, inv in KMS_DELETION_CONTROLS]

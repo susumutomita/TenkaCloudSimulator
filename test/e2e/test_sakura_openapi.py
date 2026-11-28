@@ -12,7 +12,7 @@ import unittest
 from jsonschema import ValidationError
 from openapi_json10 import validator
 from kms_reference_projection import project_before_kms_grants_and_deletion
-from route53_openapi import project_before_route53
+from route53_openapi import project_before_route53, project_before_route53_console
 from route53_ptr_reference import project_before_ptr
 from batch_reference_projection import project_batches
 from secret_reference_projection import project_secret_description
@@ -201,6 +201,7 @@ def project_server_list(spec):
     project_simpledb_domain_metadata(spec)
     project_simpledb_list_domains(spec)
     inherited = copy.deepcopy(spec)
+    project_before_route53_console(inherited)
     project_before_ptr(inherited['paths'])
     # The older Sakura guard already covered the preceding SSM API. The
     # full SSM projection later still sees and validates all seven operations.

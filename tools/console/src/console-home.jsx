@@ -17,6 +17,7 @@ export const SERVICE_PRESENTATION = Object.freeze({
   'ssm-session': {category:'management', color:'pink', icon:'settings', en:'Connect to the instance with a shell session', ja:'シェルセッションでインスタンスに接続'},
   lambda: {category:'compute', color:'orange', icon:'compute', en:'Run functions', ja:'関数を実行'},
   iam: {category:'security', color:'red', icon:'key', en:'Manage identities and access', ja:'IDとアクセスを管理'},
+  cloudfront: {category:'networking', color:'purple', icon:'gateway', en:'Read local distributions, saved content and invalidation', ja:'ローカルの配信設定・保存済みコンテンツ・無効化を確認'},
   apigateway: {category:'networking', color:'purple', icon:'gateway', en:'Create and manage APIs', ja:'APIを作成・管理'},
   cfn: {category:'management', color:'pink', icon:'stack', en:'Provision resources with templates', ja:'テンプレートでリソースを構築'},
   kms: {category:'security', color:'red', icon:'key', en:'Manage encryption keys', ja:'暗号化キーを管理'},
@@ -24,6 +25,7 @@ export const SERVICE_PRESENTATION = Object.freeze({
   sqs: {category:'integration', color:'pink', icon:'queue', en:'Send and receive queue messages', ja:'キューのメッセージを送受信'},
   logs: {category:'management', color:'pink', icon:'logs', en:'Explore log groups and streams', ja:'ロググループとストリームを確認'},
   secretsmanager: {category:'security', color:'red', icon:'key', en:'Manage secrets and versions', ja:'シークレットとバージョンを管理'},
+  support: {category:'management', color:'blue', icon:'logs', en:'Manage local support cases', ja:'ローカルのサポートケースを管理'},
   catalog: {category:'management', color:'purple', icon:'stack', en:'Explore supported service APIs', ja:'対応するサービスAPIを確認'},
 });
 const paths = {

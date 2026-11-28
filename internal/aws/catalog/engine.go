@@ -21,7 +21,10 @@ type Config struct {
 	Account          string
 	DefaultPrincipal string
 	Authorize        Authorizer
-	Now              func() time.Time
+	// AuthorizeSnapshot returns one evaluator for an operation with several
+	// dependent IAM checks. Every membership page requests a fresh evaluator.
+	AuthorizeSnapshot func(context.Context, string) (func(action, resource string) string, error)
+	Now               func() time.Time
 	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
 	// Run only for authorized, explicitly private standalone PostgreSQL writes.
 	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error
@@ -44,6 +47,7 @@ type Engine struct {
 	bySigning map[string][]*binding
 	// byQuery maps the signing name of each Query protocol service.
 	byQuery         map[string]*binding
+	quotaHistoryKey [32]byte
 	ownedPrivateRDS privateRDSLifecycle // installed only by trusted native composition
 }
 
@@ -72,6 +76,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 			return nil, err
 		}
 		if err := e.add(b); err != nil {
+			return nil, err
+		}
+	}
+	if seen["service-quotas"] {
+		if err := e.initQuotaRequestHistory(); err != nil {
 			return nil, err
 		}
 	}
@@ -302,6 +311,10 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		e.fail(w, b, op, err)
 		return
 	}
+	if (b.spec.Model == "resource-groups" && op.Name == "CreateGroup" || b.isResourceGroupQueryOperation(op.Name)) && !uniqueGroupJSON(body) {
+		e.fail(w, b, op, invalid("Expected one JSON request without duplicate fields."))
+		return
+	}
 	official := b.model.Operations[op.Name]
 	var raw map[string]any
 	if b.model.Metadata.Protocol == "json" {
@@ -319,6 +332,12 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // run validates a decoded raw input tree against the official input shape,
 // then authorizes, executes and encodes one operation in any protocol.
 func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op, region string, raw map[string]any) {
+	if b.spec.Model == "service-quotas" {
+		if err := validateQuotaJSON(raw); err != nil {
+			e.fail(w, b, op, err)
+			return
+		}
+	}
 	official := b.model.Operations[op.Name]
 	input := map[string]any{}
 	if official.Input != "" {
@@ -442,6 +461,9 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 		name = op.Name
 	}
 	code, status := b.errorCode(name, f.kind)
+	if f.kind == "denied" && b.usesResourceGroupForbidden(name) {
+		code, status = "ForbiddenException", http.StatusForbidden
+	}
 	if official := b.model.Operations[name]; f.code != "" && official != nil {
 		for _, name := range official.Errors {
 			if name == f.code {
@@ -558,6 +580,11 @@ func pick(errors, candidates []string, kind string) (string, bool) {
 }
 
 func (b *binding) status(code, kind string) int {
+	// Service Quotas documents AccessDeniedException as HTTP 400. The JSON 1.1
+	// model names the exception without recording its HTTP status.
+	if b.spec.Model == "service-quotas" && code == "AccessDeniedException" {
+		return http.StatusBadRequest
+	}
 	if shape := b.model.Shapes[code]; shape != nil && shape.Error != nil && shape.Error.HTTPStatus != 0 {
 		return shape.Error.HTTPStatus
 	}

@@ -27,6 +27,10 @@ func validParameterName(name string) bool {
 	return len(name) <= 1011 && parameterName.MatchString(name) && strings.Count(name, "/") <= 15 && !strings.HasPrefix(strings.ToLower(trimParameterSlash(name)), "aws") && !strings.HasPrefix(strings.ToLower(trimParameterSlash(name)), "ssm")
 }
 func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if isSupportRequest(r) {
+		g.serveSupport(w, r)
+		return
+	}
 	// Bedrock Runtime shares the "bedrock" signing name with the control-plane
 	// catalog, so its distinct route prefixes are recognized first.
 	if isBedrockRuntime(r) {
@@ -45,6 +49,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if isEC2(r) {
 		g.serveEC2(w, r)
+		return
+	}
+	if isCFDistribution(r) {
+		g.CloudFront.serveDistribution(g, w, r)
 		return
 	}
 	if isCloudFrontVpcOrigin(r) {
