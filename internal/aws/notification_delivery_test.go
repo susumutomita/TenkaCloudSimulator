@@ -506,3 +506,48 @@ func TestNotificationFilterPagination(t *testing.T) {
 		t.Fatal(result)
 	}
 }
+
+func TestNotificationTargetStatusUsesCurrentCreatorPolicyBeforeAnyEvent(t *testing.T) {
+	f := branchFixture(t, filepath.Join(t.TempDir(), "creator-policy.db"))
+	f.createResources()
+	const owner = "notification-manager"
+	ids := core.NewIdentities(f.team)
+	set := func(effect string) {
+		t.Helper()
+		doc, err := core.ParsePolicy([]byte(fmt.Sprintf(`{"Version":"2012-10-17","Statement":[{"Effect":%q,"Action":"sqs:SendMessage","Resource":"*"}]}`, effect)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = ids.Set(owner, doc); err != nil {
+			t.Fatal(err)
+		}
+	}
+	set("Allow")
+	name, detail := "Manager rule", "BASIC"
+	targets := []codestarnotifications.Target{{Type: "SNS", Address: f.topic.ARN}}
+	events := []string{codestarnotifications.BranchCreated}
+	result, err := f.rules.Run(t.Context(), "CreateNotificationRule", f.region, owner, codestarnotifications.Input{
+		Name: &name, DetailType: &detail, Events: &events, Source: f.source, Targets: &targets, Token: "registered",
+	}, func(string, string) string { return "allowed" })
+	if err != nil {
+		t.Fatal(err)
+	}
+	arn := result["Arn"].(string)
+	expect := func(want string) {
+		t.Helper()
+		state := f.ruleCall("DescribeNotificationRule", codestarnotifications.Input{ARN: arn})
+		if state["Targets"].([]map[string]string)[0]["TargetStatus"] != want || f.count("aws_notification_outbox") != 0 || f.count("aws_sns_messages") != 0 {
+			t.Fatal(state, f.counts())
+		}
+	}
+	expect("ACTIVE")
+	set("Deny")
+	expect("UNREACHABLE")
+	set("Allow")
+	expect("ACTIVE")
+	if err := ids.Delete(owner); err != nil {
+		t.Fatal(err)
+	}
+	set("Allow")
+	expect("UNREACHABLE")
+}
