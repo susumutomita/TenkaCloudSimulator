@@ -126,6 +126,10 @@ func NewSNSStore(db *sql.DB) (*SNSStore, error) {
 	defer tx.Rollback()
 	statements := []string{
 		`CREATE TABLE IF NOT EXISTS aws_sns_topics(region TEXT NOT NULL,name TEXT NOT NULL,arn TEXT NOT NULL UNIQUE,display_name TEXT NOT NULL DEFAULT '',fifo INTEGER NOT NULL DEFAULT 0 CHECK(fifo IN (0,1)),created REAL NOT NULL,PRIMARY KEY(region,name));`,
+		`CREATE TABLE IF NOT EXISTS aws_sns_notification_policies(
+			generation INTEGER PRIMARY KEY AUTOINCREMENT CHECK(generation>0),
+			topic_arn TEXT NOT NULL UNIQUE REFERENCES aws_sns_topics(arn) ON DELETE CASCADE,
+			policy TEXT NOT NULL CHECK(length(CAST(policy AS BLOB)) BETWEEN 1 AND 8192));`,
 		`CREATE TABLE IF NOT EXISTS aws_sns_subscriptions(arn TEXT PRIMARY KEY,topic_arn TEXT NOT NULL,protocol TEXT NOT NULL,endpoint TEXT NOT NULL,created REAL NOT NULL);`,
 		`CREATE TABLE IF NOT EXISTS aws_sns_messages(id TEXT PRIMARY KEY,topic_arn TEXT NOT NULL,message TEXT NOT NULL,subject TEXT NOT NULL DEFAULT '',published REAL NOT NULL);`,
 		`CREATE TABLE IF NOT EXISTS aws_sns_deliveries(message_id TEXT NOT NULL,subscription_arn TEXT NOT NULL,PRIMARY KEY(message_id,subscription_arn));`,
@@ -146,6 +150,7 @@ func NewSNSStore(db *sql.DB) (*SNSStore, error) {
 		return nil, fmt.Errorf("persisted SNS state exceeds local limits")
 	}
 	if err = tx.QueryRow(`SELECT
+	(SELECT count(*) FROM aws_sns_notification_policies p WHERE NOT EXISTS(SELECT 1 FROM aws_sns_topics t WHERE t.arn=p.topic_arn AND t.fifo=0))+
 	(SELECT count(*) FROM aws_sns_subscriptions s WHERE NOT EXISTS(SELECT 1 FROM aws_sns_topics t WHERE t.arn=s.topic_arn))+
 	(SELECT count(*) FROM aws_sns_messages m WHERE NOT EXISTS(SELECT 1 FROM aws_sns_topics t WHERE t.arn=m.topic_arn))+
 	(SELECT count(*) FROM aws_sns_deliveries d WHERE NOT EXISTS(SELECT 1 FROM aws_sns_messages m WHERE m.id=d.message_id))`).Scan(&orphans); err != nil {
@@ -263,7 +268,7 @@ func (s *SNSStore) DeleteTopic(arn string) error {
 	if _, err = tx.Exec("DELETE FROM aws_sns_deliveries WHERE message_id IN (SELECT id FROM aws_sns_messages WHERE topic_arn=?) OR subscription_arn IN (SELECT arn FROM aws_sns_subscriptions WHERE topic_arn=?)", arn, arn); err != nil {
 		return err
 	}
-	for _, table := range []string{"aws_sns_messages", "aws_sns_subscriptions"} {
+	for _, table := range []string{"aws_sns_messages", "aws_sns_subscriptions", "aws_sns_notification_policies"} {
 		if _, err = tx.Exec("DELETE FROM "+table+" WHERE topic_arn=?", arn); err != nil {
 			return err
 		}
@@ -272,7 +277,7 @@ func (s *SNSStore) DeleteTopic(arn string) error {
 	if err = snsAffected(r, err, 1); err != nil {
 		return err
 	}
-	for _, table := range []string{"aws_sns_messages", "aws_sns_subscriptions"} {
+	for _, table := range []string{"aws_sns_messages", "aws_sns_subscriptions", "aws_sns_notification_policies"} {
 		if err = snsCount(tx, 0, "SELECT count(*) FROM "+table+" WHERE topic_arn=?", arn); err != nil {
 			return err
 		}
