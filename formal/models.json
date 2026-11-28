@@ -29970,6 +29970,232 @@
           "expect_invariant": "ConnectionPragmasApplied"
         }
       ]
+    },
+    {
+      "id": "ALBNativePlacement",
+      "model": "formal/ALBNativePlacement.tla",
+      "config": "formal/ALBNativePlacement.cfg",
+      "bounds": "Two new ALBs and one seeded legacy ALB, nine fixed resource IDs, one team/region making changes, one staged request, eight transitions. Two regional subnets and one security group can be shared by both new ALBs. Alternatives include a second native VPC, duplicate zone, absent group, stack owner and two out-of-scope IDs.",
+      "properties": [
+        "TypeOK",
+        "AdmittedPlacement",
+        "CanceledUnchanged",
+        "ReopenUnchanged",
+        "StageInvisible",
+        "LegacyUnbound",
+        "ProjectionExact",
+        "CompleteReferences",
+        "ReferencesExist"
+      ],
+      "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes.",
+      "source_scope": [
+        "internal/aws/elb_placement.go",
+        "internal/aws/elb_store.go",
+        "internal/aws/elb_query.go",
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_security_groups_native_store.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreAvailabilityZone",
+          "edits": [
+            {
+              "old": "Zone(1) # Zone(Subnet(k))",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignSubnetVpc",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Vpc(i) = \"local\"",
+              "new": "(k = \"otherVpc\" \\/ (\\A i \\in Targets(k) : Vpc(i) = \"local\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignGroupVpc",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Vpc(i) = \"local\"",
+              "new": "(k = \"otherGroup\" \\/ (\\A i \\in Targets(k) : Vpc(i) = \"local\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignRegion",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Scope(i) = \"here\"",
+              "new": "(k = \"otherRegion\" \\/ (\\A i \\in Targets(k) : Scope(i) = \"here\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignTeam",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Scope(i) = \"here\"",
+              "new": "(k = \"otherTeam\" \\/ (\\A i \\in Targets(k) : Scope(i) = \"here\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptStackResource",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : IsNative(i)",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "InventDefaultGroup",
+          "edits": [
+            {
+              "old": "Groups(k) # {}",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AdmitDeletedTarget",
+          "edits": [
+            {
+              "old": "Targets(k) \\subseteq live",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "PublishDuringStaging",
+          "edits": [
+            {
+              "old": "request' = k /\\ UNCHANGED durable",
+              "new": "request' = k /\\ rows' = [rows EXCEPT ![n] = NativeView] /\\ UNCHANGED <<live, refs>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageInvisible"
+        },
+        {
+          "id": "ReverseZoneProjection",
+          "edits": [
+            {
+              "old": "<<Vpc(1),Zone(1),Zone(Subnet(request))>>",
+              "new": "<<Vpc(1),Zone(Subnet(request)),Zone(1)>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProjectionExact"
+        },
+        {
+          "id": "WrongVpcProjection",
+          "edits": [
+            {
+              "old": "<<Vpc(1),Zone(1),Zone(Subnet(request))>>",
+              "new": "<<\"other\",Zone(1),Zone(Subnet(request))>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProjectionExact"
+        },
+        {
+          "id": "PartialReferences",
+          "edits": [
+            {
+              "old": "Edges(pending,Targets(request))",
+              "new": "Edges(pending,{1,2})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReferences"
+        },
+        {
+          "id": "CanceledPartialReferences",
+          "edits": [
+            {
+              "old": "refs' = refs (* rollback partial references *)",
+              "new": "refs' = refs \\cup Edges(pending,{1}) (* rollback partial references *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanceledUnchanged"
+        },
+        {
+          "id": "CanceledRowCommitted",
+          "edits": [
+            {
+              "old": "rows' = rows /\\ refs' = refs (* rollback partial references *)",
+              "new": "rows' = [rows EXCEPT ![pending] = NativeView] /\\ refs' = refs (* rollback partial references *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanceledUnchanged"
+        },
+        {
+          "id": "DeleteBoundResource",
+          "edits": [
+            {
+              "old": "\\A n \\in Names : <<n,i>> \\notin refs",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReferencesExist"
+        },
+        {
+          "id": "ReleaseBothOwners",
+          "edits": [
+            {
+              "old": "refs \\ Edges(n,Resources)",
+              "new": "IF n \\in NewNames THEN {} ELSE refs \\ Edges(n,Resources)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReferences"
+        },
+        {
+          "id": "AdoptLegacyReferences",
+          "edits": [
+            {
+              "old": "refs' = refs (* historical retry acquires no ownership *)",
+              "new": "refs' = refs \\cup Edges(\"legacy\",Primary) (* historical retry acquires no ownership *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LegacyUnbound"
+        },
+        {
+          "id": "ReopenLosesOwnership",
+          "edits": [
+            {
+              "old": "rows' = rows (* reopen durable projection *)",
+              "new": "rows' = [n \\in Names |-> IF n = \"legacy\" THEN LegacyView ELSE Absent] (* reopen durable projection *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReopenUnchanged"
+        }
+      ]
     }
   ]
 }

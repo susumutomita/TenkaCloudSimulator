@@ -4818,6 +4818,48 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+BASE_MODELS.add('ALBNativePlacement')
+BASE_INVARIANTS['ALBNativePlacement'] = {
+    'TypeOK',
+    'AdmittedPlacement',
+    'CanceledUnchanged',
+    'ReopenUnchanged',
+    'StageInvisible',
+    'LegacyUnbound',
+    'ProjectionExact',
+    'CompleteReferences',
+    'ReferencesExist',
+}
+REQUIRED_MUTANTS['ALBNativePlacement'] = {
+    'IgnoreAvailabilityZone',
+    'AcceptForeignSubnetVpc',
+    'AcceptForeignGroupVpc',
+    'AcceptForeignRegion',
+    'AcceptForeignTeam',
+    'AcceptStackResource',
+    'InventDefaultGroup',
+    'AdmitDeletedTarget',
+    'PublishDuringStaging',
+    'ReverseZoneProjection',
+    'WrongVpcProjection',
+    'PartialReferences',
+    'CanceledPartialReferences',
+    'CanceledRowCommitted',
+    'DeleteBoundResource',
+    'ReleaseBothOwners',
+    'AdoptLegacyReferences',
+    'ReopenLosesOwnership',
+}
+REQUIRED_SOURCE_SCOPES['ALBNativePlacement'] = {
+    'internal/aws/elb_placement.go',
+    'internal/aws/elb_store.go',
+    'internal/aws/elb_query.go',
+    'internal/aws/ec2_subnet_native.go',
+    'internal/aws/ec2_security_groups_native_store.go',
+    'internal/server/server.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
