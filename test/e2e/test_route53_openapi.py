@@ -34,6 +34,34 @@ class Route53Reference(unittest.TestCase):
             with self.subTest(description=description), self.assertRaises(AssertionError):
                 validate_route53(broken)
 
+    def test_historical_console_tag_projection_checks_current_contract(self):
+        from route53_openapi import TAG, PRE_CONSOLE_DESCRIPTION, project_before_route53_console
+        from test_sakura_openapi import project_server_list
+
+        document = copy.deepcopy(self.spec)
+        live = project_server_list(document)
+        self.assertEqual(document, self.spec)
+        self.assertEqual(live['tags'], [tag for tag in document['tags'] if tag['name'] != 'Sakura Server metadata'])
+        expected = copy.deepcopy(document)
+        tag = next(tag for tag in expected['tags'] if tag['name'] == TAG)
+        tag['description'] = PRE_CONSOLE_DESCRIPTION
+        project_before_route53_console(document)
+        self.assertEqual(document, expected)
+
+        for mutation in ('missing', 'duplicate', 'stale', 'extra field'):
+            candidate = copy.deepcopy(self.spec)
+            tag = next(tag for tag in candidate['tags'] if tag['name'] == TAG)
+            if mutation == 'missing':
+                candidate['tags'].remove(tag)
+            elif mutation == 'duplicate':
+                candidate['tags'].append(copy.deepcopy(tag))
+            elif mutation == 'stale':
+                tag['description'] = PRE_CONSOLE_DESCRIPTION
+            else:
+                tag['unexpected'] = True
+            with self.subTest(mutation=mutation), self.assertRaises(AssertionError):
+                project_before_route53_console(candidate)
+
     @staticmethod
     def remove_ptr_descriptor(spec):
         changes = spec['paths']['/2013-04-01/hostedzone/{Id}/rrset']['post']

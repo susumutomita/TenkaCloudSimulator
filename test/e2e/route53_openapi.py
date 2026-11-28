@@ -22,12 +22,25 @@ ROUTE53_PATHS = {
 ROUTE53_IDS = {'CreateHostedZone', 'GetHostedZone', 'ListHostedZones', 'DeleteHostedZone',
     'ChangeResourceRecordSets', 'ListResourceRecordSets', 'GetChange', 'TestDNSAnswer'}
 TAG = 'Route53 public hosted zones'
+CONSOLE_DESCRIPTION = 'Bounded public zones and saved-state answers only. A dedicated Route53 Console is available. No external DNS, private VPC zones, aliases, routing policies or CloudFormation.'
+PRE_CONSOLE_DESCRIPTION = 'Bounded public zones and saved-state answers only. No external DNS, private VPC zones, aliases, routing policies, console or CloudFormation.'
 CONTRACT_SHA256 = '1210ce75c2af0b81df6acb18207f1a027627d48c0c75932b34a9792d154e7388'
 
 
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'),
         ensure_ascii=False).encode()).hexdigest()
+
+
+def current_console_tag(spec):
+    tags = [tag for tag in spec['tags'] if tag.get('name') == TAG]
+    assert tags == [{'name': TAG, 'description': CONSOLE_DESCRIPTION}], 'Route53 console tag changed'
+    return tags[0]
+
+
+def project_before_route53_console(spec):
+    """Restore the historical description on a caller-owned projection after exact validation."""
+    current_console_tag(spec)['description'] = PRE_CONSOLE_DESCRIPTION
 
 
 def validate_route53(spec):
@@ -38,8 +51,7 @@ def validate_route53(spec):
     ids = [operation['operationId'] for path in spec['paths'].values()
         for operation in path.values() if isinstance(operation, dict) and 'operationId' in operation]
     assert all(ids.count(name) == 1 for name in ROUTE53_IDS), 'Route53 operation missing or duplicated'
-    tags = [tag for tag in spec['tags'] if tag.get('name') == TAG]
-    assert tags == [{'name': TAG, 'description': 'Bounded public zones and saved-state answers only. A dedicated Route53 Console is available. No external DNS, private VPC zones, aliases, routing policies or CloudFormation.'}]
+    current_console_tag(spec)
     assert sum(group.get('tags', []).count(TAG) for group in spec['x-tagGroups']) == 1
     assert TAG in next(group['tags'] for group in spec['x-tagGroups'] if group['name'] == 'AWS')
 
