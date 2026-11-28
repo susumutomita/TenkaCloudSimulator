@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "7918c50d9ad2d97998df30fbde462bbcdd770bee",
+  "base_sha": "9300b9a42e8ffa3422d26a123c59956a7c005dc9",
   "changes": [
     {
       "path": "README.md",
@@ -11,7 +11,7 @@
     },
     {
       "path": "docs/cloudwatch-metrics.md",
-      "sha256": "92c025ba63b38da5a308db527b73ca5e03a4f5a06526cf0a74dd35f3d2e4ecd8",
+      "sha256": "1dd0c8d1510bb02ff8b4dac68bca474ff372d0173a86c760b1fcec1139581306",
       "disposition": "documentation",
       "reason": "Explain scoped UI reads and the exact native Query examples, retention and evaluator boundaries.",
       "models": []
@@ -24,11 +24,239 @@
       "models": []
     },
     {
+      "path": "formal/CloudWatchAlarmEvaluation.cfg",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "481440f40cb9ee33689f1c557409335735d11753f2e908fe76de902355b149b1"
+    },
+    {
+      "path": "formal/CloudWatchAlarmEvaluation.tla",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "acee640e017c0ffb4daba17f31e31d569d5947c2a2358529201b94f0a467288e"
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "d74ea7522f7ce2a29a8a3b49b756a61c091296d1380241b13561d6a788aad374",
+      "sha256": "ba4aa62d8b46cfd37d7bfaab42538063b44524badf375fc1caddc9e2d94dd76c",
       "disposition": "formal-infrastructure",
       "reason": "Extend the existing service and read epoch binding only to the CloudWatch UI read lifecycle.",
       "models": []
+    },
+    {
+      "path": "internal/aws/cloudwatch_metrics_gateway.go",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "8261d8e1c7fb14d3693b176b71a83547c8266f5f5fd46e019492a99a2cf212e2"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/alarm_contract_test.go",
+      "disposition": "test-support",
+      "reason": "Validate and register native alarm behavior while preserving existing metric compatibility.",
+      "models": [],
+      "sha256": "6cc25c639b711e45fdee5a45ae9bc0f7b57a0309b37f5262068075add32f6fd7"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/alarm_form.go",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "30d09d84270c2803ac973ef1c962da3f222696bf74bb393e2e12d9473de7e1bf"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/alarm_http.go",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "d0f93fb8ae0ab6f1a66239720b9366639af594dbd1d1b1fd64c8f1b87231324b"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/alarm_store.go",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "75cc72a7bebd3e8e9eeba31b126627ac0a1833e917883b1762ce47338e0a8056"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/alarm_test.go",
+      "disposition": "test-support",
+      "reason": "Validate and register native alarm behavior while preserving existing metric compatibility.",
+      "models": [],
+      "sha256": "6fb55a1c5719b0e360fc1a86a231fd427a64445190a792300ca7c42e3d1d2c22"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/alarm_transaction_test.go",
+      "disposition": "test-support",
+      "reason": "Validate and register native alarm behavior while preserving existing metric compatibility.",
+      "models": [],
+      "sha256": "902a0122558dbcafc07688a821608340d5f9dcf58c670159116b58291074015f"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/http.go",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "b86fd970d4c25c3d4cd6f360ac2534a19362bb1ad133460e0456625b65b38154"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/http_test.go",
+      "disposition": "test-support",
+      "reason": "Validate and register native alarm behavior while preserving existing metric compatibility.",
+      "models": [],
+      "sha256": "b34f29fc66bcc8309ef6e1ebff798fddafaa91b7e75f1710bc52115eedc4cc9d"
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/store.go",
+      "disposition": "modeled",
+      "reason": "Bound actual sample-derived alarm admission, persisted evaluation and transaction frames to the directed model.",
+      "models": [
+        {
+          "id": "CloudWatchAlarmEvaluation",
+          "properties": [
+            "TypeOK",
+            "PeerFrame",
+            "NoStagedPublish",
+            "RefusedFrame",
+            "AcknowledgedAtomic",
+            "ActualSampleState",
+            "MeasuredValueExact",
+            "InitialState",
+            "UpdatePreservesState",
+            "DeleteKeepsSamples",
+            "FreshIdentity"
+          ],
+          "limits": "Finite directed rational histories only; no Go, SQL, XML, IAM, floating point, clock, cursor, quota, arbitrary concurrency or scheduler refinement proof."
+        }
+      ],
+      "sha256": "3dfa4345620834a4fa1081f98cc79de20b46310c17bdcfead9a6513575a62aeb"
     },
     {
       "path": "internal/server/apidocs/openapi.json",
@@ -69,11 +297,32 @@
       ]
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Validate and register native alarm behavior while preserving existing metric compatibility.",
+      "models": [],
+      "sha256": "b73c729c5b2addc642e19fa7efabd927f6ca6fa0bb69d9d3e55df001ab91f831"
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Validate and register native alarm behavior while preserving existing metric compatibility.",
+      "models": [],
+      "sha256": "f4dbede3ea895fcf2bcc6eab09648176be3574967623b685282cc03a956f8a0c"
+    },
+    {
       "path": "test/console/cloudwatch-metrics.test.mjs",
       "sha256": "dd6870e9e56d2fa16be9843e85b6f4de80e171ecff66f765212ada879919812c",
       "disposition": "test-support",
       "reason": "Check XML operation/result scope, exact series, missing and measured zero, retired requests and availability.",
       "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_metrics.py",
+      "disposition": "test-support",
+      "reason": "Validate and register native alarm behavior while preserving existing metric compatibility.",
+      "models": [],
+      "sha256": "0fd6196486b39fbd4d83da1583778000a02257eb71a9150d6ebf8ee121d4adc6"
     },
     {
       "path": "test/e2e/cloudwatch_observability_console.py",
