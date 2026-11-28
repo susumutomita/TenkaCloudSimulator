@@ -17,7 +17,7 @@ func CloudFrontCapabilities() map[string]any {
 		"operations": []string{"CreateVpcOrigin", "GetVpcOrigin", "UpdateVpcOrigin", "DeleteVpcOrigin", "CreateDistribution", "GetDistribution", "GetDistributionConfig", "UpdateDistribution", "DeleteDistribution", "ListDistributions", "CreateInvalidation", "GetInvalidation"},
 		"protocol":   "REST/XML 2020-05-31", "originTarget": "internal application load balancer (VPC origin configuration only)",
 		"originLimit": 50, "cloudFormation": true, "cloudFormationTypes": []string{"AWS::CloudFront::VpcOrigin"},
-		"dataPlane": true, "vpcOriginDataPlane": false, "distributionConsole": false, "distributionCloudFormation": false,
+		"dataPlane": true, "vpcOriginDataPlane": false, "distributionConsole": true, "distributionCloudFormation": false,
 		"distributionOrigin": "one existing local S3 bucket", "distributionLimit": 100,
 		"delivery": cfDeliveryPath, "reference": "/_simulator/docs/cloudfront-local.html",
 		"cache":               "saved local object snapshots; DefaultTTL only; fresh distribution and S3 object authorization on every read",

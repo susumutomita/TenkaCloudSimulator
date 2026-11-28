@@ -32691,6 +32691,97 @@
       ],
       "format": "esm"
     },
+    "src/cloudfront-local.mjs": {
+      "bytes": 9766,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/cloudfront-local.jsx": {
+      "bytes": 15389,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/checkbox/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/checkbox"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/content-layout/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/content-layout"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/key-value-pairs/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/key-value-pairs"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/modal/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/modal"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/cloudfront-local.mjs",
+          "kind": "import-statement",
+          "original": "./cloudfront-local.mjs"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        }
+      ],
+      "format": "esm"
+    },
     "src/cloudwatch-logs.jsx": {
       "bytes": 13544,
       "imports": [
@@ -35429,8 +35520,13 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 15214,
+      "bytes": 15570,
       "imports": [
+        {
+          "path": "src/cloudfront-local.mjs",
+          "kind": "import-statement",
+          "original": "./cloudfront-local.mjs"
+        },
         {
           "path": "src/autoscaling-plans.mjs",
           "kind": "import-statement",
@@ -35450,7 +35546,7 @@
       "format": "esm"
     },
     "src/console-home.jsx": {
-      "bytes": 8009,
+      "bytes": 8228,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -36510,7 +36606,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 61280,
+      "bytes": 61629,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -36771,6 +36867,11 @@
           "path": "src/autoscaling-plans.jsx",
           "kind": "import-statement",
           "original": "./autoscaling-plans.jsx"
+        },
+        {
+          "path": "src/cloudfront-local.jsx",
+          "kind": "import-statement",
+          "original": "./cloudfront-local.jsx"
         },
         {
           "path": "src/cloudwatch-logs.jsx",
@@ -37112,7 +37213,7 @@
           "bytesInOutput": 33
         },
         "node_modules/@cloudscape-design/components/input/internal.js": {
-          "bytesInOutput": 4461
+          "bytesInOutput": 4459
         },
         "node_modules/@cloudscape-design/component-toolkit/mjs/internal/analytics-metadata/attributes.js": {
           "bytesInOutput": 182
@@ -37511,7 +37612,7 @@
           "bytesInOutput": 140
         },
         "node_modules/@cloudscape-design/components/internal/utils/input-styles.js": {
-          "bytesInOutput": 3242
+          "bytesInOutput": 3246
         },
         "node_modules/@cloudscape-design/components/input/styles.js": {
           "bytesInOutput": 28
@@ -37586,7 +37687,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 51477
+          "bytesInOutput": 51754
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -37619,7 +37720,7 @@
           "bytesInOutput": 210
         },
         "node_modules/@cloudscape-design/components/app-layout/classic.js": {
-          "bytesInOutput": 8048
+          "bytesInOutput": 8050
         },
         "node_modules/@cloudscape-design/components/split-panel/utils/size-utils.js": {
           "bytesInOutput": 179
@@ -37673,7 +37774,7 @@
           "bytesInOutput": 542
         },
         "node_modules/@cloudscape-design/components/button-dropdown/internal.js": {
-          "bytesInOutput": 9990
+          "bytesInOutput": 9986
         },
         "node_modules/@cloudscape-design/components/box/internal.js": {
           "bytesInOutput": 1116
@@ -37685,7 +37786,7 @@
           "bytesInOutput": 11266
         },
         "node_modules/@cloudscape-design/components/dropdown/internal.js": {
-          "bytesInOutput": 6834
+          "bytesInOutput": 6837
         },
         "node_modules/@cloudscape-design/components/internal/hooks/use-mouse-down-target.js": {
           "bytesInOutput": 345
@@ -37721,7 +37822,7 @@
           "bytesInOutput": 891
         },
         "node_modules/@cloudscape-design/components/link/internal.js": {
-          "bytesInOutput": 3094
+          "bytesInOutput": 3091
         },
         "node_modules/@cloudscape-design/components/internal/context/info-link-label-context.js": {
           "bytesInOutput": 46
@@ -37868,7 +37969,7 @@
           "bytesInOutput": 477
         },
         "node_modules/@cloudscape-design/components/button-dropdown/utils/use-button-dropdown.js": {
-          "bytesInOutput": 2683
+          "bytesInOutput": 2734
         },
         "node_modules/@cloudscape-design/components/internal/components/options-list/utils/use-open-state.js": {
           "bytesInOutput": 272
@@ -38051,7 +38152,7 @@
           "bytesInOutput": 38
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh/context.js": {
-          "bytesInOutput": 5832
+          "bytesInOutput": 5826
         },
         "node_modules/@cloudscape-design/components/internal/context/dynamic-overlap-context.js": {
           "bytesInOutput": 46
@@ -38231,7 +38332,7 @@
           "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39417
+          "bytesInOutput": 39449
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -38240,13 +38341,13 @@
           "bytesInOutput": 577
         },
         "node_modules/@dnd-kit/sortable/dist/sortable.esm.js": {
-          "bytesInOutput": 5418
+          "bytesInOutput": 5420
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/utilities/events.js": {
           "bytesInOutput": 183
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/use-drag-and-drop-reorder.js": {
-          "bytesInOutput": 1702
+          "bytesInOutput": 1704
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/defaults.js": {
           "bytesInOutput": 75
@@ -38513,7 +38614,7 @@
           "bytesInOutput": 252
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/toolbar/index.js": {
-          "bytesInOutput": 3907
+          "bytesInOutput": 3911
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/toolbar/drawer-triggers.js": {
           "bytesInOutput": 4788
@@ -38726,7 +38827,7 @@
           "bytesInOutput": 442
         },
         "node_modules/@cloudscape-design/components/table/internal.js": {
-          "bytesInOutput": 14383
+          "bytesInOutput": 14385
         },
         "node_modules/@cloudscape-design/components/internal/hooks/use-scroll-sync/index.js": {
           "bytesInOutput": 285
@@ -38813,7 +38914,7 @@
           "bytesInOutput": 2179
         },
         "node_modules/@cloudscape-design/components/form-field/internal.js": {
-          "bytesInOutput": 4708
+          "bytesInOutput": 4712
         },
         "node_modules/@cloudscape-design/components/form-field/util.js": {
           "bytesInOutput": 599
@@ -38888,7 +38989,7 @@
           "bytesInOutput": 891
         },
         "node_modules/@cloudscape-design/components/table/resizer/index.js": {
-          "bytesInOutput": 5375
+          "bytesInOutput": 5386
         },
         "node_modules/@cloudscape-design/components/internal/hooks/use-throttle-callback/index.js": {
           "bytesInOutput": 72
@@ -39017,7 +39118,7 @@
           "bytesInOutput": 1038
         },
         "node_modules/@cloudscape-design/components/table/thead.js": {
-          "bytesInOutput": 5817
+          "bytesInOutput": 5822
         },
         "node_modules/@cloudscape-design/components/table/column-groups/split-utils.js": {
           "bytesInOutput": 533
@@ -39122,7 +39223,7 @@
           "bytesInOutput": 468
         },
         "node_modules/@cloudscape-design/components/pagination/internal.js": {
-          "bytesInOutput": 4998
+          "bytesInOutput": 4999
         },
         "node_modules/@cloudscape-design/components/popover/internal.js": {
           "bytesInOutput": 2658
@@ -39206,7 +39307,7 @@
           "bytesInOutput": 1164
         },
         "node_modules/@cloudscape-design/components/select/internal.js": {
-          "bytesInOutput": 4640
+          "bytesInOutput": 4646
         },
         "node_modules/@cloudscape-design/components/internal/components/option/utils/filter-options.js": {
           "bytesInOutput": 694
@@ -39356,7 +39457,7 @@
           "bytesInOutput": 718
         },
         "node_modules/@cloudscape-design/components/internal/vendor/react-virtual.js": {
-          "bytesInOutput": 5530
+          "bytesInOutput": 5508
         },
         "node_modules/@cloudscape-design/components/internal/hooks/use-virtual/sticky-range-extractor.js": {
           "bytesInOutput": 55
@@ -39509,7 +39610,7 @@
           "bytesInOutput": 2500
         },
         "node_modules/@cloudscape-design/components/tabs/tab-header-bar.js": {
-          "bytesInOutput": 10118
+          "bytesInOutput": 10119
         },
         "node_modules/@cloudscape-design/components/tabs/native-smooth-scroll-supported.js": {
           "bytesInOutput": 71
@@ -39641,7 +39742,7 @@
           "bytesInOutput": 1900
         },
         "src/lambda.jsx": {
-          "bytesInOutput": 27473
+          "bytesInOutput": 27474
         },
         "node_modules/@cloudscape-design/components/checkbox/index.js": {
           "bytesInOutput": 232
@@ -39752,7 +39853,7 @@
           "bytesInOutput": 5106
         },
         "src/ec2-vpc-security-groups.jsx": {
-          "bytesInOutput": 21864
+          "bytesInOutput": 21881
         },
         "src/ec2-vpc-network-acls.jsx": {
           "bytesInOutput": 9739
@@ -39761,7 +39862,7 @@
           "bytesInOutput": 7289
         },
         "src/ec2-vpc-native-route-tables.jsx": {
-          "bytesInOutput": 27304
+          "bytesInOutput": 27307
         },
         "src/ec2-native-route-tables.mjs": {
           "bytesInOutput": 10351
@@ -39770,28 +39871,28 @@
           "bytesInOutput": 10616
         },
         "src/ec2-vpc-tags-panel.jsx": {
-          "bytesInOutput": 8646
+          "bytesInOutput": 8649
         },
         "src/ec2-vpc-resource-view.jsx": {
           "bytesInOutput": 1756
         },
         "src/ec2-subnets-console.jsx": {
-          "bytesInOutput": 17343
+          "bytesInOutput": 17344
         },
         "src/ec2-subnet-console-route.mjs": {
           "bytesInOutput": 807
         },
         "src/ec2-route-table-console.jsx": {
-          "bytesInOutput": 18190
+          "bytesInOutput": 18191
         },
         "src/ec2-network-acl-inventory.jsx": {
-          "bytesInOutput": 19844
+          "bytesInOutput": 19849
         },
         "src/ec2-security-groups-console.jsx": {
           "bytesInOutput": 4235
         },
         "src/ec2-internet-gateway-page.jsx": {
-          "bytesInOutput": 16685
+          "bytesInOutput": 16717
         },
         "src/session-manager.jsx": {
           "bytesInOutput": 4920
@@ -39812,7 +39913,7 @@
           "bytesInOutput": 502
         },
         "node_modules/@cloudscape-design/components/wizard/internal.js": {
-          "bytesInOutput": 3596
+          "bytesInOutput": 3605
         },
         "node_modules/@cloudscape-design/components/wizard/wizard-form.js": {
           "bytesInOutput": 2754
@@ -39854,28 +39955,34 @@
           "bytesInOutput": 8683
         },
         "src/iam-managed.jsx": {
-          "bytesInOutput": 25808
+          "bytesInOutput": 25807
         },
         "src/kms_aliases.jsx": {
-          "bytesInOutput": 17596
+          "bytesInOutput": 17593
         },
         "node_modules/@cloudscape-design/global-styles/index.js": {
           "bytesInOutput": 526
         },
         "src/kms.jsx": {
-          "bytesInOutput": 15655
+          "bytesInOutput": 15675
         },
         "src/sqs.jsx": {
-          "bytesInOutput": 28886
+          "bytesInOutput": 28877
         },
         "src/dynamodb.jsx": {
-          "bytesInOutput": 25811
+          "bytesInOutput": 25812
         },
         "src/autoscaling-plans.jsx": {
-          "bytesInOutput": 11531
+          "bytesInOutput": 11483
         },
         "src/autoscaling-plans.mjs": {
           "bytesInOutput": 4134
+        },
+        "src/cloudfront-local.jsx": {
+          "bytesInOutput": 12695
+        },
+        "src/cloudfront-local.mjs": {
+          "bytesInOutput": 6172
         },
         "src/cloudwatch-logs.jsx": {
           "bytesInOutput": 12866
@@ -39887,7 +39994,7 @@
           "bytesInOutput": 1752
         },
         "src/secrets-manager.jsx": {
-          "bytesInOutput": 24476
+          "bytesInOutput": 24452
         },
         "src/secret_versions.jsx": {
           "bytesInOutput": 8676
@@ -39896,7 +40003,7 @@
           "bytesInOutput": 8415
         },
         "src/apigateway.jsx": {
-          "bytesInOutput": 20888
+          "bytesInOutput": 20874
         },
         "node_modules/@cloudscape-design/components/toggle/index.js": {
           "bytesInOutput": 224
@@ -39914,7 +40021,7 @@
           "bytesInOutput": 624
         },
         "src/wafv2.jsx": {
-          "bytesInOutput": 22592
+          "bytesInOutput": 22546
         },
         "src/s3-settings.jsx": {
           "bytesInOutput": 8860
@@ -40025,13 +40132,13 @@
           "bytesInOutput": 1001
         },
         "src/s3-multipart.jsx": {
-          "bytesInOutput": 11913
+          "bytesInOutput": 11923
         },
         "src/s3-multipart-parts.mjs": {
           "bytesInOutput": 1761
         },
         "src/gcp-storage.jsx": {
-          "bytesInOutput": 27754
+          "bytesInOutput": 27753
         },
         "src/gcp-console-shell.jsx": {
           "bytesInOutput": 2943
@@ -40040,7 +40147,7 @@
           "bytesInOutput": 0
         },
         "src/azure-queue.jsx": {
-          "bytesInOutput": 19382
+          "bytesInOutput": 19363
         },
         "src/azure-queue-requests.mjs": {
           "bytesInOutput": 5523
@@ -40049,7 +40156,7 @@
           "bytesInOutput": 0
         },
         "src/azure-blob.jsx": {
-          "bytesInOutput": 30915
+          "bytesInOutput": 30933
         },
         "src/azure-blob.css": {
           "bytesInOutput": 0
@@ -40058,7 +40165,7 @@
           "bytesInOutput": 551
         },
         "src/azure-arm.jsx": {
-          "bytesInOutput": 21782
+          "bytesInOutput": 21771
         },
         "src/azure-arm.css": {
           "bytesInOutput": 0
@@ -40070,7 +40177,7 @@
           "bytesInOutput": 0
         },
         "src/sakura-disks.jsx": {
-          "bytesInOutput": 15591
+          "bytesInOutput": 15588
         },
         "src/sakura-servers.jsx": {
           "bytesInOutput": 5421
@@ -40079,7 +40186,7 @@
           "bytesInOutput": 1780
         },
         "src/global-navigation.jsx": {
-          "bytesInOutput": 14063
+          "bytesInOutput": 14074
         },
         "node_modules/@cloudscape-design/components/top-navigation/index.js": {
           "bytesInOutput": 209
@@ -40136,16 +40243,16 @@
           "bytesInOutput": 5687
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 12438
+          "bytesInOutput": 12742
         },
         "src/console-home.jsx": {
-          "bytesInOutput": 9688
+          "bytesInOutput": 9977
         },
         "src/console-favorites.mjs": {
           "bytesInOutput": 476
         },
         "src/catalog.jsx": {
-          "bytesInOutput": 37890
+          "bytesInOutput": 37885
         },
         "src/appstream-app-block.jsx": {
           "bytesInOutput": 7764
@@ -40184,7 +40291,7 @@
           "bytesInOutput": 14716
         },
         "src/gcp-appengine.jsx": {
-          "bytesInOutput": 23942
+          "bytesInOutput": 23939
         },
         "src/gcp-appengine.css": {
           "bytesInOutput": 0
@@ -40205,7 +40312,7 @@
           "bytesInOutput": 0
         },
         "src/sns.jsx": {
-          "bytesInOutput": 11471
+          "bytesInOutput": 11478
         },
         "src/sns-client.mjs": {
           "bytesInOutput": 2841
@@ -40235,7 +40342,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2895147
+      "bytes": 2914929
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

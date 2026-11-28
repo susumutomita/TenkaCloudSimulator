@@ -14,7 +14,7 @@ Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licenses
 
 [AWS Auto Scaling Plans のコンソール](../autoscaling-plans.md)は選択リージョンの共有 JSON API でプランを作成し、既存の DynamoDB テーブルに対する読み込みまたは書き込みの容量範囲を更新する。プラン状態は Scaling Plans から、実際の両方の容量は DynamoDB DescribeTable から読み戻す。プランの削除後もテーブルと容量は維持される。
 
-CloudFront の [ローカル distribution](../cloudfront-local-content.md) は、同じ SQLite の保存済み S3 オブジェクトだけを読み、DefaultTTL に従う有界キャッシュと native invalidation を提供する。専用の simulator GET/HEAD は、キャッシュの hit を含めて一つの新しい policy snapshot から distribution と S3 オブジェクトの権限を確認する。外部 origin・DNS・VPC Origin の通信、CDN edge、distribution の CloudFormation/Console は追加しない。
+CloudFront の [ローカル distribution](../cloudfront-local-content.md) は、同じ SQLite の保存済み S3 オブジェクトだけを読み、DefaultTTL に従う有界キャッシュと native invalidation を提供する。専用の simulator GET/HEAD は、キャッシュの hit を含めて一つの新しい policy snapshot から distribution と S3 オブジェクトの権限を確認する。Cloudscape は native の一覧・詳細・ローカルデータの安全なダウンロード・無効化を同じ状態に対して行う。本文は実行せず、古いスコープの応答を破棄する。不確定な無効化は同じ caller reference と paths の明示的な再送だけで確認する。外部 origin・DNS・VPC Origin の通信、CDN edge、distribution の CloudFormation は追加しない。
 
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
 

@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 3cc5fec741af71401550d44b5137fe68a4ce098f
+          ref: c209a2a25d2eea81dcb0aa84f697332f50225cde
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -22,12 +22,12 @@ jobs:
       - name: Build the clean immutable composed product
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 3cc5fec741af71401550d44b5137fe68a4ce098f
+          test "$(git rev-parse HEAD)" = c209a2a25d2eea81dcb0aa84f697332f50225cde
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/cloudfront-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/build.txt"
-          grep -F 'vcs.revision=3cc5fec741af71401550d44b5137fe68a4ce098f' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
+          grep -F 'vcs.revision=c209a2a25d2eea81dcb0aa84f697332f50225cde' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/binary.sha256"
       - name: Install stock pinned SDK and Chromium dependencies
@@ -35,18 +35,20 @@ jobs:
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/cloudfront-tests
           /tmp/cloudfront-tests/bin/python -m pip install -r scripts/requirements-test.txt
           /tmp/cloudfront-tests/bin/playwright install --with-deps chromium
-      - name: Run both unchanged fixtures in nonroot loopback-only isolation
+      - name: Run all three unchanged fixtures in nonroot loopback-only isolation
         run: |
           export PATH="/tmp/cloudfront-tests/bin:$PATH"
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
           export SIMULATOR_BINARY_SHA256=$(cut -d ' ' -f 1 "$RUNNER_TEMP/cloudfront-receipts/binary.sha256")
           export CHROMIUM_EXECUTABLE=$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')
-          for case in sdk scalar; do
+          for case in sdk scalar console; do
             set +e
             if [ "$case" = sdk ]; then
               unshare --user --map-current-user --net --keep-caps sh -eu -c 'ip link set lo up; exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all python test/e2e/cloudfront_local_content.py --binary "$SIMULATOR_BINARY" --binary-sha256 "$SIMULATOR_BINARY_SHA256"' > "$RUNNER_TEMP/cloudfront-$case-private.log" 2>&1
-            else
+            elif [ "$case" = scalar ]; then
               unshare --user --map-current-user --net --keep-caps sh -eu -c 'ip link set lo up; exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all python test/e2e/cloudfront_local_scalar.py' > "$RUNNER_TEMP/cloudfront-$case-private.log" 2>&1
+            else
+              unshare --user --map-current-user --net --keep-caps sh -eu -c 'ip link set lo up; exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all python test/e2e/cloudfront_local_console.py' > "$RUNNER_TEMP/cloudfront-$case-private.log" 2>&1
             fi
             result=$?
             set -e
@@ -57,7 +59,7 @@ jobs:
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           case, result = os.environ['CLOUDFRONT_CASE'], int(os.environ['CLOUDFRONT_EXIT'])
           text = (root / f'cloudfront-{case}-private.log').read_text(errors='replace')
-          receipt = {'sourceSha': '3cc5fec741af71401550d44b5137fe68a4ce098f', 'case': case, 'fixtureExit': result}
+          receipt = {'sourceSha': 'c209a2a25d2eea81dcb0aa84f697332f50225cde', 'case': case, 'fixtureExit': result}
           if result == 0:
               records = [json.loads(line) for line in text.splitlines() if line.startswith('{"ok":')]
               expected = ({'ok': True, 'nativeCloudFrontOperations': 8, 'origin': 'saved local S3 bytes',
@@ -66,6 +68,12 @@ jobs:
                           {'ok': True, 'binarySha256': os.environ['SIMULATOR_BINARY_SHA256'], 'nativeCloudFrontSends': 2,
                            'simulatorOnlyContentSends': 1, 'freshVisibleDownloadedBytes': True, 'freshHitDenial': True,
                            'peerUnchangedAcrossReopen': True, 'cleanup': True, 'outsideRequests': 0, 'externalOriginFetch': False})
+              if case == 'console':
+                  expected = {'ok': True, 'binarySha256': os.environ['SIMULATOR_BINARY_SHA256'],
+                              'nativePaging25Plus1': True, 'sameSDKScalarConsoleObject': True, 'safeDownload': True,
+                              'knownReceiptReadRecovery': True, 'rollbackReplay': True, 'committedLostAckReplay': True,
+                              'lateOwnerReadIgnored': True, 'hotCachePolicyDenial': True, 'participantBound': True,
+                              'peerRestartPreserved': True, 'japanese390': True, 'cleanup': True}
               assert records == [expected]
               receipt['verifiedFixture'] = records[0]
           else:
@@ -81,11 +89,12 @@ jobs:
           test -z "$(git status --porcelain)"
           test "$(cat "$RUNNER_TEMP/cloudfront-receipts/sdk.exit")" -eq 0
           test "$(cat "$RUNNER_TEMP/cloudfront-receipts/scalar.exit")" -eq 0
+          test "$(cat "$RUNNER_TEMP/cloudfront-receipts/console.exit")" -eq 0
       - name: Retain only safe immutable source and fixture receipts
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudfront-runtime-3cc5fec741af71401550d44b5137fe68a4ce098f
+          name: cloudfront-runtime-c209a2a25d2eea81dcb0aa84f697332f50225cde
           path: ${{ runner.temp }}/cloudfront-receipts/
           if-no-files-found: error
           retention-days: 7
@@ -98,7 +107,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 3cc5fec741af71401550d44b5137fe68a4ce098f
+          ref: c209a2a25d2eea81dcb0aa84f697332f50225cde
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -108,12 +117,12 @@ jobs:
       - name: Build the clean source and install stock pinned test requirements
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 3cc5fec741af71401550d44b5137fe68a4ce098f
+          test "$(git rev-parse HEAD)" = c209a2a25d2eea81dcb0aa84f697332f50225cde
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/cloudfront-gate-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
-          grep -F 'vcs.revision=3cc5fec741af71401550d44b5137fe68a4ce098f' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
+          grep -F 'vcs.revision=c209a2a25d2eea81dcb0aa84f697332f50225cde' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/binary.sha256"
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/cloudfront-gate-tests
@@ -133,7 +142,7 @@ jobs:
           import json, os, pathlib, re
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           text = (root / 'cloudfront-whole-private.log').read_text(errors='replace')
-          receipt = {'sourceSha': '3cc5fec741af71401550d44b5137fe68a4ce098f', 'command': 'make before-commit',
+          receipt = {'sourceSha': 'c209a2a25d2eea81dcb0aa84f697332f50225cde', 'command': 'make before-commit',
                      'exit': int(os.environ['CLOUDFRONT_GATE_EXIT']),
                      'packages': re.findall(r'^(?:ok|FAIL)\s+(github\.com/susumutomita/TenkaCloudSimulator/[A-Za-z0-9_/.-]+)', text, re.MULTILINE),
                      'failedTests': re.findall(r'^--- FAIL: (Test[A-Za-z0-9_]+)', text, re.MULTILINE),
@@ -154,7 +163,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudfront-whole-3cc5fec741af71401550d44b5137fe68a4ce098f
+          name: cloudfront-whole-c209a2a25d2eea81dcb0aa84f697332f50225cde
           path: ${{ runner.temp }}/cloudfront-gate-receipts/
           if-no-files-found: error
           retention-days: 7

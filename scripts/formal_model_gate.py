@@ -4849,7 +4849,14 @@ REQUIRED_SOURCE_SCOPES['CloudFrontLocalCache'] = {
     'internal/aws/cloudfront_distribution.go', 'internal/aws/cloudfront_distribution_store.go',
     'internal/aws/cloudfront_distribution_http.go', 'internal/aws/cloudfront_distribution_list.go',
     'internal/aws/cloudfront_vpc_origin.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+    'internal/aws/cloudfront_distribution_interrupt_test.go',
 }
+
+BASE_MODELS.add('CloudFrontConsoleEpoch')
+BASE_INVARIANTS['CloudFrontConsoleEpoch'] = {'StableUnknownCaller', 'ProtectedDownload', 'CurrentReceipt', 'TypeOK', 'OneCurrentWrite', 'ExplicitWriteConfirmation', 'CurrentContent', 'AcknowledgedReceipt'}
+REQUIRED_MUTANTS['CloudFrontConsoleEpoch'] = {'UnconfirmedWrite', 'PublishOldRead', 'RetainOldContent', 'ReplayDifferentCaller', 'OldReadUnlocksWrite', 'FreshCallerWhileUnknown', 'UnknownAcknowledged', 'UnsafeContent', 'PublishOldReceipt'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'] = {'internal/aws/cloudfront_distribution_http.go', 'tools/console/src/cloudfront-local.jsx', 'tools/console/src/cloudfront-local.mjs', 'internal/server/web/app.js', 'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'].add('tools/console/src/console-home.jsx')
 
 
 def load_registry(root, relative='formal/models.json'):

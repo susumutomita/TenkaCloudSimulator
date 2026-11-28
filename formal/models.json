@@ -30066,7 +30066,8 @@
         "internal/aws/cloudfront_distribution_list.go",
         "internal/aws/cloudfront_vpc_origin.go",
         "internal/aws/ssm.go",
-        "internal/server/server.go"
+        "internal/server/server.go",
+        "internal/aws/cloudfront_distribution_interrupt_test.go"
       ],
       "mutants": [
         {
@@ -30167,6 +30168,133 @@
             }
           ],
           "expect_invariant": "FailureRollsBack"
+        }
+      ]
+    },
+    {
+      "id": "CloudFrontConsoleEpoch",
+      "model": "formal/CloudFrontConsoleEpoch.tla",
+      "config": "formal/CloudFrontConsoleEpoch.cfg",
+      "bounds": "Two abstract actor/region/route/distribution scopes, three scope epochs, three native request tickets, two caller references and at most eight transitions.",
+      "properties": [
+        "TypeOK",
+        "CurrentContent",
+        "CurrentReceipt",
+        "ProtectedDownload",
+        "AcknowledgedReceipt",
+        "StableUnknownCaller",
+        "ExplicitWriteConfirmation",
+        "OneCurrentWrite"
+      ],
+      "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model.",
+      "source_scope": [
+        "tools/console/src/cloudfront-local.mjs",
+        "tools/console/src/cloudfront-local.jsx",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/main.jsx",
+        "internal/aws/cloudfront_distribution_http.go",
+        "internal/server/web/app.js",
+        "tools/console/src/console-home.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "PublishOldRead",
+          "edits": [
+            {
+              "old": "IF Own(r) /\\ safe (* ProtectedContent *)",
+              "new": "IF safe (* ProtectedContent *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentContent"
+        },
+        {
+          "id": "RetainOldContent",
+          "edits": [
+            {
+              "old": "content' = Empty (* ClearScope *)",
+              "new": "content' = content (* ClearScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentContent"
+        },
+        {
+          "id": "PublishOldReceipt",
+          "edits": [
+            {
+              "old": "IF Own(r) /\\ result = \"ok\" (* Acknowledged *)",
+              "new": "IF result = \"ok\" (* Acknowledged *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentReceipt"
+        },
+        {
+          "id": "UnsafeContent",
+          "edits": [
+            {
+              "old": "Own(r) /\\ safe (* ProtectedContent *)",
+              "new": "Own(r) (* ProtectedContent *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProtectedDownload"
+        },
+        {
+          "id": "UnknownAcknowledged",
+          "edits": [
+            {
+              "old": "result = \"ok\" (* Acknowledged *)",
+              "new": "result \\in {\"ok\", \"unknown\"} (* Acknowledged *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedReceipt"
+        },
+        {
+          "id": "FreshCallerWhileUnknown",
+          "edits": [
+            {
+              "old": "ELSE ~uncertain /\\ nextCaller < 2",
+              "new": "ELSE nextCaller < 2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StableUnknownCaller"
+        },
+        {
+          "id": "ReplayDifferentCaller",
+          "edits": [
+            {
+              "old": "caller' = (IF replay THEN caller ELSE nextCaller + 1)",
+              "new": "caller' = (IF replay THEN nextCaller + 1 ELSE nextCaller + 1)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StableUnknownCaller"
+        },
+        {
+          "id": "UnconfirmedWrite",
+          "edits": [
+            {
+              "old": "modal /\\ confirmed (* AffirmativeConfirmation *)",
+              "new": "modal (* AffirmativeConfirmation *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitWriteConfirmation"
+        },
+        {
+          "id": "OldReadUnlocksWrite",
+          "edits": [
+            {
+              "old": "activeKind' = (IF r.ticket = active THEN \"idle\" ELSE activeKind) (* ReadFinish *)",
+              "new": "activeKind' = \"idle\" (* ReadFinish *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneCurrentWrite"
         }
       ]
     }
