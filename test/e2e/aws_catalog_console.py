@@ -157,6 +157,41 @@ def check_versioned_edits(page, team, field, back):
 
 
 
+def check_appstream_app_block_create(page, team, create_action):
+    """The dedicated app-block wizard reviews metadata without publishing it."""
+    client = team.client('appstream')
+    name, source = 'catalog-sweep-appblock', 's3://catalog-sweep-appblock'
+    before = client.describe_app_blocks()['AppBlocks']
+    assert all(row['Name'] != name for row in before)
+    creates = []
+
+    def observe(request):
+        if request.headers.get('x-amz-target') == 'PhotonAdminProxyService.CreateAppBlock':
+            creates.append(request)
+
+    page.on('request', observe)
+    try:
+        expect(create_action).to_have_text('Create app block')
+        create_action.click()
+        expect(page.get_by_role('radio', name='WorkSpaces Applications', exact=True)).to_be_checked()
+        expect(page.get_by_role('button', name='Next', exact=True)).to_be_visible()
+        expect(page.get_by_role('button', name='Create', exact=True)).to_have_count(0)
+        page.get_by_role('textbox', name='Name', exact=True).fill(name)
+        page.get_by_role('textbox', name='S3 location', exact=True).fill(source)
+        page.get_by_role('button', name='Next', exact=True).click()
+        expect(page.get_by_role('heading', name='Review app block details', exact=True)).to_be_visible()
+        expect(page.get_by_role('button', name='Create app block', exact=True)).to_be_visible()
+        expect(page.get_by_role('button', name='Previous', exact=True)).to_be_visible()
+        expect(page.get_by_text(name, exact=True)).to_be_visible()
+        expect(page.get_by_text(source, exact=True)).to_be_visible()
+        page.get_by_role('button', name='Cancel', exact=True).click()
+        expect(page.get_by_role('heading', level=1, name='AWS service catalog')).to_be_visible()
+        assert not creates, 'Review or cancellation issued CreateAppBlock'
+        assert client.describe_app_blocks()['AppBlocks'] == before
+    finally:
+        page.remove_listener('request', observe)
+
+
 def run():
     REPORTS.mkdir(parents=True, exist_ok=True)
     axe_path = Path(os.environ['AXE_SCRIPT'])
@@ -666,10 +701,13 @@ def run():
                         assert page.get_by_text('Request failed', exact=True).count() == 0, (described['model'], kind['kind'])
                         create_action = page.get_by_role('button', name=re.compile('^Create ')).first
                         if kind['operations'].get('create') and create_action.is_enabled():
-                            create_action.click()
-                            expect(page.get_by_role('button', name='Create', exact=True)).to_be_visible()
-                            assert page.locator('[id^="catalog-field-"]').count() > 0 or page.get_by_text('This operation takes no editable members.').count() == 1, (described['model'], kind['kind'])
-                            page.get_by_role('button', name='Cancel', exact=True).click()
+                            if described['model'] == 'appstream' and kind['kind'] == 'appBlock':
+                                check_appstream_app_block_create(page, team, create_action)
+                            else:
+                                create_action.click()
+                                expect(page.get_by_role('button', name='Create', exact=True)).to_be_visible()
+                                assert page.locator('[id^="catalog-field-"]').count() > 0 or page.get_by_text('This operation takes no editable members.').count() == 1, (described['model'], kind['kind'])
+                                page.get_by_role('button', name='Cancel', exact=True).click()
                         swept += 1
                 assert not failures, failures
                 assert swept == sum(len(d['resources']) for d in descriptors), swept
