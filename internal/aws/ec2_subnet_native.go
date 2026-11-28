@@ -241,7 +241,8 @@ func (s *StackStore) deleteNativeSubnet(ctx context.Context, region, id string) 
 		return err
 	}
 	var dependent bool
-	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_ec2_network_resources WHERE region=? AND id<>? AND json_extract(document,'$.SubnetID')=?)`, region, id, id).Scan(&dependent); err != nil {
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_ec2_network_resources WHERE region=? AND id<>? AND json_extract(document,'$.SubnetID')=?
+        UNION ALL SELECT 1 FROM aws_elb_placement_refs WHERE region=? AND resource_id=?)`, region, id, id, region, id).Scan(&dependent); err != nil {
 		return err
 	}
 	if dependent {

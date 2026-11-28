@@ -37,8 +37,36 @@ def operations(spec):
 
 
 
+def project_elbv2_query_examples(spec):
+    """Remove the thirteen reviewed ELBv2 templates before checking the inherited API."""
+    post = spec['paths']['/']['post']
+    form = post['requestBody']['content']['application/x-www-form-urlencoded']
+    props = form['schema']['properties']
+    actions = ('CreateLoadBalancer', 'DescribeLoadBalancers', 'DeleteLoadBalancer',
+               'CreateTargetGroup', 'DescribeTargetGroups', 'ModifyTargetGroup', 'DeleteTargetGroup',
+               'RegisterTargets', 'DeregisterTargets', 'DescribeTargetHealth',
+               'CreateListener', 'DescribeListeners', 'DeleteListener')
+    enum = props['Action']['enum']
+    assert tuple(enum[-len(actions):]) == actions and all(enum.count(action) == 1 for action in actions)
+    del enum[-len(actions):]
+    services = next(p['schema']['enum'] for p in post['parameters'] if p.get('name') == 'X-Simulator-Service')
+    for values, added in ((services, 'elasticloadbalancing'), (props['Version']['enum'], '2015-12-01')):
+        assert values.count(added) == 1 and values[-1] == added
+        values.pop()
+    examples = {action: form['examples'].pop(action, None) for action in actions}
+    assert digest(examples) == 'cf8ce99242075bf67a4e3fd472baf4807f3fc0b08a8e15f2ee05449a65785bd6'
+    added_fields = ('Name', 'Subnets.member.1', 'Subnets.member.2', 'SecurityGroups.member.1',
+                    'Names.member.1', 'PageSize', 'LoadBalancerArns.member.1', 'LoadBalancerArn',
+                    'TargetType', 'TargetGroupArn', 'HealthCheckEnabled', 'HealthCheckPath',
+                    'Targets.member.1.Id', 'Protocol', 'Port', 'DefaultActions.member.1.Type',
+                    'DefaultActions.member.1.TargetGroupArn', 'ListenerArn')
+    fields = {key: props.pop(key, None) for key in added_fields}
+    assert digest(fields) == '7fcd469f0ea13612a2bd707f0c924c75831e330aa7732ab7854f8e440bea93f9'
+
+
 def project_simpledb_write_cleanup(spec):
     """Remove only the exact two additive practice examples and optional fields."""
+    project_elbv2_query_examples(spec)
     form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
     props = form['schema']['properties']
     actions = props['Action']['enum']

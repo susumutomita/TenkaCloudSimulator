@@ -1,533 +1,495 @@
 {
   "version": 1,
-  "base_sha": "dc76e43f5664ceef7f471fd0abc7151d04949f2b",
+  "base_sha": "615f50b8ef0916a6e0e25898310c9046bedd8ceb",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "98c23feac1362fdc790c1ded23fea5b1f97ef81ef068499defd7e745e0901a94",
+      "path": "README.ja.md",
+      "sha256": "d73bc1f0bfa7cc53295809ae83ffe9b4357278a412cdb236123ce26cb4a83559",
       "disposition": "documentation",
-      "reason": "Link the shipped KMS role grants and scheduled deletion lifecycle.",
+      "reason": "Describe the regional native EC2 placement dependency in Japanese. Document the compiled regional Console, saved health check path and shared native API scope.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "ee1aa9dfe4923ad027d46fdab029b561f033bc4abf7ada06a8624ee77d963d31",
+      "disposition": "documentation",
+      "reason": "Describe the supported local ALB placement workflow and legacy compatibility. Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "8aba03d73c7de2da96078ec47e838becdea2281c6d02905a9c77a81e8f3f150f",
+      "sha256": "6f4d097342946d4f28656663f1ce5e8486c5265a0cf055ff2aadd41c7164f5f7",
       "disposition": "documentation",
-      "reason": "Document private KMS grant authority, key generations and the local pending-deletion lifecycle.",
+      "reason": "Document transactional placement and existing load-balancer compatibility in the standalone architecture. Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
-      "path": "docs/kms.md",
-      "sha256": "f4d68dec77c8c3912a47d003823ea9da04d53046e78f50baba43c9ced6f5cb59",
+      "path": "docs/ec2-native-subnet.md",
+      "sha256": "ae3783e995dbce9bbb719fa04e12df6ccf215b22180e1076927d2d36612abe9b",
       "disposition": "documentation",
-      "reason": "Describe grant operations, seven-to-thirty-day scheduling, state transitions and shipped SDK/Console/reference evidence.",
+      "reason": "Record the native ALB dependency on existing subnets and its delete behavior.",
       "models": []
     },
     {
-      "path": "formal/KMSRoleGrantLifecycle.cfg",
-      "sha256": "fbd45f5391e3c3da4ef6d8f7846be21510270e65c26b8d94313f6f1a586d6cb9",
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "1ea25e266bf57ff44759d9e90dcf0723979318f873f4ddcbfd6cba0d6ecef343",
+      "disposition": "documentation",
+      "reason": "Describe the explicit ALB security-group dependency and delete fence.",
+      "models": []
+    },
+    {
+      "path": "docs/elb.md",
+      "sha256": "bbf06ba66a2269eb3bd8518c9b1e3a6cefbec11835c5f6d1a9f2697145b04204",
+      "disposition": "documentation",
+      "reason": "Document admitted placements, legacy rows, linked deletion and the scope of local networking. Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
+      "models": []
+    },
+    {
+      "path": "formal/ALBConsoleWorkflow.cfg",
+      "sha256": "c8da47d50187570e352bcecc28f8ef562cec1fe80e320b7f95adb5ffe786273f",
       "disposition": "modeled",
-      "reason": "Set the finite state bounds and invariants for generation-bound role grants.",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "ALBConsoleWorkflow",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
       ]
     },
     {
-      "path": "formal/KMSRoleGrantLifecycle.tla",
-      "sha256": "20a6a061e1f7984c2ad68fd14037230a663520621f97a6522ac1f5aca8df4cb2",
+      "path": "formal/ALBConsoleWorkflow.tla",
+      "sha256": "8f9b887aa0d14ecd8ec0d58b9020de839be49d925812de9a12f5f17e56f61aa8",
       "disposition": "modeled",
-      "reason": "Model exact key and generation grant authority, management, read decisions and failure frames.",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "ALBConsoleWorkflow",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
       ]
     },
     {
-      "path": "formal/KMSScheduledDeletion.cfg",
-      "sha256": "8d93c6c90c7c21a1716e0056aeb96bcd4329c13decf814a4cafec85281a30975",
+      "path": "formal/ALBNativePlacement.cfg",
+      "sha256": "44300823d05c014fffef0422885667590459892d89f3c36e64274887d9770cdb",
       "disposition": "modeled",
-      "reason": "Register bounded state and transition checks for scheduled keys.",
+      "reason": "Run the finite normalized placement invariants over two new ALBs and one legacy row.",
       "models": [
         {
-          "id": "KMSScheduledDeletion",
+          "id": "ALBNativePlacement",
           "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
           ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
         }
       ]
     },
     {
-      "path": "formal/KMSScheduledDeletion.tla",
-      "sha256": "02dd8f30187d61bb701c6d84b91c15e9248c2e055d6e6cc7e1a243c18681c078",
+      "path": "formal/ALBNativePlacement.tla",
+      "sha256": "ec2c6817925041436a4f6ef677f1f83b6e0f56e15f52ebb53274d04915c8fa89",
       "disposition": "modeled",
-      "reason": "Model eligible scheduling, cancellation, exact expiry and dependent-object frames.",
+      "reason": "Model atomic placement admission, rollback, release, shared ownership and legacy replay.",
       "models": [
         {
-          "id": "KMSScheduledDeletion",
+          "id": "ALBNativePlacement",
           "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
           ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "076d122adf6d21878a969049c826f95992af38c099177de42b433bf366586b2d",
+      "sha256": "78445bb43568a183b83cad99353b1824ca84e6c0771f605fc74c70b3ff3840dc",
       "disposition": "formal-infrastructure",
-      "reason": "Register both bounded models and the corresponding invariants, source bindings and mutation controls.",
+      "reason": "Register the native placement model, bounded claims and reason-specific mutation controls. Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_aliases.go",
-      "sha256": "8a4efb3fc859424434c6b6bf2144afaa14017aea8f021616345bb635cedbd2cd",
-      "disposition": "modeled",
-      "reason": "Enforce pending destination restrictions and observe expiry before alias operations.",
-      "models": [
-        {
-          "id": "KMSScheduledDeletion",
-          "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
-          ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/kms_deletion.go",
-      "sha256": "f1e4f0abb50af652ed520b1c17a422bb6ccd4783ea8a1ac7067cbd2ca4195260",
-      "disposition": "modeled",
-      "reason": "Atomically persist or cancel the waiting period, expire precisely due keys and their current aliases and grants.",
-      "models": [
-        {
-          "id": "KMSScheduledDeletion",
-          "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
-          ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/kms_deletion_store_failure_test.go",
-      "sha256": "a1c886bb9d7924f7090d5cb841c7fdb0ed8068cfa519167e5450d3b075a1c7cc",
+      "path": "internal/aws/cloudfront_vpc_origin_contract_test.go",
+      "sha256": "4c9712e48a8d5155a5865e12ce3b025d1936b1f678eabdae2ea3996708efd045",
       "disposition": "test-support",
-      "reason": "Exercise real SQLite failures and cancellation during schedule, cancel and expiry, check the complete transaction rollback and retry.",
+      "reason": "Create actual native placement for the existing CloudFront VPC origin contract checks.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_deletion_test.go",
-      "sha256": "3140ec9632e8cf21a8dd22a9611af9268c294c9f7e676783ae8585e52be49ec6",
+      "path": "internal/aws/cloudfront_vpc_origin_test.go",
+      "sha256": "564adf75b360623a5b84eda607b3cf07f40330b9f4c40f397926b31f0ffc1bb6",
       "disposition": "test-support",
-      "reason": "Check clock boundaries, persistence, child cleanup, failure rollback, cancellation and wire errors.",
+      "reason": "Bind existing origin lifecycle fixtures to actual regional load balancers.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_dispatch.go",
-      "sha256": "3a586f546a201d20ce924d9ea3abcff9b9b6eea1d77ea157ff4ac8dc7798a3c8",
+      "path": "internal/aws/ec2_security_groups_native_store.go",
+      "sha256": "43a43b7816658e5acc557f1920c4bf4717235cfa118232012578d80bbceedb96",
       "disposition": "modeled",
-      "reason": "Select the verified signed DescribeKey path without replacing the established participant authority.",
+      "reason": "Refuse deletion of an attached native security group in its transaction.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "ALBNativePlacement",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "CompleteReferences",
+            "ReferencesExist"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
         }
       ]
     },
     {
-      "path": "internal/aws/kms_grant_outages_test.go",
-      "sha256": "48285c9d0c603da63618e53add82a54af72640474b9c885d97890b25af705d32",
+      "path": "internal/aws/ec2_subnet_native.go",
+      "sha256": "bc0db54dc935532402c4ceed2ba78fecd5f9be182e7840ebe18bdae0bf0f877c",
+      "disposition": "modeled",
+      "reason": "Include native ALB references in the subnet deletion dependency decision.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_placement.go",
+      "sha256": "14fd6e0d0b1d4fe45bc13380da055353131602a6576ce13704ccdc5371bd8549",
+      "disposition": "modeled",
+      "reason": "Resolve actual native subnets, groups, zones and VPC, verifying the committed owner projection.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_placement_test.go",
+      "sha256": "acf8a889ef8e8ff7aad1f5af151c72b5dcbca227e0d0fcef767dc552a0c65e20",
       "disposition": "test-support",
-      "reason": "Exercise concrete grant lookups, role and signer storage failures, no acknowledgment before verified readback/commit, exact quota and recovery using unchanged native entry points.",
+      "reason": "Exercise native and historical placement, two owners, readback, partial writes, cancellation and concurrent dependency deletion.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_grants.go",
-      "sha256": "c0c3fc732aa09d685926c65e0b787c4e5cb70f1879213c1b02e3335703806f60",
+      "path": "internal/aws/elb_query.go",
+      "sha256": "e05b20beee4d22163ab08ae698cb98f680b39921ec67c6c4bcf532f987f18b2b",
       "disposition": "modeled",
-      "reason": "Persist and verify role-generation-bound grant state and evaluate it on live or pending keys.",
+      "reason": "Project the bound VPC and zone for each native subnet in the existing ELB Query wire shape.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "ALBNativePlacement",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ProjectionExact",
+            "LegacyUnbound"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
-        },
-        {
-          "id": "KMSScheduledDeletion",
-          "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
-          ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
         }
       ]
     },
     {
-      "path": "internal/aws/kms_grants_test.go",
-      "sha256": "eabbc3de6e2215d25d1b77e8cbd54d83ce07f9553ba83709abc45a515f952168",
+      "path": "internal/aws/elb_storage_faults_test.go",
+      "sha256": "cef5d6ec0a4654ad5a6ce160f63a8424b3dbe0fb0ce1990f872133ce0796ac19",
       "disposition": "test-support",
-      "reason": "Exercise grant management, row/ledger readback, rollback, token and pagination bounds, IAM decisions and role recreation.",
+      "reason": "Retain real SQL fault sweeps using native placement resources.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_http.go",
-      "sha256": "d3efe4ac076ef171c3db16ae68a9b0df02cec214dba45e8a4cc53d7b960be09e",
+      "path": "internal/aws/elb_store.go",
+      "sha256": "93a3f45a5e6338603c7faa66f9ca2b5fc161bf8c940d22c74991c3c05f67e373",
       "disposition": "modeled",
-      "reason": "Validate the concrete KMS JSON operations for grant management, signed reads and the scheduled-deletion lifecycle.",
+      "reason": "Commit and verify the allocated load balancer and complete indexed network references atomically.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "ALBNativePlacement",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
-        },
-        {
-          "id": "KMSScheduledDeletion",
-          "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
-          ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
         }
       ]
     },
     {
-      "path": "internal/aws/kms_store.go",
-      "sha256": "b2993244395c4e638b0bbebc38454895dbb885796f8407a2aa7ec6fd732de660",
-      "disposition": "modeled",
-      "reason": "Initialize local grant and pending-key state while retaining existing keys and aliases.",
-      "models": [
-        {
-          "id": "KMSRoleGrantLifecycle",
-          "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
-          ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
-        },
-        {
-          "id": "KMSScheduledDeletion",
-          "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
-          ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/kms_surface_deadline_test.go",
-      "sha256": "f6c037ecee99311ec97e1f5699b7145ac90c6f788c7bee6fe5bc8681ca278cd6",
+      "path": "internal/aws/elb_test.go",
+      "sha256": "9c51c8b103ae195620a0a34e83471cf56afdaa9d5ec541da748c69bfca2d0dd2",
       "disposition": "test-support",
-      "reason": "Exercise actual elapsed request deadlines after four native SQLite writes, whole-database rollback, and healthy retries.",
+      "reason": "Retain native ELB action, health, IAM and error assertions with verified placement resources.",
       "models": []
-    },
-    {
-      "path": "internal/aws/kms_types.go",
-      "sha256": "3cc5718fed8d8a67204a11928813b44766ac5987e83506bbd54d6c357a4dcedb",
-      "disposition": "modeled",
-      "reason": "Expose an optional pending-only UTC deletion deadline in key metadata.",
-      "models": [
-        {
-          "id": "KMSScheduledDeletion",
-          "properties": [
-            "ScheduleContract",
-            "CancelContract",
-            "ExpiryBoundary",
-            "AtomicExpiry",
-            "OperationMatrix",
-            "RestartPreservesDeadline"
-          ],
-          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sts_signature.go",
-      "sha256": "c7177e81e5c4ff981eb474174514a6339942817fc8c5f40de7eaf7892377e45d",
-      "disposition": "modeled",
-      "reason": "Admit KMS signing only for a canonical assumed-role DescribeKey request with signed content type and target.",
-      "models": [
-        {
-          "id": "KMSRoleGrantLifecycle",
-          "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
-          ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/access_sdk.go",
-      "sha256": "cbb59b195075dda2c0e0c857686b9b79f0e2484acda39cc3b7110e0eeb04608d",
-      "disposition": "modeled",
-      "reason": "Return the JSON protocol authentication failure for rejected native KMS signatures.",
-      "models": [
-        {
-          "id": "KMSRoleGrantLifecycle",
-          "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
-          ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
-        }
-      ]
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "10db0937cfaf28bf478f7d79b94d33d44e83bca463b7de347db378a9e0172296",
+      "sha256": "e03b0389cab20b5b4c6b545d842e4d3dcda6be62fbfa0c745613232451e90e93",
       "disposition": "presentation",
-      "reason": "Add the served KMS grant and scheduled-deletion examples to the existing AWS root reference.",
+      "reason": "Present thirteen ELBv2 Query templates for existing operations. The native transitions and authority are unchanged.",
       "models": []
     },
     {
-      "path": "internal/server/console_handoff_test.go",
-      "sha256": "bda5ebadaf2de6c8695cfedc781ac9fe39af1afedf118367779c3930f52e2225",
-      "disposition": "modeled",
-      "reason": "Check that discovery advertises the new signed KMS service while preserving access requirements.",
-      "models": [
-        {
-          "id": "ConsoleHandoff",
-          "properties": [
-            "SDKAuthorityPreserved"
-          ],
-          "limits": "The formal model checks independent SDK authority preservation. The exact advertised service list is checked in the native test."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/kms_grants_test.go",
-      "sha256": "41e373207a9eeb639d4d5f30b4a9642a92fe53cfeb060672d1875ee15e1faad8",
+      "path": "internal/server/elb_composition_test.go",
+      "sha256": "b9d081cd63a1be0bae1151c6411b1397ad4391133fbadd3840b4fe981f789c6e",
       "disposition": "test-support",
-      "reason": "Exercise a signed KMS DescribeKey through actual Access authentication, native authorization and a saved grant.",
-      "models": []
-    },
-    {
-      "path": "internal/server/kms_integration_test.go",
-      "sha256": "343bf385c36826f56473f3310b38666c5355bbb6c295a98b648f0d9ec51a6798",
-      "disposition": "test-support",
-      "reason": "Check protocol dispatch and the published KMS grant and deletion capabilities on the real server.",
-      "models": []
-    },
-    {
-      "path": "internal/server/sakura_provider_test.go",
-      "sha256": "b25f233be72bb1b8af0f41683efbfddd2fe3f8a4f7100de48fe1d0e7bd78114b",
-      "disposition": "test-support",
-      "reason": "Keep the shared capability-response assertions in sync with the bounded KMS operations.",
+      "reason": "Exercise native EC2 setup through the shared authenticated server before checking existing ELB behavior. Assert the shipped ELBv2 Console capability alongside the existing native operation and Lambda target limits after reopening its database.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "08db53e73fb7b3f8db22e3c94afd3573ffcb47f03fbe76eb3bcd98702ab4c597",
+      "sha256": "ed5b12859fa09518d746891d02c2e2d3a07a1ecb2704f29a9ddeba384cd06029",
       "disposition": "modeled",
-      "reason": "Advertise scoped KMS grant, authority and deletion behavior through the existing service capability endpoint.",
+      "reason": "Describe the placement dependency in the existing ELB capability response. Expose the native service only with its compiled Console and regional Query operations.",
       "models": [
         {
-          "id": "KMSProtocolAdmission",
+          "id": "ALBNativePlacement",
           "properties": [
-            "NoAuthorityFromWireMetadata"
+            "AdmittedPlacement",
+            "LegacyUnbound"
           ],
-          "limits": "Discovery publishes the KMS operations and limitations. The protocol model covers the absence of authority from wire metadata, while discovery content is checked by the SDK fixture."
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        },
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ScopeFrame",
+            "ReadAdmission"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
       ]
     },
     {
-      "path": "internal/server/ssm_session_native_route_test.go",
-      "sha256": "48a4c1493cb0c70ad0d99e6769606ee55d0e4a497bd9fcb10fd089d3443f47fd",
-      "disposition": "test-support",
-      "reason": "Share the JSON 1.1 session signer between native SSM and KMS route regressions, preserving the SSM service scope.",
-      "models": []
+      "path": "internal/server/web/app.js",
+      "sha256": "56c8bee919b48b5e80e2bbe07e5cbde1fffd9cf90eff4711e659b38b753e63c2",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "976145f94f09fa9c8e593de03bc3c670378921de1fd8a4d29b726f1b27bfabc8",
+      "sha256": "c0950528a966b9d8bd611e1b1578d11ce21836f4f30c1c0d48145d557a56ee59",
       "disposition": "formal-infrastructure",
-      "reason": "Require the registry entries, native source scope and mutation controls for both KMS lifecycle models.",
+      "reason": "Require the registered bounded placement model, its exact scope, invariants and mutation identities. Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "84fdfb5ecc8398fdded0dcc45782525b4e67e01715b08089f32cc129e911b4f4",
+      "sha256": "af55d835d2973f9e370a1326d31eb914b8acf5140f3332c870b7f951c983eb81",
       "disposition": "formal-infrastructure",
-      "reason": "Require both new KMS lifecycle models in the complete independent model inventory.",
+      "reason": "Protect the complete model inventory after adding the placement model. Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
-      "path": "test/e2e/kms.py",
-      "sha256": "dd40db512a467639ddad3f01d956218163d378ec0cf30ee2f680fc4ec4af3a5d",
+      "path": "test/e2e/elb.py",
+      "sha256": "fbc2c705aeabe3322911f1a2b686008ed21b285d70f3ce2780764d3cf9d0fa2b",
       "disposition": "test-support",
-      "reason": "Verify existing KMS operations against the expanded native capability contract.",
+      "reason": "Exercise the ordinary stock SDK on two authenticated loopback CLIs, held network dependencies, persisted placement, original Lambda lifecycle and actual cleanup.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_alias_docs.py",
-      "sha256": "1ce63cd8af2d7c2e00332e1e92b26bdf39d2fda31055863af4989d0941b87905",
+      "path": "test/e2e/elb_console.py",
+      "sha256": "f969527a52b3df67d09001c17359ffba9837d4a7c2e2eda6c03367020a80918e",
       "disposition": "test-support",
-      "reason": "Verify all original and new shipped KMS examples and retain the alias contract.",
+      "reason": "Exercise native UI and SDK behavior without changing server decisions.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_console.py",
-      "sha256": "e2e8ba411aea582964e31d8b82191afd57c062ff683e316fdff2c5ee8d033f01",
+      "path": "test/e2e/elb_scalar.py",
+      "sha256": "163f7064426f5763be4abdd20645b935b10c4a73b75db150c47024171816f3ad",
       "disposition": "test-support",
-      "reason": "Describe the existing browser fixture cleanup accurately with native scheduling available.",
+      "reason": "Exercise authenticated Scalar sends and compare the returned ELBv2 XML with independently read native SDK state.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_grants.py",
-      "sha256": "db0119d0ea918b8d53f3bdab1ed87a01fad1757d8e70dc86cb459e930dad7db2",
+      "path": "test/e2e/simpledb_scalar_reference_live.py",
+      "sha256": "1aac0b271c626918f98614ab7cc32583ae1177404fffd43d22b7672997c24478",
       "disposition": "test-support",
-      "reason": "Exercise two real local SDK processes, verified assumed roles, grants, restart, explicit denial and cleanup.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/kms_key_deletion.py",
-      "sha256": "981bfaa9ee78d10be408e727ed84161b2dd6229593d7341e90014d117b5f292d",
-      "disposition": "test-support",
-      "reason": "Drive actual SDK schedule, cancel and past-due restart with an isolated peer and verified cleanup.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/kms_reference_projection.py",
-      "sha256": "39c8cf732bda41677cdec0bfc665b5340df7361e003bbca8eeb66e121d43db8e",
-      "disposition": "test-support",
-      "reason": "Validate the exact grant and deletion reference additions before comparing the inherited API.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/kms_surface_lifecycle.py",
-      "sha256": "34dc7b0163da2009484a510d03b5e000dc2c2b27fee52303e4879d47e22d8db1",
-      "disposition": "test-support",
-      "reason": "Drive the shipped KMS Console and Scalar with a scoped browser participant, verify saved state with the official SDK and real STS across two processes and an owner restart.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "314f77608900dff4dd0c63346e5c20ec044e98775e8f799d4c831d21e331caaa",
-      "disposition": "test-support",
-      "reason": "Check all 48 shared JSON 1.1 examples and the five KMS grant and deletion target schemas.",
+      "reason": "Select the desired native Query service and let tests edit an input using the actual Scalar form. The SimpleDB defaults remain intact.",
       "models": []
     },
     {
       "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "e756a02b1500c9edd556aeb7f11633fefab69bc9adb22f1d1199fdd969ce649d",
+      "sha256": "24f8d4e321f6dd359ac7ed462092e9ae17527621eae7e53da6844f763b999a2b",
       "disposition": "test-support",
-      "reason": "Preserve the historical API digests and reject corruption of the new KMS and inherited reference entries.",
+      "reason": "Validate the new Query templates and fields before projecting them out of the pre-existing historical reference assertions.",
       "models": []
     },
     {
-      "path": "third_party/independent-native-source.json",
-      "sha256": "14a742ba1199c5834ffa32aab5c0b5e330ca4550ace7aaac61792945db6d4e60",
-      "disposition": "documentation",
-      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "c23c019b16b559619e4c248ed8bf775f340fd3ea4c4b50dcb9beb2212f7e4489",
+      "disposition": "presentation",
+      "reason": "Record the source inputs and digests used to produce the shipped Console bundle.",
       "models": []
     },
     {
-      "path": "third_party/kumo-apigateway.json",
-      "sha256": "c097c47a12d860b852c910c509be09dbeac8c9ef227883a48dfbd151158799a6",
-      "disposition": "documentation",
-      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "72231dcc4032ac4fd3a347f61e4b6797d896feb0f07cf31e13804713384e91ec",
+      "disposition": "presentation",
+      "reason": "Record the source inputs and digests used to produce the shipped Console bundle.",
       "models": []
     },
     {
-      "path": "third_party/kumo-cloudwatch-logs.json",
-      "sha256": "df123eae042088024f57d7ce0dbac73dbea0c8524f20f0842f20c2e2f36e8b6a",
-      "disposition": "documentation",
-      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
-      "models": []
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "6473cdf25ee41758e22dc3edcebfeba48efaae0b82841af91289e5aa6ebfb94f",
+      "disposition": "modeled",
+      "reason": "Offer the service route only when the needed native capabilities are present.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "ScopeFrame"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
     },
     {
-      "path": "third_party/kumo-iam.json",
-      "sha256": "24fcaa028b598cd320d27c04cc69a65b2e17edf302dcb66c8ef37d66d9d0d027",
-      "disposition": "documentation",
-      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
-      "models": []
+      "path": "tools/console/src/elb.jsx",
+      "sha256": "5a9ede4a9881572b0bb8a3c7e7d1d7d0b4042bd5993e0a254933c7f746e36629",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "DeniedProjection",
+            "TruthfulHealth",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "Acknowledgement",
+            "BoundReadback",
+            "ObservedOnly"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
     },
     {
-      "path": "third_party/kumo-kms.json",
-      "sha256": "04357b2cb40b7d042ccb6c8587da0c9dfec26a99de136c24129ce4c8e39a3850",
-      "disposition": "documentation",
-      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "path": "tools/console/src/elb.mjs",
+      "sha256": "2a4afd2b13aba4938f6edbfb87e689ef1cf431d77fa348106daaca2dcb9285cc",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "CompleteDetail",
+            "CheckedHealth",
+            "BoundReadback",
+            "NativeFrame",
+            "Acknowledgement"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "4a9da367913532920f582f0072044a8bb91d993f7a1430a2441ab0084efb3cdb",
+      "disposition": "modeled",
+      "reason": "Mount the regional Console under the selected exercise identity and retire old mounted state.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ScopeFrame",
+            "RetiredWriteFrame"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/elb.test.mjs",
+      "sha256": "8c4f0a10a003d47fc892ce0f325a4235169f2ded11c1f2852b6b9c877ce23aab",
+      "disposition": "presentation",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
     }
   ]

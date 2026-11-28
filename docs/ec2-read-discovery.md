@@ -178,7 +178,7 @@ allocated group ARN; tags require `ec2:CreateTags` on the group. A native group
 has `groupName` and the local `simulatorSecurityGroupMode=detached-config-only`
 marker. Delete requires the exact `GroupId` resource ARN. Stack-owned groups
 cannot be adopted or deleted through this API. There is no default group,
-implicit egress, native attachment, or execution.
+implicit egress or packet execution. A regional [Application Load Balancer](elb.md) may reference the group as placement configuration; EC2 refuses deletion until every referencing ALB is deleted.
 
 For this detached profile, `AuthorizeSecurityGroupIngress`,
 `AuthorizeSecurityGroupEgress`, `RevokeSecurityGroupIngress` and
