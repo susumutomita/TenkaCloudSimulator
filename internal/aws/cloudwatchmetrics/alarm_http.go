@@ -55,7 +55,7 @@ func (s *Store) serveAlarm(w http.ResponseWriter, r *http.Request, region, actio
 				XMLName   xml.Name
 				Alarms    []metricAlarm `xml:"MetricAlarms>member"`
 				NextToken string        `xml:",omitempty"`
-			}{XMLName: xml.Name{Local: "DescribeAlarmsResult"}, Alarms: alarms, NextToken: token}
+			}{XMLName: xml.Name{Space: xmlNamespace, Local: "DescribeAlarmsResult"}, Alarms: alarms, NextToken: token}
 			writeXML(w, 200, alarmXML(action, result))
 			return
 		}
