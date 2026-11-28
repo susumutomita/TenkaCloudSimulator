@@ -30744,8 +30744,10 @@
       "id": "CodeStarBranchNotificationDelivery",
       "model": "formal/CodeStarBranchNotificationDelivery.tla",
       "config": "formal/CodeStarBranchNotificationDelivery.cfg",
-      "bounds": "One team database, one tracked Git branch initially missing or at its first commit, one existing commit usable by CreateBranch, one native or untrusted write request, and one matching rule with zero, one or two target topics. The model distinguishes zero, one or two remaining outbox slots, two per-target subscriptions/queues, initial and replacement generations, a stored rule creator and a distinct Git writer. The worker may retry either target independently across ticks or restarts.",
+      "bounds": "One team database, one tracked Git branch initially missing or at its first commit, one existing commit usable by CreateBranch, one native or untrusted write request, and one matching rule with zero, one or two target topics. The model distinguishes zero, one or two remaining outbox slots, two per-target subscriptions/queues, initial and replacement generations, a stored rule creator and a distinct Git writer. The worker may retry either target independently across ticks or restarts. The tracked rule can be enabled, disabled or deleted. List requests observe one representative candidate row and an exclusive cursor bound.",
       "properties": [
+        "ListReadFrame",
+        "ListReadResult",
         "RetryEligibility",
         "TypeOK",
         "GitAdmission",
@@ -30761,7 +30763,7 @@
         "RestartExact",
         "RuleChangeAtomic"
       ],
-      "limits": "The model checks safety for one event and a finite set of single-condition observations per operation. One receipt per target represents one event identity. Matching and immutable identities abstract exact ARNs, repository UUIDs, subscription IDs, event JSON, Git objects and SQLite foreign keys. A captured publisher must use the same current rule-owner policy snapshot for both queues. Temporary denies defer a target; changed captured identities cannot publish it. A tick represents elapsed native retry time without a real clock or fairness guarantee. Local limits of 2,048 pending targets and 20 destinations are represented by capacity boundaries and two queues. Actual SDK, two team databases, concurrent SQLite writes, cancellation timing, cryptographic identities, rule request validation, full IAM and external delivery are outside this finite check.",
+      "limits": "The model checks safety for one event and a finite set of single-condition observations per operation. One receipt per target represents one event identity. Matching and immutable identities abstract exact ARNs, repository UUIDs, subscription IDs, event JSON, Git objects and SQLite foreign keys. A captured publisher must use the same current rule-owner policy snapshot for both queues. Temporary denies defer a target; changed captured identities cannot publish it. A tick represents elapsed native retry time without a real clock or fairness guarantee. Local limits of 2,048 pending targets and 20 destinations are represented by capacity boundaries and two queues. Actual SDK, two team databases, concurrent SQLite writes, cancellation timing, cryptographic identities, rule request validation, full IAM and external delivery are outside this finite check. The read projection distinguishes service selection, store availability, ordinary actor, wildcard IAM List permission, region, matching filter and scoped cursor. A read preserves the actual modeled Git and publication frame even after denial, disabling or deletion. Native routing and request parsing, token HMAC/encoding and multi-page issuance, complete filter grammar and other rule API admission remain separate checks.",
       "source_scope": [
         "internal/aws/catalog/codecommit_content.go",
         "internal/aws/catalog/engine.go",
@@ -30773,7 +30775,11 @@
         "internal/aws/sns_topic_policy.go",
         "internal/aws/sns_sqs_fanout.go",
         "internal/server/server.go",
-        "internal/aws/notification_delivery_test.go"
+        "internal/aws/notification_delivery_test.go",
+        "internal/aws/codestarnotifications/list.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/aws/notification_gateway_test.go"
       ],
       "mutants": [
         {
@@ -31499,6 +31505,292 @@
             }
           ],
           "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "ListClaimsForeignSelector",
+          "edits": [
+            {
+              "old": "ListSelected(m) == m # \"otherService\"",
+              "new": "ListSelected(m) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RefuseSignedList",
+          "edits": [
+            {
+              "old": "ListSelected(m) == m # \"otherService\"",
+              "new": "ListSelected(m) == m # \"otherService\" /\\ m # \"signedRoute\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RefuseServiceHintList",
+          "edits": [
+            {
+              "old": "ListSelected(m) == m # \"otherService\"",
+              "new": "ListSelected(m) == m # \"otherService\" /\\ m # \"serviceHint\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListWithoutActor",
+          "edits": [
+            {
+              "old": "ListCaller(m) == m \\notin {\"missingActor\", \"unsupportedSession\"}",
+              "new": "ListCaller(m) == m \\notin {\"unsupportedSession\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListAllowsUnsupportedSession",
+          "edits": [
+            {
+              "old": "ListCaller(m) == m \\notin {\"missingActor\", \"unsupportedSession\"}",
+              "new": "ListCaller(m) == m \\notin {\"missingActor\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListDespiteWildcardDeny",
+          "edits": [
+            {
+              "old": "ListAllowance(m) == m \\notin {\"wildcardDeny\", \"onlyScopedAllow\"}",
+              "new": "ListAllowance(m) == m \\notin {\"onlyScopedAllow\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AllowRuleARNInsteadOfWildcard",
+          "edits": [
+            {
+              "old": "ListAllowance(m) == m \\notin {\"wildcardDeny\", \"onlyScopedAllow\"}",
+              "new": "ListAllowance(m) == m \\notin {\"wildcardDeny\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AcceptAnotherActorCursor",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AcceptAnotherRegionCursor",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "AcceptAnotherFilterCursor",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"invalidLimit\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IgnorePageLimit",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidFilter\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IgnoreInvalidListFilter",
+          "edits": [
+            {
+              "old": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\", \"invalidFilter\"}",
+              "new": "ListQuery(m) == m \\notin {\"tokenOtherActor\", \"tokenOtherRegion\", \"tokenOtherFilter\", \"invalidLimit\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ReturnWrongFilter",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\", \"nextPageExhausted\"}",
+              "new": "                  /\\ m \\notin {\"differentFilterMiss\", \"nextPageExhausted\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IgnoreDistinctFilterGroup",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\", \"nextPageExhausted\"}",
+              "new": "                  /\\ m \\notin {\"filterMiss\", \"nextPageExhausted\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RepeatRowAfterCursor",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\", \"nextPageExhausted\"}",
+              "new": "                  /\\ m \\notin {\"filterMiss\", \"differentFilterMiss\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListMalformedWire",
+          "edits": [
+            {
+              "old": "m = \"otherWire\" -> \"invalid\"",
+              "new": "FALSE -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListWithoutStore",
+          "edits": [
+            {
+              "old": "m = \"unconfiguredStore\" -> \"unavailable\"",
+              "new": "FALSE -> \"unavailable\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListForeignRule",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"foreignRegion\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "HideDisabledRule",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState = \"enabled\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ListDeletedRule",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "LimitListToRuleOwner",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"differentActorAllowed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "IntersectRepeatedFilterValues",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"sameFilterAlternative\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "RejectMatchingScopedCursor",
+          "edits": [
+            {
+              "old": "ListMatches(m) == /\\ ruleState # \"absent\"",
+              "new": "ListMatches(m) == /\\ ruleState # \"absent\" /\\ m # \"validScopedPage\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadResult"
+        },
+        {
+          "id": "ClearPendingOnDeniedList",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "new": "pending' = IF m = \"wildcardDeny\" THEN {} ELSE pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadFrame"
+        },
+        {
+          "id": "LosePriorReceiptOnInvalidList",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "new": "pending' = pending /\\ receipts' = IF m = \"tokenOtherActor\" THEN {} ELSE receipts /\\ ruleState' = ruleState",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadFrame"
+        },
+        {
+          "id": "DeleteRuleDuringList",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "new": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = IF m = \"signedRoute\" THEN \"absent\" ELSE ruleState",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ListReadFrame"
         }
       ]
     }

@@ -12,9 +12,9 @@ WorkerModes == {"ok", "topicDeny", "ownerDenyFirst", "ownerDenySecond", "writerO
                 "ruleChanged", "ruleDisabled", "repoRecreated", "topicRecreated",
                 "ownerRecreated", "queue1Recreated", "queue2Recreated", "subRecreated",
                 "noRecipients", "readFault", "afterFirstQueue", "receiptFailure", "commitFailure", "deadline"}
-VARIABLES phase, old, ref, wroteObjects, envelope, pending, delayed, receipts,
+VARIABLES phase, ruleState, old, ref, wroteObjects, envelope, pending, delayed, receipts,
           sns, first, second, last
-vars == <<phase, old, ref, wroteObjects, envelope, pending, delayed, receipts,
+vars == <<phase, ruleState, old, ref, wroteObjects, envelope, pending, delayed, receipts,
           sns, first, second, last>>
 Zero == [t \in Targets |-> 0]
 BaselineLife(t) ==
@@ -38,10 +38,11 @@ ValidBinding(m) == OriginalQueue(m) = QueueAtCapture(m)
 Empty == [kind |-> "none", previous |-> 0, commit |-> 0, validTopology |-> FALSE, life |-> CapturedLife("ok")]
 Pub == [pending |-> pending, delay |-> delayed, receipt |-> receipts,
         audit |-> sns, q1 |-> first, q2 |-> second]
-Durable == [ref |-> ref, objects |-> wroteObjects, event |-> envelope, publication |-> Pub]
+Durable == [rule |-> ruleState, ref |-> ref, objects |-> wroteObjects, event |-> envelope, publication |-> Pub]
 Notice(op, mode, target, result) ==
  [op |-> op, mode |-> mode, target |-> target, result |-> result, before |-> Durable]
 Init ==
+ /\ ruleState \in {"enabled", "disabled"}
  /\ old \in {0, 1} /\ ref = old /\ wroteObjects = FALSE /\ envelope = Empty
  /\ phase = "git" /\ pending = {} /\ delayed = {} /\ receipts = {}
  /\ sns = Zero /\ first = Zero /\ second = Zero /\ last = Notice("init", "ok", "", "none")
@@ -58,7 +59,7 @@ Slots(m) == CASE m \in {"noRoom", "fullWithoutMatch"} -> 0 [] m \in {"oneSlot", 
 Kind == IF old = 0 THEN "referenceCreated" ELSE "referenceUpdated"
 Event(m) == [kind |-> Kind, previous |-> old, commit |-> 2, validTopology |-> ValidBinding(m), life |-> CapturedLife(m)]
 Git(op, m) ==
- /\ phase = "git"
+ /\ phase = "git" /\ (m = "disabled") = (ruleState = "disabled")
  /\ LET targets == Matched(m)
         ok == Origin(op) /\ CAS(op) /\ GitAllowed(m) /\ Cardinality(targets) <= Slots(m)
     IN /\ ref' = IF ok THEN 2 ELSE ref
@@ -67,7 +68,7 @@ Git(op, m) ==
        /\ envelope' = IF ok /\ targets # {} THEN Event(m) ELSE envelope
        /\ last' = Notice(op, m, "", IF ok THEN "committed" ELSE "refused")
  /\ phase' = "worker"
- /\ UNCHANGED <<old, delayed, receipts, sns, first, second>>
+ /\ UNCHANGED <<ruleState, old, delayed, receipts, sns, first, second>>
 
 \* A changed durable identity or topology is terminal for the captured intent.
 \* A policy deny within the same generation is temporary.
@@ -105,31 +106,59 @@ Attempt(t, m) ==
        /\ first' = Bump(first, t, deliver)
        /\ second' = Bump(second, t, deliver)
        /\ last' = Notice("attempt", m, t, result)
- /\ UNCHANGED <<phase, old, ref, wroteObjects, envelope>>
+ /\ UNCHANGED <<ruleState, phase, old, ref, wroteObjects, envelope>>
 
 Tick(t) ==
  /\ t \in delayed /\ delayed' = delayed \ {t}
  /\ last' = Notice("tick", "ok", t, "ready")
- /\ UNCHANGED <<phase, old, ref, wroteObjects, envelope, pending, receipts, sns, first, second>>
+ /\ UNCHANGED <<ruleState, phase, old, ref, wroteObjects, envelope, pending, receipts, sns, first, second>>
 Restart ==
  /\ phase = "worker"
  /\ pending' = pending /\ receipts' = receipts /\ delayed' = delayed
  /\ last' = Notice("restart", "ok", "", "reopened")
- /\ UNCHANGED <<phase, old, ref, wroteObjects, envelope, sns, first, second>>
+ /\ UNCHANGED <<ruleState, phase, old, ref, wroteObjects, envelope, sns, first, second>>
 \* Rule changes remove this rule's unpublished intents in their own transaction.
 \* A prior native publication remains observable even after rule deletion.
 ChangeRule(mode) ==
- /\ phase = "worker"
+ /\ phase = "worker" /\ ruleState # "absent"
+ /\ ruleState' = CASE mode = "delete" -> "absent" [] mode = "disable" -> "disabled" [] OTHER -> ruleState
  /\ pending' = IF mode = "changeFailed" THEN pending ELSE {}
  /\ delayed' = IF mode = "changeFailed" THEN delayed ELSE {}
  /\ last' = Notice("changeRule", mode, "", IF mode = "changeFailed" THEN "refused" ELSE "changed")
  /\ UNCHANGED <<phase, old, ref, wroteObjects, envelope, receipts, sns, first, second>>
+\* Both supported route selectors still require an ordinary authenticated actor
+\* and the wildcard ListNotificationRules decision. A disabled rule remains
+\* queryable. One candidate row represents the current region and filters.
+ListModes == {"signedRoute", "serviceHint", "differentActorAllowed", "otherService",
+              "missingActor", "unsupportedSession", "otherWire", "unconfiguredStore",
+              "wildcardDeny", "onlyScopedAllow", "foreignRegion", "filterMiss",
+              "sameFilterAlternative", "differentFilterMiss", "nextPageExhausted",
+              "validScopedPage", "tokenOtherActor", "tokenOtherRegion", "tokenOtherFilter",
+              "invalidLimit", "invalidFilter"}
+ListSelected(m) == m # "otherService"
+ListCaller(m) == m \notin {"missingActor", "unsupportedSession"}
+ListAllowance(m) == m \notin {"wildcardDeny", "onlyScopedAllow"}
+ListQuery(m) == m \notin {"tokenOtherActor", "tokenOtherRegion", "tokenOtherFilter", "invalidLimit", "invalidFilter"}
+ListMatches(m) == /\ ruleState # "absent" /\ m # "foreignRegion"
+                  /\ m \notin {"filterMiss", "differentFilterMiss", "nextPageExhausted"}
+ListVerdict(m) ==
+ CASE ~ListSelected(m) -> "otherRoute" [] ~ListCaller(m) -> "denied"
+ [] m = "otherWire" -> "invalid" [] m = "unconfiguredStore" -> "unavailable"
+ [] ~ListAllowance(m) -> "denied" [] ~ListQuery(m) -> "invalid"
+ [] ListMatches(m) -> "listed" [] OTHER -> "empty"
+ListRules(m) ==
+ /\ phase = "worker"
+ /\ last' = Notice("list", m, "", ListVerdict(m))
+ /\ pending' = pending /\ receipts' = receipts /\ ruleState' = ruleState
+ /\ UNCHANGED <<phase, old, ref, wroteObjects, envelope, delayed, sns, first, second>>
 Next == (\E op \in {"PutFile", "CreateBranch", "untrusted"}, m \in GitModes : Git(op, m))
         \/ (\E t \in Targets, m \in WorkerModes : Attempt(t, m))
         \/ (\E t \in Targets : Tick(t)) \/ Restart
+        \/ (\E m \in ListModes : ListRules(m))
         \/ (\E m \in {"update", "disable", "delete", "changeFailed"} : ChangeRule(m))
 
 TypeOK ==
+ /\ ruleState \in {"enabled", "disabled", "absent"}
  /\ old \in {0,1} /\ ref \in 0..2 /\ wroteObjects \in BOOLEAN
  /\ pending \subseteq Targets /\ delayed \subseteq pending /\ receipts \subseteq Targets
  /\ sns \in [Targets -> 0..2] /\ first \in [Targets -> 0..2] /\ second \in [Targets -> 0..2]
@@ -179,6 +208,15 @@ RetryEligibility == last.op # "attempt" \/
 RuleChangeAtomic == last.op # "changeRule" \/
   (IF last.mode = "changeFailed" THEN Durable = last.before
    ELSE /\ pending = {} /\ delayed = {}
-        /\ Durable = [last.before EXCEPT !.publication.pending = {}, !.publication.delay = {}])
+        /\ Durable = [last.before EXCEPT !.publication.pending = {}, !.publication.delay = {},
+                       !.rule = CASE last.mode = "delete" -> "absent" [] last.mode = "disable" -> "disabled" [] OTHER -> @])
+ListReadFrame == last.op # "list" \/ Durable = last.before
+ListReadResult == last.op # "list" \/ last.result =
+  (CASE last.mode = "otherService" -> "otherRoute"
+   [] last.mode \in {"missingActor", "unsupportedSession", "wildcardDeny", "onlyScopedAllow"} -> "denied"
+   [] last.mode \in {"otherWire", "tokenOtherActor", "tokenOtherRegion", "tokenOtherFilter", "invalidLimit", "invalidFilter"} -> "invalid"
+   [] last.mode = "unconfiguredStore" -> "unavailable"
+   [] ruleState = "absent" \/ last.mode \in {"foreignRegion", "filterMiss", "differentFilterMiss", "nextPageExhausted"} -> "empty"
+   [] OTHER -> "listed")
 RestartExact == last.op # "restart" \/ Durable = last.before
 =============================================================================
