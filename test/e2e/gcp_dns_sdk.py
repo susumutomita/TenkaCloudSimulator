@@ -125,7 +125,8 @@ def project_and_endpoint(team, capabilities):
     origin = f'http://127.0.0.1:{team.port}'
     require(type(team.port) is int and 0 < team.port <= 65535 and team.endpoint == origin,
             'DNS SDK target must be the owned numeric IPv4 loopback')
-    return project, origin + DNS
+    # The discovery document already prefixes its method paths with dns/v1/.
+    return project, origin + PROVIDER + '/'
 
 
 def checked_uri(uri, port, collection):

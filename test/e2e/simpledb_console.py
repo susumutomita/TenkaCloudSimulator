@@ -81,7 +81,8 @@ def run():
 
                 guest, unsigned = page_for(None)
                 unsigned.goto(endpoint + "/_simulator/console/#/simpledb")
-                unsigned.wait_for_url("**/_simulator/login")
+                unsigned.wait_for_url(endpoint + "/_simulator/login#/simpledb")
+                expect(unsigned.get_by_role("button", name="Open sandbox", exact=True)).to_be_visible()
                 assert not actions
                 guest.close()
 
@@ -89,7 +90,7 @@ def run():
                 page.goto(endpoint + "/_simulator/console/#/home")
                 page.get_by_role("button", name="Services", exact=True).click()
                 page.get_by_role("menuitem", name="SimpleDB", exact=True).click()
-                expect(page.get_by_role("heading", name="Amazon SimpleDB", exact=True)).to_be_visible()
+                expect(page.get_by_role("heading", level=1, name="Amazon SimpleDB", exact=True)).to_be_visible()
                 expect(page.get_by_text("No domains on this page.", exact=True)).to_be_visible()
                 page.get_by_label("Domain to open or create").fill(DOMAIN)
                 page.get_by_role("button", name="Create domain", exact=True).click()
@@ -114,7 +115,8 @@ def run():
                 page.get_by_role("radio", name="Attribute equals expected value", exact=True).check()
                 page.get_by_label("New value", exact=True).fill("new + & 値")
                 page.get_by_role("button", name="Save attribute", exact=True).click()
-                expect(page.get_by_text("new + & 値", exact=True)).to_be_visible()
+                saved_attributes = page.get_by_role("table", name="Saved attributes", exact=True)
+                expect(saved_attributes.get_by_role("cell", name="new + & 値", exact=True)).to_be_visible()
                 assert values() == [("version", "new + & 値")]
                 page.get_by_label("New value", exact=True).fill("must not persist")
                 page.get_by_role("button", name="Save attribute", exact=True).click()

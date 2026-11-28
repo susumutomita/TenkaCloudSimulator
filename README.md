@@ -109,6 +109,8 @@ console, CloudFormation adapter or Challenge integration.
   [CloudWatch Logs](docs/cloudwatch-logs.md).
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
+  Manage role trust in the IAM Console, read the role in the API reference and
+  assume it through the local STS SDK.
 - **Networking:** [read-only EC2 instance discovery in the API Reference](docs/api-reference.md#aws-services-and-the-shared-endpoint),
   [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
   [EC2-managed VPC Name and tags API](docs/ec2-read-discovery.md#native-vpc-tag-editing),
@@ -234,3 +236,7 @@ The identified runtime portions were independently reimplemented against public
 AWS contracts. We retain the [original MIT notice](third_party/KUMO-LICENSE.txt)
 and [reviewed replacement scope](third_party/independent-native-source.json).
 These records are not a clean-room or legal certification.
+
+The local SimpleDB Query reference also offers explicit PutAttributes and
+DeleteDomain practice examples. Put replaces one named attribute; whole-domain
+cleanup must target only a disposable domain owned by the caller.
