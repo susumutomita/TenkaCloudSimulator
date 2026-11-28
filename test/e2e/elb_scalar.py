@@ -15,6 +15,7 @@ from xml.etree import ElementTree
 
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from playwright.sync_api import expect, sync_playwright
 
 from autoscaling_plans_console import wire
@@ -195,6 +196,18 @@ def check_placement(result, ref, actual):
     assert len(zones) == 2 and zones == {(z['SubnetId'], z['ZoneName']) for z in actual['AvailabilityZones']}
 
 
+def cleanup_unconfirmed_group(elb):
+    """A failed browser assertion may follow a successful CreateTargetGroup."""
+    try:
+        groups = elb.describe_target_groups(Names=[NAME])['TargetGroups']
+    except ClientError as error:
+        if error.response['Error']['Code'] == 'TargetGroupNotFound':
+            return
+        raise
+    assert len(groups) == 1 and groups[0]['TargetGroupName'] == NAME and groups[0]['TargetType'] == 'lambda'
+    elb.delete_target_group(TargetGroupArn=groups[0]['TargetGroupArn'])
+
+
 def exercise(team, peer, browser):
     sends = []
     with ExitStack() as clients:
@@ -207,6 +220,8 @@ def exercise(team, peer, browser):
             clean.callback(other.delete_target_group, TargetGroupArn=peer_group['TargetGroupArn'])
             lb, linked, fn = setup_listener(clean, elb, ec2, iam, lambdas)
             lb_args = {'LoadBalancerArns.member.1': lb['LoadBalancerArn']}
+            assert all(g['TargetGroupName'] != NAME for g in elb.describe_target_groups()['TargetGroups'])
+            clean.callback(cleanup_unconfirmed_group, elb)
             with reference(browser, team, team.token) as (ref, requests):
                 created = send(ref, requests, 'CreateTargetGroup', {}, 200, sends)
                 target = created.findtext('e:TargetGroups/e:member/e:TargetGroupArn', namespaces=NS)
