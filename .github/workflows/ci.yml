@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: d1ac372b0e36b8ffd3e118967e0e1da06beee8c6
+      PRODUCT: d54baed484f7a386dfd72c158e523f1e1f5f3ba9
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: d1ac372b0e36b8ffd3e118967e0e1da06beee8c6
+          ref: d54baed484f7a386dfd72c158e523f1e1f5f3ba9
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -24,7 +24,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-service-iam
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 2805bf2b976bce8a79b5638dd66e2b638b2fbb53
+          test "$(git rev-parse 'HEAD^{tree}')" = db0383e3d6b0361564f2fb2b16b847d52442c7f4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -129,7 +129,8 @@ jobs:
               with path.open('rb') as stream: return hashlib.file_digest(stream, 'sha256').hexdigest()
           binary = Path(os.environ['SIMULATOR_BINARY'])
           initial = digest(binary)
-          assert initial == "4157e718672c34cd718e1d23f04dab634424e47bde1e95aa7932c151024fa52f"
+          assert initial == "a1218cabe5910d53185babcb57d0f733104fbd926895eb1afd5a409e3e4b873d"
+          assert digest(tests/"catalog_fixtures/resource-groups.json") == "365b357be8f765365368ee8564617669e1cf4a002ce85f40b5794cfe90d2233a"
           assert digest(tests/"resource_group_ecr_members.py") == "7d5c6ae694f97226871f6b1b91bd4281cbb65edf36bdb23e9df8a29087bf3f4b"
           receipt = {'sha': os.environ['PRODUCT'], 'binarySha256': initial, 'sdk': [version('boto3'), version('botocore')], 'cli': version('awscli'), 'isolation': 'nonroot private user/net, only lo, zero capabilities', 'cases': []}
           path = Path(os.environ['RUNNER_TEMP']) / 'receipts/receipt.json'
@@ -164,11 +165,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
-      PRODUCT: d1ac372b0e36b8ffd3e118967e0e1da06beee8c6
+      PRODUCT: d54baed484f7a386dfd72c158e523f1e1f5f3ba9
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: d1ac372b0e36b8ffd3e118967e0e1da06beee8c6
+          ref: d54baed484f7a386dfd72c158e523f1e1f5f3ba9
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -179,7 +180,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-service-iam
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 2805bf2b976bce8a79b5638dd66e2b638b2fbb53
+          test "$(git rev-parse 'HEAD^{tree}')" = db0383e3d6b0361564f2fb2b16b847d52442c7f4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -199,7 +200,7 @@ jobs:
           set -euo pipefail
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-          export SIMULATOR_BINARY_SHA256=4157e718672c34cd718e1d23f04dab634424e47bde1e95aa7932c151024fa52f
+          export SIMULATOR_BINARY_SHA256=a1218cabe5910d53185babcb57d0f733104fbd926895eb1afd5a409e3e4b873d
           python="$RUNNER_TEMP/group-tools/bin/python"
           "$python" -I -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_","BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in (Path.home()/".aws",Path.home()/".boto","/etc/boto.cfg"))'
           cat > "$RUNNER_TEMP/group-private/verify.py" <<'PYTHON'
@@ -264,11 +265,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      PRODUCT: d1ac372b0e36b8ffd3e118967e0e1da06beee8c6
+      PRODUCT: d54baed484f7a386dfd72c158e523f1e1f5f3ba9
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: d1ac372b0e36b8ffd3e118967e0e1da06beee8c6
+          ref: d54baed484f7a386dfd72c158e523f1e1f5f3ba9
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -281,7 +282,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-service-iam
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 2805bf2b976bce8a79b5638dd66e2b638b2fbb53
+          test "$(git rev-parse 'HEAD^{tree}')" = db0383e3d6b0361564f2fb2b16b847d52442c7f4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
