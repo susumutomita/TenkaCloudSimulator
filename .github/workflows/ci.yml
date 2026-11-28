@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
-      PRODUCT: 4690a44cc465d9e46c914bc936b719b407cfafc0
+      PRODUCT: ffd2258ec28391a3607e06ecd5aaec3152b9a542
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 4690a44cc465d9e46c914bc936b719b407cfafc0
+          ref: ffd2258ec28391a3607e06ecd5aaec3152b9a542
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -23,7 +23,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-group-console
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 2aa0187221064748d2056a389ec7119b45988551
+          test "$(git rev-parse 'HEAD^{tree}')" = 06677cc0ef7945aa7091d4adeb368fdd898555d4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -43,7 +43,7 @@ jobs:
           set -euo pipefail
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-          export SIMULATOR_BINARY_SHA256=02349a2a0a8d02512e68e1e0d1c94e7464b7d3d7b2c24c24994c223645a97ed0
+          export SIMULATOR_BINARY_SHA256=12e940a07c54c28d20c7e3ff65a159fc3f09569d1c2f4afe90542d5ad5cb364f
           python="$RUNNER_TEMP/group-tools/bin/python"
           "$python" -I -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_","BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in (Path.home()/".aws",Path.home()/".boto","/etc/boto.cfg"))'
           cat > "$RUNNER_TEMP/group-private/verify.py" <<'PYTHON'
@@ -102,5 +102,66 @@ jobs:
         with:
           name: group-console-sdk-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/group-receipts/
+          if-no-files-found: error
+          retention-days: 14
+  before-commit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PRODUCT: ffd2258ec28391a3607e06ecd5aaec3152b9a542
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ffd2258ec28391a3607e06ecd5aaec3152b9a542
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Verify clean source and run the repository gate
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
+          test "$GITHUB_REF" = refs/heads/verify/207-group-console
+          test "$(git rev-parse HEAD)" = "$PRODUCT"
+          test "$(git rev-parse 'HEAD^{tree}')" = 06677cc0ef7945aa7091d4adeb368fdd898555d4
+          test -z "$(git status --porcelain)"
+          test "$(go env GOVERSION)" = go1.26.11
+          test "$(id -u)" -ne 0
+          mkdir "$RUNNER_TEMP/receipts"
+          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/pycache" python3 scripts/check-formal-applicability.py check --base fd803075c37af3faa377f550c8e1cd52b3cfbbb1
+          umask 077
+          test -z "${GOFLAGS:-}${MAKEFLAGS:-}${GO_TEST_RUN_FILE:-}${GO_TEST_PACKAGES:-}"
+          status=0
+          make before-commit > "$RUNNER_TEMP/private-before-commit.log" 2>&1 || status=$?
+          printf '%d\n' "$status" > "$RUNNER_TEMP/receipts/make-exit.txt"
+          python3 - <<'PYTHON'
+          import os, re
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"])
+          lines = (root / "private-before-commit.log").read_text(errors="replace").splitlines()
+          packages = [m.group(1) for line in lines if (m := re.match(r"^ok\s+(github\.com/susumutomita/TenkaCloudSimulator/[^\s]+)\s", line))]
+          failed = [m.group(1) for line in lines if (m := re.match(r"^\s*--- FAIL: ([a-zA-Z0-9_/]+)", line))]
+          (root / "receipts/native-cases.txt").write_text("\n".join(sorted(set(packages + failed))) + "\n")
+          PYTHON
+          test "$status" -eq 0
+          go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > "$RUNNER_TEMP/coverage.xml"
+          status=0
+          python3 scripts/check-coverage.py reports/coverage.out "$RUNNER_TEMP/coverage.xml" || status=$?
+          printf '%d\n' "$status" > "$RUNNER_TEMP/receipts/coverage-exit.txt"
+          cp "$RUNNER_TEMP/coverage-summary.md" "$RUNNER_TEMP/receipts/coverage-summary.md"
+          test "$status" -eq 0
+          test -z "$(git status --porcelain)"
+          go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/receipts/build.txt"
+          grep -Fx "$(printf '\tbuild\tvcs.revision=%s' "$PRODUCT")" "$RUNNER_TEMP/receipts/build.txt"
+          grep -Fx "$(printf '\tbuild\tvcs.modified=false')" "$RUNNER_TEMP/receipts/build.txt"
+          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/receipts/binary.sha256"
+      - name: Retain native gate results
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: group-console-standard-gate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/receipts/
           if-no-files-found: error
           retention-days: 14
