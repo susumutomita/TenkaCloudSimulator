@@ -260,6 +260,7 @@ def exercise(binary, jars, directory):
                 cursor = metadata[0]['AWS_KINESISVIDEO_CONTINUATION_TOKEN']
                 assert cursor != metadata[1]['AWS_KINESISVIDEO_CONTINUATION_TOKEN']
                 assert fragments(read(reader, arn, cursor), sources[1:], numbers[1:], STAMPS[1:]) == metadata[1:]
+                assert read(reader, arn, metadata[1]['AWS_KINESISVIDEO_CONTINUATION_TOKEN']) == b''
                 refused(400, read, reader=peer_reader, arn=other_arn, cursor=cursor)
                 zero_name = NAME + '-zero'
                 zero = create(op, zero_name, 0)
@@ -277,6 +278,7 @@ def exercise(binary, jars, directory):
         with running_cli(binary, directory / 'owner') as reopened, ExitStack() as stack:
             op = sdk(stack, session, totals, reopened, reopened.token)
             try:
+                assert reopened.endpoint != owner.endpoint
                 assert op.describe_stream(StreamName=NAME)['StreamInfo']['StreamARN'] == arn
                 _, _, fresh_reader = data_clients(stack, session, totals, reopened, arn)
                 persisted = read(fresh_reader, arn)
@@ -297,7 +299,7 @@ def exercise(binary, jars, directory):
     return {'boto3Calls': totals['sends'], 'producer': '1.12.0', 'netty': '1.12.797', 'fragmentNumbers': numbers,
             'frameMD5': [item[1] for item in sources], 'inputSHA256': [hashlib.sha256(p.read_bytes()).hexdigest() for p in clips],
             'acknowledgments': ACKS, 'zeroRetentionAcknowledgments': ACKS[:2], 'nettyWithoutLocalHeader': 401,
-            'readerAsWriter': 401, 'writerAsReader': 401, 'foreignParticipant': 401, 'cursorSelectedSecond': True,
+            'readerAsWriter': 401, 'writerAsReader': 401, 'foreignParticipant': 401, 'cursorSelectedSecond': True, 'lastCursorEmpty': True,
             'sameNamePeerUnchanged': True, 'reopenedDecoded': True, 'cleanup': True}
 
 
