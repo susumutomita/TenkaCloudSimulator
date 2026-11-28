@@ -133,9 +133,7 @@ func (s *federationStorage) transition(ctx context.Context, scope Scope, id stri
 	if changed {
 		// Mint a fresh marker even when replacing the payload with identical bytes.
 		next := make([]byte, federationRevisionBytes+len(metadata))
-		if _, err = rand.Read(next[:federationRevisionBytes]); err != nil {
-			return federationSnapshot{}, err
-		}
+		rand.Read(next[:federationRevisionBytes])
 		copy(next[federationRevisionBytes:], metadata)
 		// An untyped nil binds SQLite NULL; a typed nil []byte can bind an empty BLOB.
 		var previous any

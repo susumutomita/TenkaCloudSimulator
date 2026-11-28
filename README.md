@@ -46,6 +46,13 @@ More: [startup options and existing binaries](docs/start.md),
 This README describes this source tree; main and released binaries may differ,
 including Lambda Tail support. Check the [binary's source/version](docs/releases.md).
 
+### Optional: local Cognito and Entra sign-in sample
+
+With this source's built binary, run `./dist/tenkacloud-simulator local-sso`
+to try one synthetic sign-in through the built-in Entra SAML and Cognito
+components. An isolated browser trust store is required. It does not replace
+ordinary Simulator sign-in. See the [local SSO guide](docs/local-sso.md).
+
 ## Try it: run a Python Lambda and read its output
 
 Prefer the browser? In the local console, open **Lambda → Create function**, choose an existing execution role, edit the Python sample in CodeMirror, and create it. Use **Code → Deploy code**, then **Test** to run it without making a ZIP yourself. Deployed handler source can be reopened after reload, including existing Python ZIP functions. Deploy preserves the other ZIP files. Reading source requires `lambda:GetFunction`; editing also requires `lambda:UpdateFunctionCode`. Unsaved drafts remain in memory; download them before leaving. See [console limits](docs/lambda.md).
@@ -133,7 +140,9 @@ console, CloudFormation adapter or Challenge integration.
 - **Cognito User Pools:** [Local metadata by default](docs/design/cognito-user-pools.md). Verified local SigV4
   supports Create, Describe, List, and DeleteUserPool. Explicit
   [local configuration opt-in](docs/design/cognito-federation-configuration.md) adds Create/Describe for
-  synthetic SAML providers and public clients. No sign-in, token issuance, Console, or Scalar support.
+  synthetic SAML providers and public clients; that mode does not enable sign-in,
+  issuance, Console or Scalar support. The separate [local SSO sample](docs/local-sso.md)
+  runs an isolated browser flow on demand.
 - **SimpleDB:** Native `PutAttributes` and `DeleteAttributes` accept one SDK-style `Expected` condition. It
   can compare a single value or require that an attribute be absent. The check and
   change share one transaction. Delete individual values, entire attributes or the item;

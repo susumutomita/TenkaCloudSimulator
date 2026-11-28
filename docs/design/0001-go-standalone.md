@@ -33,6 +33,15 @@ SimpleDB の `PutAttributes` と `DeleteAttributes` は AWS SDK の標準形式�
 
 Redshift の `DescribeTags` は既存のローカル ARN 1件に限り、同じ認可でタグのキーと値を読む。全体検索や SQL は扱わない。
 
+別サブコマンド `local-sso` は、同じ Go バイナリの中で使い捨ての Entra SAML IdP、
+Cognito 受信側とサンプルアプリを別々の数値ループバック HTTPS オリジンで動かす。
+SQLite、テスト用 ID、署名鍵、ブラウザー用 CA は各実行で生成する。
+管理操作は既存の署名済み SDK 境界を通し、準備専用の管理リスナーは準備完了を表示する前に閉じる。
+Cognito の SAML POST は同じオリジンで完了し、検証済みアプリのコールバックへ別のナビゲーションで進む。
+サンプルの成功は通常の Console の認証、実 AWS・Microsoft のアカウント、Azure OAuth/Graph/ARM を有効にしない。
+Entra の SAML コンポーネントは Cognito に依存しないが、別 SP は明示的に登録する必要がある。
+[起動手順と制約](../local-sso.md)。
+
 [ローカル Entra OIDC 検証フィクスチャ](../azure-entra-verification-fixture.md)は、明示的な別コマンドで数値ループバックにだけ待ち受ける。通常のゲートウェイや Azure の権限は変更せず、検証用メタデータと一時公開鍵を返す。テスト用トークンは明示指定した起動出力に限り、実テナント、ログイン、SAML、HTTP発行には対応しない。
 
 Azure Queue は Blob と独立したプロバイダールートを持ち、固定 account・owner・environment に結びつくローカル SQLite にメッセージを保存する。受信と更新は表示予約と pop receipt を更新し、削除は現在の receipt を要求する。Console と API リファレンスは同じ所有者境界とデータプレーンを使う。アカウント全体のキュー一覧や Azure RBAC は模倣しない。[操作範囲と検証条件](../acceptance/azure-queue.md)。
