@@ -1,26 +1,12 @@
 {
   "version": 1,
-  "base_sha": "d769a48ad0483766d100c1a25a872cd91fbd3146",
+  "base_sha": "acf7246197842acf5d8f3d9efa85b6f59d098573",
   "changes": [
     {
-      "path": "docs/kms.md",
-      "sha256": "f4d68dec77c8c3912a47d003823ea9da04d53046e78f50baba43c9ced6f5cb59",
-      "disposition": "documentation",
-      "reason": "Describe the seventeen shipped KMS presets, pending grant reads and real Console/Scalar/SDK workflow.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/kms_surface_deadline_test.go",
-      "sha256": "f6c037ecee99311ec97e1f5699b7145ac90c6f788c7bee6fe5bc8681ca278cd6",
-      "disposition": "test-support",
-      "reason": "Exercise actual elapsed request deadlines after four native SQLite writes, whole-database rollback, and healthy retries.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/kms_surface_lifecycle.py",
-      "sha256": "34dc7b0163da2009484a510d03b5e000dc2c2b27fee52303e4879d47e22d8db1",
-      "disposition": "test-support",
-      "reason": "Drive the shipped KMS Console and Scalar with a scoped browser participant, verify saved state with the official SDK and real STS across two processes and an owner restart.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "8d39ad6b819176e486861513c4ce75a9592ce0705f0959144a3d623985d33343",
+      "disposition": "formal-infrastructure",
+      "reason": "Manually verify the immutable KMS browser, SDK and staged deadline tests with the complete standard gate, both coverage floors and a separate restricted Chromium fixture.",
       "models": []
     }
   ]
