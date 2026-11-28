@@ -177,7 +177,11 @@ def run():
             writer_token = control(owner, '/_simulator/v1/access', 'POST', {'Principal': 'metric-writer'})['AccessToken']
             writer = client(stack, owner, counts, encodings, token=writer_token)
             denied(403, writer.get_metric_statistics, **query)
-            writer.put_metric_data(Namespace=NAMESPACE, MetricData=[dict(MetricName='Writer', Value=5)])
+            writer.put_metric_data(Namespace=NAMESPACE, MetricData=[dict(MetricName='Writer', Value=5, Dimensions=[])])
+            optional = dict(query, MetricName='Writer', Unit='None',
+                            EndTime=datetime.now(timezone.utc) + timedelta(minutes=1))
+            optional.pop('Dimensions')
+            assert a.get_metric_statistics(**optional)['Datapoints'][0]['Sum'] == 5
             # Token authentication precedes AWS Query. Its 401 response uses
             # the simulator's JSON envelope and cannot be parsed as Query XML.
             wrong_team = urllib.request.Request(
