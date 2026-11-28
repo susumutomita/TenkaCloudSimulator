@@ -1,47 +1,264 @@
 {
   "version": 1,
-  "base_sha": "8a9be8bd5a2d56959e6cbc6b5e80fb9b57e5935e",
+  "base_sha": "110354ea421d576f12b9452e0d472eda2077cc11",
   "changes": [
     {
-      "path": "test/e2e/api_cloud_sections_contract.py",
-      "sha256": "27e55e07a9076773010a51c224f5af67bdd2649922e204fbe0398ff4f0e1b139",
-      "disposition": "test-support",
-      "reason": "Validate the current Sakura Server navigation and provider binding and preserve the historical method, path and operation inventory.",
+      "path": "README.md",
+      "sha256": "4a340e879120a2f35b545ca84903cda8b81630463fa183fc0700608bacf92b76",
+      "disposition": "documentation",
+      "reason": "Introduce the scoped local KMS role grant workflow.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudwatch_logs.py",
-      "sha256": "a3ab52eebd8130d18925559a31a1a3905cd445436c2e18494ff96eee070a2532",
-      "disposition": "test-support",
-      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing eight native Logs examples.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "c49a6977448f1059f7b8471a304407feb02d59f97ee120c6f1ef2a21aeb781db",
+      "disposition": "documentation",
+      "reason": "Describe key-scoped grant persistence and verified role generation.",
       "models": []
     },
     {
-      "path": "test/e2e/dynamodb_docs.py",
-      "sha256": "ecbd976e404f69b19578964227c8a19846235de58416281fa96cefc2b15a59af",
-      "disposition": "test-support",
-      "reason": "Check the served historical inventory before executing the seven existing DynamoDB templates and SDK readbacks.",
+      "path": "docs/kms.md",
+      "sha256": "f27c93b2327d2d7e4616631a57f489873aa15a6d95617bed5a4322659fbd7ced",
+      "disposition": "documentation",
+      "reason": "Publish per-operation grant fields, role and token authorization, quotas, disabled-state behavior and scope.",
       "models": []
     },
     {
-      "path": "test/e2e/historical_reference_inventory.py",
-      "sha256": "292db852cd1fa1160a6ed69c2a319cc6827d4cae349f15d136096979da380ce3",
-      "disposition": "test-support",
-      "reason": "Pin the historical IDs to their HTTP methods and paths using the 66 routes from historical main and the existing multipart POST.",
+      "path": "formal/KMSRoleGrantLifecycle.cfg",
+      "sha256": "fbd45f5391e3c3da4ef6d8f7846be21510270e65c26b8d94313f6f1a586d6cb9",
+      "disposition": "modeled",
+      "reason": "Set the finite state bounds and invariants for generation-bound role grants.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "formal/KMSRoleGrantLifecycle.tla",
+      "sha256": "20a6a061e1f7984c2ad68fd14037230a663520621f97a6522ac1f5aca8df4cb2",
+      "disposition": "modeled",
+      "reason": "Model exact key and generation grant authority, management, read decisions and failure frames.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "a13d74d8bb83f5bf8d31841849050c671d5c02bc5672a073f90d914dd0f8bf27",
+      "disposition": "formal-infrastructure",
+      "reason": "Register KMS role grant lifecycle, fixed mutants, read/write witnesses and scope.",
       "models": []
     },
     {
-      "path": "test/e2e/secrets_manager_docs.py",
-      "sha256": "5d04c99554f24855650d26703d41394de3ea899d451ef4022266f822aa3c95fd",
+      "path": "internal/aws/kms_dispatch.go",
+      "sha256": "3a586f546a201d20ce924d9ea3abcff9b9b6eea1d77ea157ff4ac8dc7798a3c8",
+      "disposition": "modeled",
+      "reason": "Select the verified signed DescribeKey path without replacing the established participant authority.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_grants.go",
+      "sha256": "b49442d4f1fc3e751cdbac1962ba4ecfbc95b190cd1f33f8aad2586da0fb0501",
+      "disposition": "modeled",
+      "reason": "Validate, persist, list and revoke real KMS grants and evaluate role DescribeKey against a transactional key/grant snapshot.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_grants_test.go",
+      "sha256": "aa6ef7fef6637db7088278443c5719f98186765e478361aa03857bb045193dee",
       "disposition": "test-support",
-      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing seven native Secrets Manager examples.",
+      "reason": "Exercise grant management, refusal frames, token and pagination bounds, IAM decisions and role recreation.",
       "models": []
     },
     {
-      "path": "test/e2e/test_storage_reference_sakura_projection.py",
-      "sha256": "f1bba14a42561d79e548dfdcc383a449b81a328f20b67a42d85f369d8bda38fc",
+      "path": "internal/aws/kms_http.go",
+      "sha256": "5ff65eb3796f95f3815925e44933be1fe82fa01f3ad0496d157ac962d3e1077e",
+      "disposition": "modeled",
+      "reason": "Add strict official KMS grant fields, pagination options and narrow native request dispatch.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_store.go",
+      "sha256": "c7debf4b92694cc528665369d4ae27a757f79fba6bd9cf301378bf5b98ad5778",
+      "disposition": "modeled",
+      "reason": "Add the key-scoped grant schema and persisted token signer in a single bootstrap transaction.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_signature.go",
+      "sha256": "ed3a19d5b77c9a5973656a7f8fcf1d3b85bf7a6b532998a89e4592503690def3",
+      "disposition": "modeled",
+      "reason": "Admit KMS signing only for a canonical assumed-role DescribeKey request with signed content type and target.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/access_sdk.go",
+      "sha256": "cbb59b195075dda2c0e0c857686b9b79f0e2484acda39cc3b7110e0eeb04608d",
+      "disposition": "modeled",
+      "reason": "Return the JSON protocol authentication failure for rejected native KMS signatures.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "da2d8b0b122d24b51da37cf3f8d8f501b24602a4dea9e1bb78b232e1cfc60200",
+      "disposition": "presentation",
+      "reason": "Describe the scoped KMS operations, schemas, constraints and examples in the served reference.",
+      "models": []
+    },
+    {
+      "path": "internal/server/console_handoff_test.go",
+      "sha256": "bda5ebadaf2de6c8695cfedc781ac9fe39af1afedf118367779c3930f52e2225",
+      "disposition": "modeled",
+      "reason": "Check that discovery advertises the new signed KMS service while preserving access requirements.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "The formal model checks independent SDK authority preservation. The exact advertised service list is checked in the native test."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "23c8e1525e25f6dea67c1de1de17a185226f4f6f48990a061f554a6bf4af8a90",
+      "disposition": "modeled",
+      "reason": "Advertise the three implemented grant operations and bounded supported grantee and permission.",
+      "models": [
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Discovery publishes the KMS operations and limitations. The protocol model covers the absence of authority from wire metadata, while discovery content is checked by the SDK fixture."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "f1a1424bf05ef2a5f3903ec564b6d1607332edff57e28ce1f24beae1312ce7e0",
+      "disposition": "formal-infrastructure",
+      "reason": "Bind the new KMS grant model to fixed properties, mutation controls and model-owned source paths.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "33cb325259349078d4db900bd26b1f62658bf5337b71c515f01e1f493e07d96a",
+      "disposition": "formal-infrastructure",
+      "reason": "Verify the grant lifecycle model registry and required controls.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms.py",
+      "sha256": "2d3ed884c14d0c3d7b28517e55ad07d5244bb9936e8810c17ec0184e8c81f549",
       "disposition": "test-support",
-      "reason": "Exercise the historical fixture validators against changed native operations, paths, methods and the Sakura Server contract.",
+      "reason": "Preserve the existing eight native key/crypto verifications while requiring all fifteen served KMS operations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_alias_docs.py",
+      "sha256": "7c9ed951b147ea162fa279bc3f76633fa514793a88a7437c3825020fc1ef93fa",
+      "disposition": "test-support",
+      "reason": "Preserve all four existing alias examples while checking the updated exact set of served operations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_grants.py",
+      "sha256": "db0119d0ea918b8d53f3bdab1ed87a01fad1757d8e70dc86cb459e930dad7db2",
+      "disposition": "test-support",
+      "reason": "Exercise two real local SDK processes, verified assumed roles, grants, restart, explicit denial and cleanup.",
       "models": []
     }
   ]
