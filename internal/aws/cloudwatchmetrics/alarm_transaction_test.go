@@ -173,6 +173,18 @@ func TestAlarmFailedEvaluationRollsBackActualSamples(t *testing.T) {
 	s.now = func() time.Time { return now }
 	allow := func(string, string) bool { return true }
 	alarmServe(t, s, "us-east-1", "PutMetricAlarm", alarmWire("target"), allow, 200)
+	// These rows were valid at their original write time. A later failed
+	// derived alarm update must also restore the physically pruned old row.
+	originalTime := now.Add(-retention - time.Second)
+	if err := s.put(t.Context(), "us-east-1", "Training", []sample{observation(originalTime, 23)}, originalTime); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.put(t.Context(), "us-east-1", "OtherNamespace", []sample{observation(originalTime, 71)}, originalTime); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.put(t.Context(), "us-west-2", "Training", []sample{observation(originalTime, 17)}, originalTime); err != nil {
+		t.Fatal(err)
+	}
 	alarmState(t, s, "target", "INSUFFICIENT_DATA")
 	before := alarmFrame(t, s.db)
 	if _, err := s.db.Exec("CREATE TRIGGER ignored_alarm_update BEFORE UPDATE ON aws_cloudwatch_alarms BEGIN SELECT RAISE(IGNORE); END"); err != nil {
@@ -192,4 +204,14 @@ func TestAlarmFailedEvaluationRollsBackActualSamples(t *testing.T) {
 		t.Fatal(err)
 	}
 	alarmState(t, s, "target", "ALARM")
+	for _, scope := range []struct {
+		region, namespace string
+		value             float64
+	}{{"us-east-1", "Training", 9}, {"us-east-1", "OtherNamespace", 71}, {"us-west-2", "Training", 17}} {
+		var count int
+		var value float64
+		if err := s.db.QueryRow("SELECT count(*),min(value) FROM aws_cloudwatch_samples WHERE region=? AND namespace=?", scope.region, scope.namespace).Scan(&count, &value); err != nil || count != 1 || value != scope.value {
+			t.Fatal("successful retry pruned the wrong scope", scope, count, value, err)
+		}
+	}
 }

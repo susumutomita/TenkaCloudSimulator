@@ -250,13 +250,13 @@ func validAlarmReasonData(a metricAlarm) bool {
 	}
 	var data struct {
 		Version, Start, End, Statistic string
-		SampleCount                    int
+		SampleCount                    *int
 		Value                          *float64
-		Threshold                      float64
+		Threshold                      *float64
 	}
 	decoder := json.NewDecoder(bytes.NewReader([]byte(a.StateReasonData)))
 	decoder.DisallowUnknownFields()
-	if decoder.Decode(&data) != nil || data.Version != "1.0" || !slices.Contains(statistics, data.Statistic) || data.SampleCount < 0 || data.SampleCount > maxNamespaceSamples || math.IsNaN(data.Threshold) || math.IsInf(data.Threshold, 0) || math.Abs(data.Threshold) > math.Exp2(360) {
+	if decoder.Decode(&data) != nil || data.Version != "1.0" || !slices.Contains(statistics, data.Statistic) || data.SampleCount == nil || data.Threshold == nil || *data.SampleCount < 0 || *data.SampleCount > maxNamespaceSamples || math.IsNaN(*data.Threshold) || math.IsInf(*data.Threshold, 0) || math.Abs(*data.Threshold) > math.Exp2(360) {
 		return false
 	}
 	start, err := time.Parse(time.RFC3339, data.Start)
@@ -267,7 +267,7 @@ func validAlarmReasonData(a metricAlarm) bool {
 	if err != nil || end.Sub(start) != time.Minute {
 		return false
 	}
-	if data.SampleCount == 0 {
+	if *data.SampleCount == 0 {
 		return data.Value == nil && a.StateValue == "INSUFFICIENT_DATA"
 	}
 	return data.Value != nil && !math.IsInf(*data.Value, 0) && !math.IsNaN(*data.Value) && a.StateValue != "INSUFFICIENT_DATA"

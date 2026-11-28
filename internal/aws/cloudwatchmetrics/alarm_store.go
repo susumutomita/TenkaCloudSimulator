@@ -74,7 +74,7 @@ func readAlarm(ctx context.Context, tx *sql.Tx, region, name string) (metricAlar
 	}
 	decoder := json.NewDecoder(bytes.NewReader([]byte(data)))
 	decoder.DisallowUnknownFields()
-	if decoder.Decode(&a) != nil || decoder.Decode(new(any)) != io.EOF || !validSavedAlarm(a) || a.AlarmName != name || a.AlarmArn != alarmARN(region, name) || a.Generation != generation || len(generation) != 32 {
+	if decoder.Decode(&a) != nil || decoder.Decode(new(any)) != io.EOF || !typedAlarmDocument([]byte(data), a) || !validSavedAlarm(a) || a.AlarmName != name || a.AlarmArn != alarmARN(region, name) || a.Generation != generation || len(generation) != 32 {
 		return a, errors.New("invalid saved alarm identity")
 	}
 	if raw, err := hex.DecodeString(generation); err != nil || len(raw) != 16 {
@@ -408,4 +408,24 @@ func evaluateRestartedAlarms(ctx context.Context, tx *sql.Tx, now time.Time) err
 		}
 	}
 	return nil
+}
+
+// All private alarm fields are emitted by this provider. A present JSON null
+// must not be mistaken for a measured zero, false, or an omitted configuration.
+func typedAlarmDocument(data []byte, a metricAlarm) bool {
+	var actual, expected map[string]json.RawMessage
+	if json.Unmarshal(data, &actual) != nil {
+		return false
+	}
+	canonical, err := json.Marshal(a)
+	if err != nil || json.Unmarshal(canonical, &expected) != nil || len(actual) != len(expected) {
+		return false
+	}
+	for key := range expected {
+		value, exists := actual[key]
+		if !exists || key != "Dimensions" && bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return false
+		}
+	}
+	return true
 }

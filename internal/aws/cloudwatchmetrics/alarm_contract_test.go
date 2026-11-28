@@ -48,7 +48,7 @@ func TestAlarmStrictNativeFieldShapesAndUntouchedFrame(t *testing.T) {
 }
 
 func TestAlarmSavedConfigurationAndCursorAuthorityFailClosed(t *testing.T) {
-	for _, damage := range []string{"invalid-json", "unknown-field", "unit", "canonical-dimensions", "state", "reason", "generation", "generation-nonhex", "timestamp", "empty-reason-object", "cursor-secret"} {
+	for _, damage := range []string{"invalid-json", "unknown-field", "unit", "canonical-dimensions", "state", "reason", "generation", "generation-nonhex", "timestamp", "empty-reason-object", "null-reason-threshold", "null-reason-count", "missing-config-threshold", "null-config-threshold", "null-actions", "cursor-secret"} {
 		t.Run(damage, func(t *testing.T) {
 			s, _ := testStore(t, "")
 			now := time.Now().UTC()
@@ -86,6 +86,27 @@ func TestAlarmSavedConfigurationAndCursorAuthorityFailClosed(t *testing.T) {
 				data["AlarmConfigurationUpdatedTimestamp"] = "not-a-time"
 			case "empty-reason-object":
 				data["StateReasonData"] = "null"
+			case "null-reason-threshold", "null-reason-count":
+				var reason map[string]any
+				if err := json.Unmarshal([]byte(data["StateReasonData"].(string)), &reason); err != nil {
+					t.Fatal(err)
+				}
+				key := "Threshold"
+				if damage == "null-reason-count" {
+					key = "SampleCount"
+				}
+				reason[key] = nil
+				encoded, err := json.Marshal(reason)
+				if err != nil {
+					t.Fatal(err)
+				}
+				data["StateReasonData"] = string(encoded)
+			case "missing-config-threshold":
+				delete(data, "Threshold")
+			case "null-config-threshold":
+				data["Threshold"] = nil
+			case "null-actions":
+				data["ActionsEnabled"] = nil
 			case "cursor-secret":
 			}
 			if damage != "invalid-json" {
