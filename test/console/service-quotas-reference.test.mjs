@@ -71,7 +71,11 @@ test('other origins, routes, methods, media, targets and credential overrides fa
     [origin + '/', {method: 'GET', headers}],
     [origin + '/', {method: 'POST', headers: {...headers, 'Content-Type': 'application/json'}, body: '{}'}],
     [origin + '/', {method: 'POST', headers: {...headers, 'X-Amz-Target': 'ServiceQuotasV20190624.DeleteQuota'}, body: '{}'}],
-    ...['Authorization', 'X-Simulator-Token', 'X-Simulator-Principal', 'X-Simulator-Access-Role']
+    [origin + '/', {method: 'POST', headers: {...headers, 'X-Simulator-Region': 'us-west-2'}, body: '{}'}],
+    [origin + '/', {method: 'POST', headers: {...headers, 'X-Simulator-Region': 'us-east-1'}, body: '{}'}],
+    ...['Authorization', 'Proxy-Authorization', 'Cookie', 'X-Simulator-Token', 'X-Simulator-Principal',
+      'X-Simulator-Access-Role', 'X-Simulator-Service', 'X-Simulator-Unknown-Role',
+      'X-Amz-Security-Token', 'X-Amz-Region', 'X-Amz-Region-Set']
       .map((header) => [origin + '/', {method: 'POST', headers: {...headers, [header]: 'fixture-only'}, body: '{}'}]),
   ]) await assert.rejects(config.customFetch(url, init));
   assert.equal(calls.length, 0);
