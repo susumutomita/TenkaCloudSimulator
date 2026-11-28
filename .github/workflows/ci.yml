@@ -9,11 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     env:
-      PRODUCT: a38583533cadb36f8ab41c15ae268b15836b3f8c
+      PRODUCT: 9f2df4ff95516d0bdce8b96bbfa7f60bb33f3a7a
+      PRODUCT_TREE: 512cd241021a8acfc569d613366fc410c0c9c548
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: a38583533cadb36f8ab41c15ae268b15836b3f8c
+          ref: 9f2df4ff95516d0bdce8b96bbfa7f60bb33f3a7a
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -24,6 +25,7 @@ jobs:
           test "$(id -u)" -ne 0
           test "$(go env GOVERSION)" = go1.26.11
           test "$(git rev-parse HEAD)" = "$PRODUCT"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$PRODUCT_TREE"
           test -z "$(git status --porcelain)"
           make build
           receipts="$RUNNER_TEMP/native-reference-receipts"
@@ -63,7 +65,7 @@ jobs:
       - name: Retain product identity and native results
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: native-reference-a385835-${{ github.run_id }}
+          name: native-reference-9f2df4f-${{ github.run_id }}
           path: ${{ runner.temp }}/native-reference-receipts/
           if-no-files-found: error
           retention-days: 14
