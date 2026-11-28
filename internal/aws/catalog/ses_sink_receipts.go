@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"errors"
-	"strings"
 	"time"
 )
 
@@ -83,8 +82,12 @@ func (e *Engine) SESSinkMessage(ctx context.Context, region, id string, content,
 		if err = tx.QueryRowContext(ctx, "SELECT mime,sha256 FROM aws_ses_local_inbox WHERE id=?", id).Scan(&data, &storedDigest); err != nil {
 			return receipt, nil, err
 		}
+		sentAt, err := time.Parse(time.RFC3339Nano, receipt.AcceptedAt)
+		if err != nil {
+			return receipt, nil, err
+		}
 		digest := sha256.Sum256(data)
-		if !bytes.Equal(digest[:], storedDigest) || len(data) != receipt.ContentBytes || !strings.HasPrefix(string(data), "From: "+receipt.Sender+"\r\nTo: "+receipt.Recipient+"\r\n") {
+		if !bytes.Equal(digest[:], storedDigest) || len(data) != receipt.ContentBytes || !bytes.HasPrefix(data, []byte(sesEnvelopeHeaders(receipt.Sender, receipt.Recipient, receipt.MessageID, sentAt))) {
 			return receipt, nil, errors.New("invalid saved SES local MIME")
 		}
 	}

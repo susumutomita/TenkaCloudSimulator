@@ -153,6 +153,10 @@ func (q *request) authorizeSESSend(s sesSubmission) error {
 	return nil
 }
 
+func sesEnvelopeHeaders(from, to, id string, at time.Time) string {
+	return fmt.Sprintf("From: %s\r\nTo: %s\r\nDate: %s\r\nMessage-ID: <%s@inbox.ses.test>\r\n", from, to, at.UTC().Format(time.RFC1123Z), id)
+}
+
 func (q *request) sesSubmitMIME(tx *sql.Tx, s sesSubmission, id string, at time.Time) ([]byte, error) {
 	var rendered map[string]any
 	var err error
@@ -171,7 +175,7 @@ func (q *request) sesSubmitMIME(tx *sql.Tx, s sesSubmission, id string, at time.
 	if err != nil {
 		return nil, err
 	}
-	data := fmt.Sprintf("From: %s\r\nTo: %s\r\nDate: %s\r\nMessage-ID: <%s@inbox.ses.test>\r\n", s.from, s.to, at.Format(time.RFC1123Z), id) + dataText(rendered["RenderedTemplate"])
+	data := sesEnvelopeHeaders(s.from, s.to, id, at) + dataText(rendered["RenderedTemplate"])
 	if len(data) > maxSESMIME {
 		return nil, invalid("The complete local email exceeds 256 KiB.")
 	}

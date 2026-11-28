@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -218,5 +219,34 @@ func TestSESLocalSinkBoundsAndStorageFailures(t *testing.T) {
 	}
 	if data, _ := json.Marshal(localSinkSummary(c)); string(data) != "{}" {
 		t.Fatal("cleanup retained sink messages")
+	}
+}
+
+func TestSESLocalMailboxDownloadBelongsToReceipt(t *testing.T) {
+	c, db, closeDB := openSinkDB(t, filepath.Join(t.TempDir(), "db"), "a")
+	defer closeDB()
+	seedMailDomain(c)
+	const inbox = "inbox@inbox.ses.test"
+	first := localSend(c, inbox, true, 200)
+	second := localSend(c, inbox, true, 200)
+	path := func(id string) string { return sesSinkEast + "/" + id + "/content" }
+	firstMIME := c.call("", "GET", path(first), "", 200)
+	secondMIME := c.call("", "GET", path(second), "", 200)
+	if first == second || bytes.Equal(firstMIME, secondMIME) {
+		t.Fatal("distinct submissions need distinct MIME identities")
+	}
+	if _, err := db.Exec("UPDATE aws_ses_local_inbox SET (mime,sha256)=(SELECT mime,sha256 FROM aws_ses_local_inbox WHERE id=?) WHERE id=?", second, first); err != nil {
+		t.Fatal(err)
+	}
+	out := c.call("", "GET", path(first), "", 500)
+	if bytes.Contains(out, []byte(second)) || !bytes.Equal(secondMIME, c.call("", "GET", path(second), "", 200)) {
+		t.Fatal("download exposed a different submission or changed its content")
+	}
+	digest := sha256.Sum256(firstMIME)
+	if _, err := db.Exec("UPDATE aws_ses_local_inbox SET mime=?,sha256=? WHERE id=?", firstMIME, digest[:], first); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(firstMIME, c.call("", "GET", path(first), "", 200)) {
+		t.Fatal("original MIME not recovered")
 	}
 }
