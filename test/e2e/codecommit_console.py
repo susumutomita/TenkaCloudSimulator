@@ -13,6 +13,7 @@ from urllib.parse import urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 from autoscaling_plans_console import LocalTeam, started, wire
+from codecommit_notification_witness import BranchNotificationWitness
 from reflow import assert_reflow
 
 PREFIX = 'CodeCommit_20150413.'
@@ -188,7 +189,9 @@ def exercise(binary, use_sdk, axe):
             a,b = [driver(t,use_sdk,stack,observed) for t in teams]
             def api(op,**kwargs): return a(op,repositoryName=NAME,**kwargs)
             def other(op,**kwargs): return b(op,repositoryName=NAME,**kwargs)
-            ids=[f('CreateRepository')['repositoryMetadata']['repositoryId'] for f in (api,other)]
+            repositories=[f('CreateRepository')['repositoryMetadata'] for f in (api,other)]
+            ids=[repository['repositoryId'] for repository in repositories]
+            notifications=BranchNotificationWitness(browser,team,peer,use_sdk,stack,repositories[0])
             assert ids[0]!=ids[1]
             peer_commit=other('PutFile',branchName='main',filePath=FILE,fileContent='cGVlcg==')['commitId']
             ctx,page=context(browser,team,team.token,observed)
@@ -207,6 +210,7 @@ def exercise(binary, use_sdk, axe):
             first=api('GetFile',filePath=FILE,commitSpecifier=root_id)
             assert first['fileMode']=='EXECUTABLE' and base64.b64decode(first['fileContent'])==BINARY_CONTENT
             assert api('GetCommit',commitId=root_id)['commit']['parents']==[]
+            notifications.received('main',root_id)
             expect(pane.get_by_text(first['blobId'],exact=True)).to_be_visible()
             with page.expect_download() as saved: button(pane,'Download file').click()
             assert Path(saved.value.path()).read_bytes()==BINARY_CONTENT; saved.value.delete()
@@ -216,6 +220,7 @@ def exercise(binary, use_sdk, axe):
             second=scalar(ctx,team,'PutFile',dict(repositoryName=NAME,**with_args))['commitId']
             observed['scalar'].append('PutFile')
             assert api('GetFile',filePath=FILE,commitSpecifier=second)['fileContent']==''
+            notifications.received('main',second,root_id)
             button(pane,'Refresh repository').click()
             expect(pane.get_by_text(second,exact=True)).to_be_visible()
             button(pane,root_id).click()
@@ -224,6 +229,8 @@ def exercise(binary, use_sdk, axe):
             button(pane,'Create branch at this commit').click()
             expect(pane.get_by_text('Branch created and verified.',exact=True)).to_be_visible()
             assert api('GetBranch',branchName='historical')['branch']['commitId']==root_id
+            notifications.received('historical',root_id)
+            notifications.disable()
             button(pane,'Add or edit file').click()
             pane.get_by_label('Commit file path',exact=True).fill('notes.txt')
             pane.get_by_label('Text contents',exact=True).fill('separate branch\n')
@@ -231,6 +238,7 @@ def exercise(binary, use_sdk, axe):
             expect(pane.get_by_text('Commit saved and verified.',exact=True)).to_be_visible()
             fork_tip=api('GetBranch',branchName='historical')['branch']['commitId']
             assert api('GetCommit',commitId=fork_tip)['commit']['parents']==[root_id]
+            notifications.quiet_after_commit('disabledAtCommit','historical',fork_tip)
             assert api('GetBranch',branchName='main')['branch']['commitId']==second
             audit(page,'populated history',axe,observed)
 
@@ -293,6 +301,7 @@ def exercise(binary, use_sdk, axe):
                     {'Effect':'Allow','Action':['codecommit:'+op for op in actions],'Resource':'*'}]})
             rights(read_actions)
             token=wire(team,'POST','/_simulator/v1/access',{'Principal':'git-reader'})['AccessToken']
+            notifications.refusal(notifications.client(team,token),403,'AccessDeniedException')
             ctx,page=context(browser,team,token,observed)
             pane=show(page,team)
             button(pane,'Add or edit file').click()
@@ -326,6 +335,7 @@ def exercise(binary, use_sdk, axe):
         with started(team),started(peer):
             a,b = [driver(t,use_sdk,stack,observed) for t in teams]
             try:
+                notifications.remove_after_restart(browser)
                 assert api('GetRepository')['repositoryMetadata']['repositoryId']==ids[0]
                 assert api('GetFile',commitSpecifier=root_id,filePath=FILE)==first
                 assert api('GetFile',commitSpecifier=second,filePath=FILE)['fileContent']==''
@@ -345,6 +355,8 @@ def exercise(binary, use_sdk, axe):
                 boundary=api('GetFile',filePath='boundary.bin',commitSpecifier='main')
                 assert boundary['fileSize']==len(maximum) and base64.b64decode(boundary['fileContent'])==maximum
                 assert api('GetCommit',commitId=boundary['commitId'])['commit']['parents']==[second]
+                notifications.quiet_after_commit('deletedAtCommit','main',boundary['commitId'])
+                notifications.clean_up()
                 button(pane,'Add or edit file').click()
                 pane.get_by_label('Commit file path',exact=True).fill('held-draft.txt')
                 pane.get_by_label('Upload file',exact=True).set_input_files(
@@ -369,7 +381,7 @@ def exercise(binary, use_sdk, axe):
     assert observed['signed']==observed['sdkResponses'] and (not use_sdk or observed['signed']>25)
     actual={op for op,status in observed['console'] if status==200}
     assert {'GetFile','GetCommit','GetBranch','ListBranches','PutFile','CreateBranch'}<=actual
-    return {**observed,'cleanup':True,'reopenedDatabases':2,'lostAcknowledgements':len(lost),
+    return {**observed,'branchNotifications':notifications.result,'cleanup':True,'reopenedDatabases':2,'lostAcknowledgements':len(lost),
             'staleReadStatuses':[200,403],'replacedRepositoryWriteSends':0,'largestFileBytes':len(maximum),
             'preSendLossCheckedAgainstMissingFile':True}
 
