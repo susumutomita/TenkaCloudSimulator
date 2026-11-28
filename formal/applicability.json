@@ -3,11 +3,25 @@
   "base_sha": "ffd2258ec28391a3607e06ecd5aaec3152b9a542",
   "changes": [
     {
+      "path": "README.md",
+      "sha256": "84ed64283e2fbefeb88353024c47c2580d4b182537dae877f63aef0e2ca1402a",
+      "models": [],
+      "disposition": "documentation",
+      "reason": "Document the policy migration for service-wide CreateGroup/ListGroups, modeled IAM denial, and group-type response shape."
+    },
+    {
       "path": "docs/aws-catalog.md",
       "sha256": "6e35ebe6a556043166d3b4476c250d6ea38bc5008ed857400615aa0a9e9791d2",
       "models": [],
       "disposition": "documentation",
       "reason": "Record the official service-wide IAM targets and the application-only tag member for the bounded local group types."
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "83434c9440ce3d5bd3c5c9362683f7c2205c65dd31f5dfa95db328e2e5330113",
+      "models": [],
+      "disposition": "documentation",
+      "reason": "Describe group ARN authorization by operation, the uniform native ForbiddenException, and ApplicationTag and ordinary tag projections."
     },
     {
       "path": "internal/aws/catalog/engine.go",
