@@ -8,8 +8,10 @@ subsets of the pinned official botocore 1.41.6 models; see
 Every listed operation is implemented against provider-owned SQLite state. Every
 other official operation of the same service returns HTTP 501
 `UnknownOperationException`. Input members that the simulator would ignore are
-refused with the operation's own validation exception. No workload, data plane,
-network, OAuth or real AWS call is executed or simulated.
+refused with the operation's own validation exception. Catalog metadata operations
+stay local and do not execute workloads, network traffic, OAuth or real AWS calls.
+The Kinesis Video Streams data plane stores and serves bounded local media through
+two additional native HTTP operations. [Media scope](kinesis-video-media.md)
 
 ## Services
 

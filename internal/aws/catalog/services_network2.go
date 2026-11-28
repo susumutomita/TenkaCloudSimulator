@@ -202,7 +202,7 @@ var kinesisVideo = &Service{
 	Model: "kinesisvideo", Title: "Amazon Kinesis Video Streams", IAMPrefix: "kinesisvideo", Issues: []int{280},
 	Resources: []*Resource{
 		{Kind: "stream", Shape: "StreamInfo", ID: "name",
-			ARN:       "arn:{partition}:kinesisvideo:{region}:{account}:stream/{name}/1",
+			ARN:       "arn:{partition}:kinesisvideo:{region}:{account}:stream/{name}/*",
 			ARNMember: "StreamARN", NameMember: "StreamName", Unique: true, Limit: 50, Token: "Version", TokenID: "alnum:20",
 			Generate: map[string]any{"Status": "CREATING", "CreationTime": "$now", "DataRetentionInHours": 0, "KmsKeyId": "alias/aws/kinesisvideo"}},
 		{Kind: "channel", Shape: "ChannelInfo", ID: "name",
@@ -213,6 +213,9 @@ var kinesisVideo = &Service{
 	},
 	Ops: []Op{
 		{Name: "CreateStream", Kind: Create, Resource: "stream", Check: kinesisVideoStream},
+		{Name: "GetDataEndpoint", Kind: Read, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Accept: []string{"APIName"}},
+		// The generic console opens a stream with DescribeStream. Its read slot
+		// is the last registered Read, while discovery has its own media panel.
 		{Name: "DescribeStream", Kind: Read, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Check: kinesisVideoStreamSelector},
 		{Name: "ListStreams", Kind: List, Resource: "stream"},
 		{Name: "UpdateStream", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Check: kinesisVideoStreamSelector, Token: "CurrentVersion",
@@ -231,8 +234,8 @@ var kinesisVideo = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceARN"},
 	},
 	Bounds: []string{
-		"Streams and signaling channels are stored records: no media is ingested, stored or played, and no WebRTC signaling, relay or ICE server exists. GetDataEndpoint, GetSignalingChannelEndpoint, the edge agent, media storage, image generation, notification, stream storage and mapped resource configuration APIs return UnknownOperationException with HTTP 501, so no endpoint is ever returned.",
-		"Streams and signaling channels are stored records that stay CREATING and never become ACTIVE, because nothing is provisioned. The ARN ends in the fixed number 1 instead of the creation timestamp AWS uses, so a deleted and recreated name has the same ARN. A stream created without a KmsKeyId reports the alias alias/aws/kinesisvideo instead of the ARN of that managed key; the key is not resolved. StreamStorageConfiguration is refused.",
+		"GetDataEndpoint returns the active numeric loopback origin for PUT_MEDIA and GET_MEDIA. PutMedia accepts one finite Matroska/AVC video track and cluster, at most 4 MiB and 512 unlaced frames spanning at most ten seconds. A retained fragment receives PERSISTED only after SQLite commits. Zero retention returns BUFFERING and RECEIVED. GetMedia returns a finite EARLIEST or CONTINUATION_TOKEN snapshot with five fragment metadata tags and the original encoded AVC bytes.",
+		"The local media store serves default-key streams. New stream ARNs include a durable creation timestamp. Existing default-key /1 streams keep their ARN, tags and version across upgrade. Explicit customer-key streams and signaling channels stay in metadata state. The simulator stores media in its local database and does not provision a KMS key. WebRTC, signaling endpoints, archive and image APIs, edge agents and stream storage configuration are outside this media profile.",
 		"Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel delete the latest version, or refuse with VersionMismatchException a CurrentVersion that is not the stored Version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created.",
 		"Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
 	},

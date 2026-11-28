@@ -87,6 +87,15 @@ func TestKinesisVideoRetainedMedia(t *testing.T) {
 		t.Fatalf("unexpected returned endpoint %s", endpoint)
 	}
 	earliest := map[string]string{"StartSelectorType": "EARLIEST"}
+	for _, bad := range []string{
+		`{"StreamName":"other","StreamName":"frames","APIName":"GET_MEDIA"}`,
+		`{"StreamName":"frames","APIName":"GET_MEDIA"}]`,
+		`{"StreamName":"frames","APIName":[]}`,
+		`{"StreamName":"frames","APIName":"GET_MEDIA","StreamARN":""}`,
+	} {
+		call("/getDataEndpoint", []byte(bad), nil, 400)
+	}
+	call("/getMedia", []byte(`{"StreamName":"frames","StartSelector":{"StartSelectorType":"CONTINUATION_TOKEN","StartSelectorType":"EARLIEST"}}`), nil, 400)
 	if got := get("frames", earliest, 200); len(got) != 0 {
 		t.Fatal("empty stream returned bytes")
 	}

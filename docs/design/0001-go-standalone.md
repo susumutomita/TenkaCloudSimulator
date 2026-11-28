@@ -148,3 +148,7 @@ with their group. SDK and Console share EC2 Query `DescribeSecurityGroups`
 readback. This separate detached state never modifies CloudFormation-owned
 ingress or feeds live network/instance attachment decisions. See the
 [security group subset](../ec2-read-discovery.md#security-group-readback).
+
+### Local Kinesis video fragments
+
+The AWS provider stores finite AVC/Matroska fragments in the same SQLite database as their stream. Each receipt binds the stream incarnation, fragment number, cursor, times and media bytes. The data endpoint comes from the accepted numeric-loopback socket. The standalone binary validates the container and emits original encoded frames with Kinesis metadata. Decoding and the producer SDK run in the client. [Media scope](../kinesis-video-media.md)

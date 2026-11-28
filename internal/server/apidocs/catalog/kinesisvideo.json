@@ -188,7 +188,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Amazon Kinesis Video Streams API (2017-09-30). Every other official operation returns HTTP 501 UnknownOperationException. Streams and signaling channels are stored records: no media is ingested, stored or played, and no WebRTC signaling, relay or ICE server exists. GetDataEndpoint, GetSignalingChannelEndpoint, the edge agent, media storage, image generation, notification, stream storage and mapped resource configuration APIs return UnknownOperationException with HTTP 501, so no endpoint is ever returned. Streams and signaling channels are stored records that stay CREATING and never become ACTIVE, because nothing is provisioned. The ARN ends in the fixed number 1 instead of the creation timestamp AWS uses, so a deleted and recreated name has the same ARN. A stream created without a KmsKeyId reports the alias alias/aws/kinesisvideo instead of the ARN of that managed key; the key is not resolved. StreamStorageConfiguration is refused. Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel delete the latest version, or refuse with VersionMismatchException a CurrentVersion that is not the stored Version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created. Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
+  "description": "Bounded simulator subset of the official Amazon Kinesis Video Streams API (2017-09-30). Every other official operation returns HTTP 501 UnknownOperationException. GetDataEndpoint returns the active numeric loopback origin for PUT_MEDIA and GET_MEDIA. PutMedia accepts one finite Matroska/AVC video track and cluster, at most 4 MiB and 512 unlaced frames spanning at most ten seconds. A retained fragment receives PERSISTED only after SQLite commits. Zero retention returns BUFFERING and RECEIVED. GetMedia returns a finite EARLIEST or CONTINUATION_TOKEN snapshot with five fragment metadata tags and the original encoded AVC bytes. The local media store serves default-key streams. New stream ARNs include a durable creation timestamp. Existing default-key /1 streams keep their ARN, tags and version across upgrade. Explicit customer-key streams and signaling channels stay in metadata state. The simulator stores media in its local database and does not provision a KMS key. WebRTC, signaling endpoints, archive and image APIs, edge agents and stream storage configuration are outside this media profile. Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel delete the latest version, or refuse with VersionMismatchException a CurrentVersion that is not the stored Version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created. Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
   "title": "Amazon Kinesis Video Streams (simulator catalog)",
   "version": "2017-09-30"
  },
@@ -895,6 +895,245 @@
     ]
    }
   },
+  "/getDataEndpoint": {
+   "post": {
+    "description": "Discover the local numeric-loopback origin for PUT_MEDIA or GET_MEDIA. Select exactly one stream name or ARN.",
+    "operationId": "kinesisvideoGetDataEndpoint",
+    "parameters": [
+     {
+      "description": "Routes unsigned requests from this API reference.",
+      "example": "kinesisvideo",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kinesisvideo",
+       "enum": [
+        "kinesisvideo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "example": {
+        "APIName": "GET_MEDIA",
+        "StreamName": "workshop-video"
+       },
+       "schema": {
+        "additionalProperties": false,
+        "oneOf": [
+         {
+          "required": [
+           "StreamName"
+          ]
+         },
+         {
+          "required": [
+           "StreamARN"
+          ]
+         }
+        ],
+        "properties": {
+         "APIName": {
+          "enum": [
+           "PUT_MEDIA",
+           "GET_MEDIA"
+          ],
+          "type": "string"
+         },
+         "StreamARN": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "StreamName": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "APIName"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DataEndpoint": {
+           "format": "uri",
+           "type": "string"
+          }
+         },
+         "required": [
+          "DataEndpoint"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "Local origin for the requested operation."
+     },
+     "400": {
+      "description": "InvalidArgumentException or ClientLimitExceededException."
+     },
+     "401": {
+      "description": "NotAuthorizedException for the selected stream."
+     },
+     "404": {
+      "description": "ResourceNotFoundException."
+     }
+    },
+    "summary": "GetDataEndpoint",
+    "tags": [
+     "Amazon Kinesis Video Streams"
+    ]
+   }
+  },
+  "/getMedia": {
+   "post": {
+    "description": "Read a finite snapshot of retained local media. Resume with the continuation token returned inside a previous fragment.",
+    "externalDocs": {
+     "url": "https://docs.aws.amazon.com/kinesisvideostreams/latest/APIReference/API_dataplane_GetMedia.html"
+    },
+    "operationId": "kinesisvideoGetMedia",
+    "parameters": [
+     {
+      "description": "Routes unsigned requests from this API reference.",
+      "example": "kinesisvideo",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kinesisvideo",
+       "enum": [
+        "kinesisvideo"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "example": {
+        "StartSelector": {
+         "StartSelectorType": "EARLIEST"
+        },
+        "StreamName": "workshop-video"
+       },
+       "schema": {
+        "additionalProperties": false,
+        "oneOf": [
+         {
+          "required": [
+           "StreamName"
+          ]
+         },
+         {
+          "required": [
+           "StreamARN"
+          ]
+         }
+        ],
+        "properties": {
+         "StartSelector": {
+          "additionalProperties": false,
+          "oneOf": [
+           {
+            "not": {
+             "required": [
+              "ContinuationToken"
+             ]
+            },
+            "properties": {
+             "StartSelectorType": {
+              "const": "EARLIEST"
+             }
+            }
+           },
+           {
+            "properties": {
+             "StartSelectorType": {
+              "const": "CONTINUATION_TOKEN"
+             }
+            },
+            "required": [
+             "ContinuationToken"
+            ]
+           }
+          ],
+          "properties": {
+           "ContinuationToken": {
+            "type": "string"
+           },
+           "StartSelectorType": {
+            "enum": [
+             "EARLIEST",
+             "CONTINUATION_TOKEN"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "StartSelectorType"
+          ],
+          "type": "object"
+         },
+         "StreamARN": {
+          "type": "string"
+         },
+         "StreamName": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "StartSelector"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "video/x-matroska": {
+        "schema": {
+         "format": "binary",
+         "type": "string"
+        }
+       }
+      },
+      "description": "Actual stored Matroska segments and fragment metadata."
+     },
+     "400": {
+      "description": "InvalidArgumentException or ClientLimitExceededException."
+     },
+     "401": {
+      "description": "NotAuthorizedException for the selected stream."
+     },
+     "404": {
+      "description": "ResourceNotFoundException."
+     }
+    },
+    "summary": "GetMedia",
+    "tags": [
+     "Amazon Kinesis Video Streams"
+    ]
+   }
+  },
   "/listSignalingChannels": {
    "post": {
     "operationId": "kinesisvideoListSignalingChannels",
@@ -1052,6 +1291,107 @@
      }
     },
     "summary": "ListStreams",
+    "tags": [
+     "Amazon Kinesis Video Streams"
+    ]
+   }
+  },
+  "/putMedia": {
+   "post": {
+    "description": "Send one finite Matroska segment with one AVC track. Supply exactly one stream header. Use the producer start time in seconds or RFC 3339.",
+    "externalDocs": {
+     "url": "https://docs.aws.amazon.com/kinesisvideostreams/latest/APIReference/API_dataplane_PutMedia.html"
+    },
+    "operationId": "kinesisvideoPutMedia",
+    "parameters": [
+     {
+      "description": "Routes unsigned requests from this API reference.",
+      "example": "kinesisvideo",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kinesisvideo",
+       "enum": [
+        "kinesisvideo"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "description": "Stream name.",
+      "in": "header",
+      "name": "x-amzn-stream-name",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Stream ARN.",
+      "in": "header",
+      "name": "x-amzn-stream-arn",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "The local media profile uses relative timestamps.",
+      "in": "header",
+      "name": "x-amzn-fragment-timecode-type",
+      "required": true,
+      "schema": {
+       "default": "RELATIVE",
+       "enum": [
+        "RELATIVE"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "description": "Recording start timestamp.",
+      "in": "header",
+      "name": "x-amzn-producer-start-timestamp",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/octet-stream": {
+       "schema": {
+        "format": "binary",
+        "type": "string"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "A stream of newline-delimited acknowledgement events. Retained media receives PERSISTED after commit."
+     },
+     "400": {
+      "description": "InvalidArgumentException or ClientLimitExceededException."
+     },
+     "401": {
+      "description": "NotAuthorizedException for the selected stream."
+     },
+     "404": {
+      "description": "ResourceNotFoundException."
+     }
+    },
+    "summary": "PutMedia",
     "tags": [
      "Amazon Kinesis Video Streams"
     ]
@@ -1310,7 +1650,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Amazon Kinesis Video Streams API (2017-09-30). Every other official operation returns HTTP 501 UnknownOperationException. Streams and signaling channels are stored records: no media is ingested, stored or played, and no WebRTC signaling, relay or ICE server exists. GetDataEndpoint, GetSignalingChannelEndpoint, the edge agent, media storage, image generation, notification, stream storage and mapped resource configuration APIs return UnknownOperationException with HTTP 501, so no endpoint is ever returned. Streams and signaling channels are stored records that stay CREATING and never become ACTIVE, because nothing is provisioned. The ARN ends in the fixed number 1 instead of the creation timestamp AWS uses, so a deleted and recreated name has the same ARN. A stream created without a KmsKeyId reports the alias alias/aws/kinesisvideo instead of the ARN of that managed key; the key is not resolved. StreamStorageConfiguration is refused. Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel delete the latest version, or refuse with VersionMismatchException a CurrentVersion that is not the stored Version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created. Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
+   "description": "Bounded simulator subset of the official Amazon Kinesis Video Streams API (2017-09-30). Every other official operation returns HTTP 501 UnknownOperationException. GetDataEndpoint returns the active numeric loopback origin for PUT_MEDIA and GET_MEDIA. PutMedia accepts one finite Matroska/AVC video track and cluster, at most 4 MiB and 512 unlaced frames spanning at most ten seconds. A retained fragment receives PERSISTED only after SQLite commits. Zero retention returns BUFFERING and RECEIVED. GetMedia returns a finite EARLIEST or CONTINUATION_TOKEN snapshot with five fragment metadata tags and the original encoded AVC bytes. The local media store serves default-key streams. New stream ARNs include a durable creation timestamp. Existing default-key /1 streams keep their ARN, tags and version across upgrade. Explicit customer-key streams and signaling channels stay in metadata state. The simulator stores media in its local database and does not provision a KMS key. WebRTC, signaling endpoints, archive and image APIs, edge agents and stream storage configuration are outside this media profile. Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel delete the latest version, or refuse with VersionMismatchException a CurrentVersion that is not the stored Version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created. Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
    "name": "Amazon Kinesis Video Streams"
   }
  ],
