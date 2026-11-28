@@ -23,7 +23,6 @@ from playwright.sync_api import expect, sync_playwright
 from sqs import BINARY, Team
 
 PROJECT = 'tenkacloud-local'
-OWNER = 'simulator-admin'
 ALTERNATE = 'dns-gui-nonowner'
 CAPS = '/_simulator/v1/capabilities'
 COLLECTION = '/_simulator/providers/gcp/dns/v1/projects/' + PROJECT + '/managedZones'
@@ -89,7 +88,8 @@ def binary_checksum():
 def verify_capability(document):
     cap = document.get('gcpDns') if isinstance(document, dict) else None
     require(isinstance(cap, dict), 'Invalid Cloud DNS capability shape')
-    require(document.get('principal') == OWNER and cap.get('console') is True
+    require(document.get('principal') == '' and document.get('identitySelection') is True
+            and cap.get('console') is True
             and cap.get('api') == 'dns.v1' and cap.get('project') == PROJECT
             and cap.get('endpoint') == COLLECTION and len(cap.get('operations', [])) == len(OPS)
             and set(cap.get('operations', [])) == OPS,
