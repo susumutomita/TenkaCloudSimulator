@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
-      SOURCE_SHA: f517e36087b5904de88871fd33ca3bc556eef2ad
+      SOURCE_SHA: 1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
       PYTHONPYCACHEPREFIX: /tmp/trace-v1-pycache
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: f517e36087b5904de88871fd33ca3bc556eef2ad
+          ref: 1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
