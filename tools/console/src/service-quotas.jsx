@@ -221,7 +221,6 @@ export default function ServiceQuotas({ request, region, account }) {
     setError("");
     const controller = new AbortController();
     write.current = controller;
-    const started = Date.now();
     try {
       const saved = quotaAcknowledgement(
         (
@@ -240,8 +239,6 @@ export default function ServiceQuotas({ request, region, account }) {
           account,
           desired: value,
           support,
-          started,
-          finished: Date.now(),
         },
       );
       if (alive.current) {

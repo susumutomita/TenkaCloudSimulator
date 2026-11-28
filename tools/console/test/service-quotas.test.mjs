@@ -136,7 +136,6 @@ test("acknowledgement binds physical result to desired status scope and actual c
     { DesiredValue: 9 },
     { Status: "PENDING" },
     { QuotaArn: saved.QuotaArn.replace("us-east-1", "us-west-2") },
-    { Created: record.Created - 10, LastUpdated: record.Created - 10 },
     { Created: Infinity },
     { LastUpdated: record.Created + 1 },
   ])
@@ -154,4 +153,23 @@ test("direct HTTP refusal and parent request refusal have the same definitive cl
   } catch (error) {
     assert.equal(definitiveQuotaRefusal(error), true);
   }
+});
+
+test("confirmed server timestamps do not require a synchronized browser clock", async () => {
+  const { quotaAcknowledgement } = await import("../src/service-quotas.mjs");
+  const saved = {
+    ...record,
+    Created: 1234567890,
+    LastUpdated: 1234567890,
+    QuotaArn: "arn:aws:servicequotas:us-east-1:000000000000:b2bi/L-05F6A9EF",
+  };
+  assert.equal(
+    quotaAcknowledgement(saved, {
+      region: "us-east-1",
+      account: "000000000000",
+      desired: 8,
+      support: false,
+    }).Id,
+    record.Id,
+  );
 });

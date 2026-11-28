@@ -111,7 +111,7 @@ def run():
                     assert sdk.get_service_quota(**KEY)['Quota']['Value'] == 5
                     ids = {preexisting}
                     for desired in ('8', '9'):
-                        page.get_by_role('textbox', name='Desired value', exact=True).fill(desired)
+                        page.get_by_role('spinbutton', name='Desired value', exact=True).fill(desired)
                         view.click('Submit increase request', 'RequestServiceQuotaIncrease')
                         current = sdk.list_requested_service_quota_change_history_by_quota(**KEY)['RequestedQuotas']
                         added = {item['Id'] for item in current} - ids
@@ -126,7 +126,7 @@ def run():
                     # Original request commits; only its acknowledgement to this view is lost.
                     page.evaluate("""() => {const original=window.fetch; window.__quotaLost={original}; window.fetch=async function(input,options){const response=await original.apply(this,arguments); if(options?.headers?.['X-Amz-Target']==='ServiceQuotasV20190624.RequestServiceQuotaIncrease'){window.fetch=original; window.__quotaLost.status=response.status; throw new TypeError('deliberately lost local acknowledgement');} return response;};} """)
                     before = frame(owner)
-                    page.get_by_role('textbox', name='Desired value', exact=True).fill('8')
+                    page.get_by_role('spinbutton', name='Desired value', exact=True).fill('8')
                     view.click('Submit increase request', 'RequestServiceQuotaIncrease')
                     expect(page.get_by_text('Request outcome unknown', exact=True)).to_be_visible()
                     expect(page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()

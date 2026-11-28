@@ -127,14 +127,12 @@ export function quotaScopeRecord(value, region, account) {
 }
 export function quotaAcknowledgement(
   value,
-  { region, account, desired, support, started, finished },
+  { region, account, desired, support },
 ) {
   const record = quotaScopeRecord(value, region, account);
   if (
     record.DesiredValue !== desired ||
     record.Status !== (support ? "PENDING" : "NOT_APPROVED") ||
-    record.Created < started / 1000 - 1 ||
-    record.Created > finished / 1000 + 1 ||
     record.LastUpdated !== record.Created
   )
     throw Error("Request acknowledgement does not match this submission.");
