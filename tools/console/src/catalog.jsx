@@ -3,6 +3,8 @@ import {useLocale} from './i18n.jsx';
 import AppStreamAppBlockForm from './appstream-app-block.jsx';
 import BatchJobDefinitionForm from './batch-job-definition-form.jsx';
 import {batchDefinitionARN,batchDefinitionOperations,isBatchJobDefinition} from './batch-job-definitions.mjs';
+import ServiceQuotas from './service-quotas.jsx';
+import {quotaConsoleAvailable} from './service-quotas.mjs';
 import KinesisVideoRetention from './kinesis-video-retention.jsx';
 import {isKinesisVideoRetention,kinesisRetentionEdit,kinesisRetentionUpdate} from './kinesis-video-retention.mjs';
 import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
@@ -233,7 +235,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
  // A selection passes its parent explicitly: the state update is not yet
  // visible to this render's closure. The first page resets the token trail.
  async function load(token='',preferred=parent,values=scope){
-  if(!service||!resource)return;const epoch=fresh();setLoading(true);setLoadError('');setPage('list');setDetail(null);setTags(null);setEditing(null);setSelected(null);setChosen([]);setFieldErrors({});
+  if(!service||!resource||service.model==='service-quotas')return;const epoch=fresh();setLoading(true);setLoadError('');setPage('list');setDetail(null);setTags(null);setEditing(null);setSelected(null);setChosen([]);setFieldErrors({});
   if(!token)setPager({tokens:[''],index:0});
   try{
    let owner=preferred;if(parentResource){owner=await loadParents(epoch,preferred);if(!valid(epoch))return;if(!owner){setItems([]);setNext('');return}}
@@ -444,6 +446,10 @@ export default function CatalogView({region,request,catalog,onSaving}){
  if(descriptorError)return <Alert type="error">{descriptorError}</Alert>;
  if(services===null)return <Box>{t('Loading','読み込み中')}</Box>;
  if(!services.length)return <Alert type="info">{t('No catalog services are enabled.','有効なカタログサービスはありません。')}</Alert>;
+ if(service?.model==='service-quotas')return <SpaceBetween size="l">
+  <FormField label={t('Catalog service','カタログサービス')}><Select selectedOption={{value:model,label:service.title}} filteringType="auto" onChange={({detail})=>{setModel(detail.selectedOption.value);setKind('');setParent('');setParents([])}} options={services.map(s=>({value:s.model,label:s.title}))}/></FormField>
+  {quotaConsoleAvailable(service)?<ServiceQuotas key={region} request={request} region={region} account={service.account}/>:<Alert type="info">{t('Service Quotas discovery and request operations are unavailable.','Service Quotas の検出とリクエスト操作は利用できません。')}</Alert>}
+ </SpaceBetween>;
  const singular=kindName(resource),many=appBlock?t('App blocks','App Block'):plural(singular);
  const createLabel=appBlock?t('Create app block','App Block を作成'):t('Create ','作成: ')+phrase(singular);
  const pick=chosen[0];

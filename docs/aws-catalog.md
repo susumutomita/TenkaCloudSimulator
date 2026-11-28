@@ -115,6 +115,19 @@ request IDs survive restart. Creating a request and listing by quota require
 the operation's IAM action on the regional quota ARN. Looking up an ID and
 listing the general history require their respective actions on `*`.
 
+In **AWS service catalog**, choose **Service Quotas** to see the published
+default and the applied account capacity in the selected region. Enter a
+desired value to submit an increase request. **Refresh history** shows stored
+requests and their IDs. If the submit response is lost, choose **Refresh
+same-scope history** before starting a separate request. Several requests
+can have the same desired value.
+
+Open **Service Quotas API reference** at `/_simulator/docs/service-quotas.html`
+to send the same operations in `us-east-1`. It uses the signed-in browser
+identity. Select the operation's `X-Amz-Target` and its JSON body before
+sending. Paste the returned request ID into `GetRequestedServiceQuotaChange`
+to inspect the saved record.
+
 Resource contexts, usage metrics and general quota inventory remain outside the supported scope.
 [B2BI endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/b2bi-service.html) ·
 [GetServiceQuota](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetServiceQuota.html) ·
