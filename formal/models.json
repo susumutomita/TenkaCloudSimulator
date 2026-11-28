@@ -30473,6 +30473,269 @@
           "expect_invariant": "RestartAndClock"
         }
       ]
+    },
+    {
+      "id": "CloudTraceObservations",
+      "model": "formal/CloudTraceObservations.tla",
+      "config": "formal/CloudTraceObservations.cfg",
+      "bounds": "Two isolated project/owner bindings; three ordered trace keys, one shared span ID, two valid payloads, one invalid payload, five observations per project. Each initial store has two identical observations on key 3 followed by key 1. A one-key page precedes one two- or three-observation batch and one fresh Get or continuation. All valid observations overlap a fixed time window.",
+      "properties": [
+        "TypeOK",
+        "FirstPageOrdered",
+        "PendingInvisible",
+        "AdmitEligible",
+        "CallerBound",
+        "ValidBatchOnly",
+        "ProjectBound",
+        "PeerUnchanged",
+        "AllObservationsCommitted",
+        "RollbackUnchanged",
+        "GetCurrent",
+        "NextBound",
+        "NextStableKey",
+        "NextStableBody"
+      ],
+      "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence.",
+      "source_scope": [
+        "internal/gcp/trace/store.go",
+        "internal/gcp/trace/model.go",
+        "internal/gcp/trace/http.go",
+        "internal/server/cloud_storage.go",
+        "internal/gcp/internal/jsonwire/unicode.go"
+      ],
+      "mutants": [
+        {
+          "id": "ArrivalOrderedPage",
+          "edits": [
+            {
+              "old": "id == FirstKey(rs, 0)",
+              "new": "id == rs[1].trace",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FirstPageOrdered"
+        },
+        {
+          "id": "ExposePendingPrefix",
+          "edits": [
+            {
+              "old": "/\\ rows' = rows\n    /\\ phase' = \"staged\"",
+              "new": "/\\ rows' = [rows EXCEPT ![target] = Append(@, b[1])]\n    /\\ phase' = \"staged\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PendingInvisible"
+        },
+        {
+          "id": "RejectValidRepeat",
+          "edits": [
+            {
+              "old": "Valid(b) /\\ Fits(rows[target], b)",
+              "new": "Valid(b) /\\ b[1] # b[2] /\\ Fits(rows[target], b)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmitEligible"
+        },
+        {
+          "id": "AdmitWrongOwner",
+          "edits": [
+            {
+              "old": "Allowed(target, a, p) /\\ Valid(b)",
+              "new": "target = p /\\ Valid(b)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CallerBound"
+        },
+        {
+          "id": "AdmitWrongProject",
+          "edits": [
+            {
+              "old": "Allowed(target, a, p) /\\ Valid(b)",
+              "new": "target = a /\\ Valid(b)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CallerBound"
+        },
+        {
+          "id": "SkipFinalValidation",
+          "edits": [
+            {
+              "old": "Valid(b) /\\ Fits(rows[target], b)",
+              "new": "b[1].value \\in Scopes /\\ Fits(rows[target], b)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValidBatchOnly"
+        },
+        {
+          "id": "CountOnlyFirstObservation",
+          "edits": [
+            {
+              "old": "Fits(rows[target], b)",
+              "new": "Len(rows[target]) + 1 <= ProjectLimit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProjectBound"
+        },
+        {
+          "id": "ShareCommitWithPeer",
+          "edits": [
+            {
+              "old": "rows' = [rows EXCEPT ![target] = @ \\o batch]",
+              "new": "rows' = [s \\in Scopes |-> rows[s] \\o batch]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerUnchanged"
+        },
+        {
+          "id": "CommitPrefix",
+          "edits": [
+            {
+              "old": "rows' = [rows EXCEPT ![target] = @ \\o batch]",
+              "new": "rows' = [rows EXCEPT ![target] = Append(@, batch[1])]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AllObservationsCommitted"
+        },
+        {
+          "id": "CoalesceIdenticalObservations",
+          "edits": [
+            {
+              "old": "rows' = [rows EXCEPT ![target] = @ \\o batch]",
+              "new": "rows' = [rows EXCEPT ![target] = IF batch[1] = batch[2] THEN Append(@, batch[1]) ELSE @ \\o batch]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AllObservationsCommitted"
+        },
+        {
+          "id": "CancelPublishesPrefix",
+          "edits": [
+            {
+              "old": "rows' = rows (* DiscardStaging *)",
+              "new": "rows' = IF kind = \"canceled\" THEN [rows EXCEPT ![target] = Append(@, batch[1])] ELSE rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RollbackUnchanged"
+        },
+        {
+          "id": "RefusalPublishesPrefix",
+          "edits": [
+            {
+              "old": "rows' = rows (* DiscardStaging *)",
+              "new": "rows' = IF kind = \"refused\" THEN [rows EXCEPT ![target] = Append(@, batch[1])] ELSE rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RollbackUnchanged"
+        },
+        {
+          "id": "GetUsesCursorHighWater",
+          "edits": [
+            {
+              "old": "Reply(3, Body(rows[target], 3)) ELSE EmptyReply\n    /\\ phase'",
+              "new": "Reply(3, Body(SubSeq(rows[target], 1, high), 3)) ELSE EmptyReply\n    /\\ phase'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetCurrent"
+        },
+        {
+          "id": "GetDropsRepeatedSpans",
+          "edits": [
+            {
+              "old": "THEN Reply(3, Body(rows[target], 3)) ELSE EmptyReply\n    /\\ phase'",
+              "new": "THEN Reply(3, SubSeq(Body(rows[target], 3), 1, 1)) ELSE EmptyReply\n    /\\ phase'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetCurrent"
+        },
+        {
+          "id": "AllowPeerContinuation",
+          "edits": [
+            {
+              "old": "IF Allowed(target, a, p) /\\ tokenIssuer = target /\\ q = view",
+              "new": "IF target = p /\\ tokenIssuer = target /\\ q = view",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextBound"
+        },
+        {
+          "id": "AcceptForeignCursor",
+          "edits": [
+            {
+              "old": "IF Allowed(target, a, p) /\\ tokenIssuer = target /\\ q = view",
+              "new": "IF Allowed(target, a, p) /\\ q = view",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextBound"
+        },
+        {
+          "id": "ReuseCursorForOtherView",
+          "edits": [
+            {
+              "old": "IF Allowed(target, a, p) /\\ tokenIssuer = target /\\ q = view",
+              "new": "IF Allowed(target, a, p) /\\ tokenIssuer = target",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextBound"
+        },
+        {
+          "id": "IncludeNewTraceOnNextPage",
+          "edits": [
+            {
+              "old": "id == FirstKey(atHigh, after)",
+              "new": "id == FirstKey(rs, after)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextStableKey"
+        },
+        {
+          "id": "RepeatLastTraceOnNextPage",
+          "edits": [
+            {
+              "old": "id == FirstKey(atHigh, after)",
+              "new": "id == FirstKey(atHigh, after - 1)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextStableKey"
+        },
+        {
+          "id": "ProjectCurrentSpanBodies",
+          "edits": [
+            {
+              "old": "Render(q, atHigh, id)",
+              "new": "Render(q, rs, id)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextStableBody"
+        },
+        {
+          "id": "ExposeMinimalSpanBodies",
+          "edits": [
+            {
+              "old": "Render(q, atHigh, id)",
+              "new": "Body(atHigh, id)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextStableBody"
+        }
+      ]
     }
   ]
 }
