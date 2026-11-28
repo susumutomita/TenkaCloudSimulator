@@ -30152,7 +30152,7 @@
       "id": "CloudWatchAlarmEvaluation",
       "model": "formal/CloudWatchAlarmEvaluation.tla",
       "config": "formal/CloudWatchAlarmEvaluation.cfg",
-      "bounds": "Ten directed normalized request histories (20 equality statistic/comparison choices plus nine other histories); 29 initial scenarios, one target, one immutable populated peer, at most three raw observations, two UTC-minute classes and two physical alarm generations. Begin/stage and Commit/Cancel/Fail/Denied are distinct transitions. No arbitrary request interleavings.",
+      "bounds": "Eleven directed normalized request histories (20 equality and 20 nonconstant statistic/comparison choices plus nine other histories); 49 initial scenarios, one target, one immutable populated peer, at most three raw observations, two UTC-minute classes and two physical alarm generations. Begin/stage and Commit/Cancel/Fail/Denied are distinct transitions. No arbitrary request interleavings.",
       "properties": [
         "TypeOK",
         "PeerFrame",
@@ -30401,6 +30401,39 @@
             }
           ],
           "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "SumUsesAverage",
+          "edits": [
+            {
+              "old": "  den |-> IF c.stat = \"Average\" THEN Len(p) ELSE 1]\nCompare(c,m)",
+              "new": "  den |-> IF c.stat \\in {\"Average\",\"Sum\"} THEN Len(p) ELSE 1]\nCompare(c,m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MeasuredValueExact"
+        },
+        {
+          "id": "MinimumUsesMaximum",
+          "edits": [
+            {
+              "old": "[] c.stat = \"Minimum\" -> Minimum(p)",
+              "new": "[] c.stat = \"Minimum\" -> Maximum(p)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "MaximumUsesMinimum",
+          "edits": [
+            {
+              "old": "[] OTHER -> Maximum(p),",
+              "new": "[] OTHER -> Minimum(p),",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
         }
       ]
     }

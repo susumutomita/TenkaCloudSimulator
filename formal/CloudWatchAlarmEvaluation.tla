@@ -11,7 +11,7 @@ NoValue == [has |-> FALSE, num |-> 0, den |-> 1]
 Stats == {"Average","Sum","SampleCount","Minimum","Maximum"}
 Comparisons == {"GreaterThanThreshold","GreaterThanOrEqualToThreshold",
                 "LessThanThreshold","LessThanOrEqualToThreshold"}
-Cases == {"weighted","equality","time","scope-unit","cancel","fail",
+Cases == {"weighted","equality","statistics","time","scope-unit","cancel","fail",
           "denied-put","denied-read","update","retire"}
 PeerInitial == [raw |-> <<9>>, state |-> "ALARM", generation |-> 1]
 Base == [stat |-> "Average", comparison |-> "GreaterThanThreshold", threshold |-> 4]
@@ -31,6 +31,7 @@ Advance == Request("advance",EmptyPoint,Base,TRUE,"Commit")
 Delete == Request("delete",EmptyPoint,Base,TRUE,"Commit")
 Program == CASE scenario = "weighted" -> <<Configure(Weighted),Put(1),Put(1),Put(9),Read>>
  [] scenario = "equality" -> <<Configure(EqualConfig),Put(0),Read>>
+ [] scenario = "statistics" -> <<Configure([stat |-> stat,comparison |-> comparison,threshold |-> 4]),Put(1),Put(9),Put(1),Read>>
  [] scenario = "time" -> <<Configure(Base),PutAt(9,-1,"target","Count"),PutAt(1,0,"target","Count"),PutAt(9,2,"target","Count"),Advance,Read>>
  [] scenario = "scope-unit" -> <<Configure(Base),PutAt(9,1,"other","Count"),PutAt(9,1,"target","Bytes"),Put(1),Read>>
  [] scenario = "cancel" -> <<Configure(Base),Request("put",Point(9,1,"target","Count"),Base,TRUE,"Cancel"),Put(9),Read>>
@@ -77,7 +78,7 @@ Prepare(req) ==
      nextRetired == IF req.op = "delete" /\ alarm.exists THEN retired \cup {alarm.id} ELSE retired
  IN [raw |-> nextRaw, alarm |-> nextAlarm, gen |-> nextGen, retired |-> nextRetired, peer |-> peer]
 Init == /\ scenario \in Cases /\ stat \in Stats /\ comparison \in Comparisons
- /\ (scenario # "equality" => stat = "Average" /\ comparison = "GreaterThanThreshold")
+ /\ (scenario \notin {"equality","statistics"} => stat = "Average" /\ comparison = "GreaterThanThreshold")
  /\ raw = <<>> /\ alarm = NoAlarm /\ gen = 0 /\ retired = {} /\ epoch = 0
  /\ phase = "idle" /\ pc = 1 /\ peer = PeerInitial
  /\ pending = None /\ before = InitialSnapshot
