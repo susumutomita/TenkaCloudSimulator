@@ -126,7 +126,7 @@ console, CloudFormation adapter or Challenge integration.
   [regional VPC console pages and saved-resource links](docs/ec2-vpc-console.md),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md),
-  [CloudFront distributions with bounded saved S3 content and invalidation](docs/cloudfront-local-content.md),
+  [CloudFront distributions, Console saved-content downloads and invalidation](docs/cloudfront-local-content.md),
   [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).
 - **Scaling:** [Create a scaling plan in the Console and read back local DynamoDB table capacity](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
