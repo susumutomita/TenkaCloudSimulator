@@ -45,6 +45,37 @@ def permission(team, name, statements, region='us-east-1'):
     return team.client('resource-groups', token=token, region=region)
 
 
+def check_named_group_actions(owner, admin, protected):
+    arn = admin.create_group(Name='named-policy-control')['Group']['GroupArn']
+    prefix = arn.rsplit('/', 1)[0] + '/'
+    actions = ['resource-groups:' + name for name in ('GetGroup', 'UpdateGroup', 'DeleteGroup', 'Tag', 'Untag', 'GetTags')]
+    exact = permission(owner, 'six-allowed-on-named-group', [{'Effect': 'Allow', 'Action': actions, 'Resource': arn}])
+    denied = permission(owner, 'six-explicitly-denied', [{'Effect': 'Allow', 'Action': actions, 'Resource': '*'},
+                                                        {'Effect': 'Deny', 'Action': actions, 'Resource': '*'}])
+    for client, decision in ((exact, 'implicitDeny'), (denied, 'explicitDeny')):
+        for target in (protected, prefix + 'absent-group'):
+            calls = ((client.get_group, {'Group': target}), (client.update_group, {'Group': target, 'Description': 'refused'}),
+                     (client.delete_group, {'Group': target}), (client.tag, {'Arn': target, 'Tags': {'changed': 'refused'}}),
+                     (client.untag, {'Arn': target, 'Keys': ['Team']}), (client.get_tags, {'Arn': target}))
+            for operation, params in calls:
+                try:
+                    operation(**params)
+                except client.exceptions.ForbiddenException as error:
+                    metadata = error.response['ResponseMetadata']
+                    assert metadata['HTTPStatusCode'] == 403 and metadata['HTTPHeaders']['x-amzn-errortype'] == 'ForbiddenException'
+                    assert error.response['Error'] == {'Code': 'ForbiddenException', 'Message': 'IAM evaluation: ' + decision}
+                else:
+                    raise AssertionError('group-scoped request unexpectedly succeeded')
+    assert exact.get_group(Group=arn)['Group']['GroupArn'] == arn
+    assert exact.update_group(Group=arn, Description='changed')['Group']['Description'] == 'changed'
+    exact.tag(Arn=arn, Tags={'Team': 'allowed'})
+    assert exact.get_tags(Arn=arn)['Tags'] == {'Team': 'allowed'}
+    exact.untag(Arn=arn, Keys=['Team'])
+    assert exact.get_tags(Arn=arn)['Tags'] == {}
+    assert exact.delete_group(Group=arn)['Group']['GroupArn'] == arn
+    refused('NotFoundException', 404, admin.get_group, Group=arn)
+
+
 def check_service_actions(owner, peer):
     admin = owner.client('resource-groups')
     west = owner.client('resource-groups', region='us-west-2')
@@ -91,6 +122,7 @@ def check_service_actions(owner, peer):
     for client in (limited, named, explicit):
         refused('ForbiddenException', 403, client.create_group, Name='scope-one', Tags={'Team': 'refused'})
         refused('ForbiddenException', 403, client.list_groups, NextToken=token)
+    check_named_group_actions(owner, admin, first)
     assert admin.get_tags(Arn=first)['Tags'] == tags
     admin.untag(Arn=second, Keys=['awsApplication'])
     admin.tag(Arn=second, Tags={'Team': 'changed'})

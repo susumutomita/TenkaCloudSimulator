@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"unicode/utf8"
 )
@@ -25,7 +26,8 @@ func (b *binding) isResourceGroupServiceAction(name string) bool {
 }
 
 func (b *binding) usesResourceGroupForbidden(name string) bool {
-	return b.isResourceGroupServiceAction(name) || b.isResourceGroupQueryOperation(name)
+	official := b.model.Operations[name]
+	return b.spec.Model == "resource-groups" && official != nil && slices.Contains(official.Errors, "ForbiddenException")
 }
 
 func parsedRepositoryTagFilter(resourceQuery any) (repositoryTagFilter, error) {

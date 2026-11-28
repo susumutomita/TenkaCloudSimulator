@@ -2,8 +2,10 @@ package catalog
 
 import (
 	"context"
+	"maps"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -125,6 +127,56 @@ func TestResourceGroupUserTagsDoNotCreateApplicationMembership(t *testing.T) {
 			deleted := group("delete-group", map[string]any{"Group": arn})
 			expect(t, deleted, 200, "")
 			plain(deleted.body["Group"])
+		})
+	}
+}
+
+func TestResourceGroupsModelAllGroupScopedIAMRefusals(t *testing.T) {
+	for _, test := range []struct {
+		op, method, path string
+		body             map[string]any
+	}{
+		{"GetGroup", "POST", "/get-group", nil},
+		{"UpdateGroup", "POST", "/update-group", map[string]any{"Description": "refused"}},
+		{"DeleteGroup", "POST", "/delete-group", nil},
+		{"Tag", "PUT", "/resources/{Arn}/tags", map[string]any{"Tags": map[string]any{"changed": "refused"}}},
+		{"Untag", "PATCH", "/resources/{Arn}/tags", map[string]any{"Keys": []any{"Team"}}},
+		{"GetTags", "GET", "/resources/{Arn}/tags", nil},
+	} {
+		t.Run(test.op, func(t *testing.T) {
+			h := newHarness(t, resourceGroups, ecr)
+			for _, name := range []string{"owned", "sibling"} {
+				expect(t, h.rest("resource-groups", "POST", "/groups", map[string]any{
+					"Name": name, "ResourceQuery": repositoryTagQuery("Team", "blue"), "Tags": map[string]any{"Team": "kept"},
+				}), 200, "")
+			}
+			before := groupCatalogFrame(t, h.db)
+			for _, name := range []string{"owned", "missing"} {
+				arn := "arn:aws:resource-groups:us-east-1:000000000000:group/" + name
+				action := "resource-groups:" + test.op
+				var targets []string
+				h.engine.cfg.Authorize = func(_ context.Context, _ string, requested, resource string) (string, error) {
+					targets = append(targets, requested+" "+resource)
+					return "implicitDeny", nil
+				}
+				path := strings.ReplaceAll(test.path, "{Arn}", url.PathEscape(arn))
+				var payload any
+				if test.method == "POST" {
+					body := map[string]any{"Group": arn}
+					maps.Copy(body, test.body)
+					payload = body
+				} else if test.body != nil {
+					payload = test.body
+				}
+				r := h.rest("resource-groups", test.method, path, payload)
+				expect(t, r, 403, "ForbiddenException")
+				if r.header.Get("X-Amzn-ErrorType") != "ForbiddenException" || r.header.Get("X-Simulator-IAM-Decision") != "implicitDeny" || !reflect.DeepEqual(r.body, map[string]any{"Message": "IAM evaluation: implicitDeny"}) {
+					t.Fatalf("unexpected refusal for %s: %v %v", test.op, r.header, r.body)
+				}
+				if !reflect.DeepEqual(targets, []string{action + " " + arn}) || !reflect.DeepEqual(before, groupCatalogFrame(t, h.db)) {
+					t.Fatalf("%s evaluated unexpected targets or changed saved state: %v", test.op, targets)
+				}
+			}
 		})
 	}
 }

@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "0b7677a634b8e01b492f900aec570e64b28df570980f11c204918873985acd4a",
+      "sha256": "6e35ebe6a556043166d3b4476c250d6ea38bc5008ed857400615aa0a9e9791d2",
       "models": [],
       "disposition": "documentation",
       "reason": "Record the official service-wide IAM targets and the application-only tag member for the bounded local group types."
@@ -24,7 +24,7 @@
         }
       ],
       "disposition": "modeled",
-      "reason": "Map refused group creation and group listing to the modeled ForbiddenException after the authorization guard."
+      "reason": "Return the service-modeled ForbiddenException after a denied Resource Groups authorization check."
     },
     {
       "path": "internal/aws/catalog/openapi.go",
@@ -41,18 +41,18 @@
         }
       ],
       "disposition": "modeled",
-      "reason": "Keep the served native reference consistent with the two corrected authorization refusals; exact reference contents are tested separately."
+      "reason": "Keep the 403 descriptions consistent with the eleven supported operations and their modeled error."
     },
     {
       "path": "internal/aws/catalog/resource_group_iam_test.go",
-      "sha256": "e4bb1e24d8c9c97b488218e4d4b73d76e37e2064379509f89597a69fc97e989f",
+      "sha256": "44cf6e60942f0ca433a0cfd506e4a14a0352177c16fdbee586fc7091a8f31927",
       "models": [],
       "disposition": "test-support",
-      "reason": "Test actual HTTP error and data frames, IAM decisions, full saved resource/sequence preservation, and independent ordinary tag updates on both group types."
+      "reason": "Test the two service-wide targets and the six retained group-scoped native refusal envelopes, full data and allocation frames, and ordinary tags versus application membership."
     },
     {
       "path": "internal/aws/catalog/resource_group_query.go",
-      "sha256": "33b3ba541ba35d7a235a9be37bc582e696337e9c54ba7506ee283c60daf43656",
+      "sha256": "b48ccc3e2070ca6cb5aed89697908dc4697efbae5c19b447cdc4fd1070004cf3",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -65,7 +65,7 @@
         }
       ],
       "disposition": "modeled",
-      "reason": "Identify the two operations that AWS authorizes on all resources and the five modeled local ForbiddenException operations."
+      "reason": "Identify the two service-wide IAM actions and verify the denied response type against each supported Resource Groups operation model."
     },
     {
       "path": "internal/aws/catalog/semantics.go",
@@ -86,17 +86,17 @@
     },
     {
       "path": "internal/server/apidocs/catalog/resource-groups.json",
-      "sha256": "1f28b5736a8568c4ff8fe34e243dd3c9f23a1d33f7e3343d9cffe515e4730948",
+      "sha256": "5dca7935fbe75d3e272c14d7c74da1a6542e852a6a9ea78a0d0511b0f22e6073",
       "models": [],
       "disposition": "presentation",
-      "reason": "Regenerate the shipped response descriptions for CreateGroup and ListGroups."
+      "reason": "Publish the modeled ForbiddenException on all eleven supported Resource Groups operation references."
     },
     {
       "path": "test/e2e/resource_group_ecr_members.py",
-      "sha256": "6ffc476ad6752ee81404296e4202f5da65daecbd6155a836efe9a78b5c374c62",
+      "sha256": "7d5c6ae694f97226871f6b1b91bd4281cbb65edf36bdb23e9df8a29087bf3f4b",
       "models": [],
       "disposition": "test-support",
-      "reason": "Use stock boto3, two private teams, two regions, genuine policies and restart to check service-scoped create/list, tags, query membership and cleanup."
+      "reason": "Use official boto3 over two private teams and two regions to check service-wide and group-scoped IAM/refusals, tag readbacks, revision-independent lists, membership, reopen and cleanup."
     }
   ]
 }
