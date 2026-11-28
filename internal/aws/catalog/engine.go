@@ -326,6 +326,12 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // run validates a decoded raw input tree against the official input shape,
 // then authorizes, executes and encodes one operation in any protocol.
 func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op, region string, raw map[string]any) {
+	if b.spec.Model == "service-quotas" {
+		if err := validateQuotaJSON(raw); err != nil {
+			e.fail(w, b, op, err)
+			return
+		}
+	}
 	official := b.model.Operations[op.Name]
 	input := map[string]any{}
 	if official.Input != "" {

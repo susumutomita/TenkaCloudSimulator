@@ -3,6 +3,10 @@
  "denied_status": 400,
  "steps": [
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF"}, "expect": {"Quota.Value": 5, "Quota.QuotaName": "Profiles", "Quota.QuotaAppliedAtLevel": "ACCOUNT", "Quota.Adjustable": true, "Quota.GlobalQuota": false, "Quota.QuotaArn": "arn:aws:servicequotas:us-east-1:000000000000:b2bi/L-05F6A9EF"}},
+  {"op": "list_services", "args": {}, "expect": {"Services#count": 1, "Services[0].ServiceCode": "b2bi"}},
+  {"op": "get_aws_default_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF"}, "expect": {"Quota.Value": 5, "Quota.QuotaName": "Profiles", "Quota.Adjustable": true}},
+  {"op": "list_aws_default_service_quotas", "args": {"ServiceCode": "b2bi"}, "expect": {"Quotas#count": 1, "Quotas[0].Value": 5}},
+  {"op": "list_service_quotas", "args": {"ServiceCode": "b2bi"}, "expect": {"Quotas#count": 1, "Quotas[0].Value": 5, "Quotas[0].QuotaAppliedAtLevel": "ACCOUNT"}},
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-00000000"}, "error": "NoSuchResourceException", "status": 400},
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "ContextId": "arn:aws:b2bi:us-east-1:000000000000:profiles/fixture"}, "error": "IllegalArgumentException", "status": 400},
   {"op": "request_service_quota_increase", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "DesiredValue": 10}, "error": "UnknownOperationException", "status": 501}

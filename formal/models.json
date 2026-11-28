@@ -30041,6 +30041,231 @@
           "expect_invariant": "RetryRequiresNamedRefresh"
         }
       ]
+    },
+    {
+      "id": "ServiceQuotaDiscovery",
+      "model": "formal/ServiceQuotaDiscovery.tla",
+      "config": "formal/ServiceQuotaDiscovery.cfg",
+      "bounds": "Two private team scopes, one representative supported-region class plus Tokyo, published default5 vs effective2/3 or absent binding, counts0..3, four grant classes, five reads, typed key/level/token cases, one restart and four steps. MaxResults bounds and the three literal region names are native-test obligations.",
+      "properties": [
+        "TypeOK",
+        "ReadPreservesFrame",
+        "ReadProjectionCorrect",
+        "PeerPreserved",
+        "RestartPreservesFrame"
+      ],
+      "limits": "Independent finite projection oracle only: no JSON/SDK/ARN-string/IAM-parser/evaluator/SQL/Go/process-concurrency/refinement proof. Create/Delete are bounded prior-state fixtures for the existing CatalogResourceLifecycle, not quota-increase or execution APIs. No liveness claim: the finite step budget terminates exploration. No real AWS comparison, general AWS quota inventory or pagination support.",
+      "source_scope": [
+        "internal/aws/catalog/service_quotas.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/services_business.go"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultUsesApplied",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN IF caps[r.team]=None THEN 5 ELSE caps[r.team] ELSE caps[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedUsesPublishedDefault",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE 5",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedReportsRemaining",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]-used[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "PeerCapacityReturned",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE IF caps[Other(r.team)]=None THEN caps[r.team] ELSE caps[Other(r.team)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnavailableRegionAdvertised",
+          "edits": [
+            {
+              "old": "Available(r) == r.region=Supported",
+              "new": "Available(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "WildcardReadsUseQuotaARN",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ r.grant=\"QuotaOnly\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedGetRequiresWildcard",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ExplicitDenyIgnored",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\") \\/ r.grant=\"Deny\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnrelatedActionAllowed",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\") \\/ r.grant=\"OtherAction\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ResourceLevelIgnored",
+          "edits": [
+            {
+              "old": "Filtered(r) == r.op=\"AppliedList\" /\\ (~r.knownQuota \\/ r.level=\"RESOURCE\")",
+              "new": "Filtered(r) == r.op=\"AppliedList\" /\\ ~r.knownQuota",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnknownServiceProjected",
+          "edits": [
+            {
+              "old": "KnownService(r) == r.knownService",
+              "new": "KnownService(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnknownQuotaProjected",
+          "edits": [
+            {
+              "old": "(r.op \\in {\"DefaultGet\",\"AppliedGet\"} /\\ ~r.knownQuota) \\/",
+              "new": "FALSE \\/",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ForeignTokenAccepted",
+          "edits": [
+            {
+              "old": "ForeignToken(r) == r.op \\in ListOps /\\ r.token",
+              "new": "ForeignToken(r) == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "SingleRowInventsCursor",
+          "edits": [
+            {
+              "old": "Cursor(r,rows) == FALSE",
+              "new": "Cursor(r,rows) == rows=1 /\\ r.op \\in ListOps",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "DefaultInventsQuotaARN",
+          "edits": [
+            {
+              "old": "rows=1 /\\ ~defaults /\\ r.op # \"Services\",Cursor(r,rows)",
+              "new": "rows=1 /\\ r.op # \"Services\",Cursor(r,rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ReadChangesSelectedUsage",
+          "edits": [
+            {
+              "old": "/\\ counts'=counts (* read publication never changes the selected or peer state *)",
+              "new": "/\\ counts'=[counts EXCEPT ![r.team]=IF @=3 THEN 0 ELSE @+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadPreservesFrame"
+        },
+        {
+          "id": "ReadChangesPeerUsage",
+          "edits": [
+            {
+              "old": "/\\ counts'=counts (* read publication never changes the selected or peer state *)",
+              "new": "/\\ counts'=[counts EXCEPT ![Other(r.team)]=IF @=3 THEN 0 ELSE @+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadPreservesFrame"
+        },
+        {
+          "id": "AbsentBindingFallsBackToDefault",
+          "edits": [
+            {
+              "old": "HasBinding(r,caps) == caps[r.team] # None",
+              "new": "HasBinding(r,caps) == TRUE",
+              "count": 1
+            },
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE IF caps[r.team]=None THEN 5 ELSE caps[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        }
+      ]
     }
   ]
 }

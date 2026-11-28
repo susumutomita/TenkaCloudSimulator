@@ -1,251 +1,227 @@
 {
   "version": 1,
-  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
+  "base_sha": "dcb889f7f011934864d8b0f7ed9c2bc55390d0e8",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "ee1cb3e3162df427bed8a71642a9133c0692ff7692a54669fe5a67352e277be8",
+      "sha256": "d5e09dac42a3842e9c2fbe1d088ceba5a4bc03e82a33082a5d21a97e8169aa1d",
       "disposition": "documentation",
-      "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
+      "reason": "Document only the five local B2BI quota reads, published versus enforced capacity, exact IAM resources and remaining unsupported workflows.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "e77c34a5611dac16c80e33fd65d08183070cb0579515e393b120633e8217d480",
+      "sha256": "8bea7d61cfe9bc5a40badd9656cc4e4fbb0f91f852e796793e98197f220580a3",
       "disposition": "documentation",
-      "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
+      "reason": "Document only the five local B2BI quota reads, published versus enforced capacity, exact IAM resources and remaining unsupported workflows.",
       "models": []
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "e77c06b85bc6fceec845f9be3cb9162949be99ed695adff021794afc3eeb0c1c",
+      "sha256": "735b63bf307ff0ae4e59cf393da74f9d18c95d093f6cbaf04276fa568bcbf7e8",
       "disposition": "documentation",
-      "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
+      "reason": "Document only the five local B2BI quota reads, published versus enforced capacity, exact IAM resources and remaining unsupported workflows.",
       "models": []
     },
     {
       "path": "docs/coverage-assessment.md",
-      "sha256": "5433b7d2bb5ab36e5734937d0e31cf12ead5e5dec069773fc56df00b8789065c",
+      "sha256": "049e9893188bb2f9270a4edee0ae0360c59c44f668c233ceea499bba22a134d3",
       "disposition": "documentation",
-      "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
+      "reason": "Document only the five local B2BI quota reads, published versus enforced capacity, exact IAM resources and remaining unsupported workflows.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "d9c4a18ad21d5e7a663dc2fc8f6a26ab3d958a52e03ed57194643e856cc15e11",
+      "sha256": "6f96b9a43a4e2816a2fc6f4061055bc9492c405d80ff71b0cdb497554de58d74",
       "disposition": "documentation",
-      "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
+      "reason": "Document only the five local B2BI quota reads, published versus enforced capacity, exact IAM resources and remaining unsupported workflows.",
       "models": []
     },
     {
-      "path": "formal/models.json",
-      "sha256": "5df86e08cde3e6c8ef74e57fa5eb88d24dbfeed66ddc382c1c4f57ca207cd2e0",
-      "disposition": "formal-infrastructure",
-      "reason": "Add the quota operation and extracted pinned model to the existing catalog lifecycle source scope.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/describe.go",
-      "sha256": "006da4e78ab08177f1cda74126e54fc35325f9185ec3df4f63db902134f1735c",
+      "path": "formal/ServiceQuotaDiscovery.cfg",
+      "sha256": "29343c9ee7103f411aeca22b5d2dd1c10617b9be00dcc33c1bc49a151a5631e7",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "ServiceQuotaDiscovery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "5da4b272232d030a0cb69262870f294a32e9a46ad170f675425b504465a2feb9",
+      "path": "formal/ServiceQuotaDiscovery.tla",
+      "sha256": "e1cefc02c38bbc66d6865bb17ac2e889e5ad8f027cba3a37de5128da9293062e",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "ServiceQuotaDiscovery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "5b0ec590f467d92aa3904ca436ce6970050d5bda26f4cb6101f35c28d63f4f1d",
+      "disposition": "formal-infrastructure",
+      "reason": "Append one finite discovery leaf and protect all properties, sensitivity controls and source scopes; preserve every prior registration.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "6b01688778afa50e1bb674a7eb238e9db6e67d65c227be90c2c01c8730232d8c",
+      "disposition": "modeled",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
+      "models": [
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/models/service-quotas.json",
-      "sha256": "54fe0b48387e545360e283ada9ae5f073b94facd2d3c19c707d713f3b977e669",
+      "sha256": "f6c30611187a5769429a5fef405dd5f0d7168c666f5aae56b1a91d93d657d418",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Select exactly five pinned official read operations; native contract tests verify the copied input/output shapes. The new computed projections are separately bound at their service implementation.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "PeerFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Retain the existing catalog admission/state-frame abstraction for operation/model declarations. It does not prove these JSON codecs or computed read outputs; ServiceQuotaDiscovery and native tests cover their separately stated finite projection and executable contracts."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/openapi.go",
-      "disposition": "modeled",
-      "reason": "Use the declared fixed JSON inputs and service-specific denial status in the generated native catalog reference.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "Native HTTP status codes, JSON body examples, browser rendering and Go-to-model refinement are outside the finite lifecycle model."
-        }
-      ],
-      "sha256": "d32c97729fa82c0d6eb2ea3d7403d1d18a0d8c4fb3393734d2b11875e2163589"
-    },
-    {
       "path": "internal/aws/catalog/selection.json",
-      "sha256": "d4ae02f01b5d0e5f491f87847af150f2011e4e45bce0cb8e4f14d24ffbc5a45b",
+      "sha256": "98d93c44bec9adddc933376e72b6acc0323e9d374829c73493401109eb02d4a8",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Select exactly five pinned official read operations; native contract tests verify the copied input/output shapes. The new computed projections are separately bound at their service implementation.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "PeerFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Retain the existing catalog admission/state-frame abstraction for operation/model declarations. It does not prove these JSON codecs or computed read outputs; ServiceQuotaDiscovery and native tests cover their separately stated finite projection and executable contracts."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "ccf14a2ee482a92e88a7352a17e1e421f30f790aa2dcf18b66f6c7ae1c1cad81",
+      "sha256": "efeb1af536dab3cddc67c78059b660b490ebd180f243134c64cf794138d502af",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "ServiceQuotaDiscovery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/service_quotas.go",
-      "sha256": "fc63cabacad0fafeffad571d0a45d657ed86ec4b73f695b59fe61bdb291c3e27",
+      "sha256": "bcaf3de41ca979aa0f2a14c02cd09591085909097df9ec4922eccb71d8db3799",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "ServiceQuotaDiscovery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/service_quotas_test.go",
-      "sha256": "5607fc25095dc1ce219d415ea89515be9baf0ac9d781bd79c690a600c2f92af3",
+      "path": "internal/aws/catalog/service_quotas_discovery_test.go",
+      "sha256": "f3acca2efa9cb644d88af486869b5e14eea344580a4cd913c41b9e2bf1044ce8",
       "disposition": "test-support",
-      "reason": "Verify the native applied quota, B2BI profile enforcement, negative responses and isolation through the applicable test entry point.",
+      "reason": "Exercise the real native/SDK read contracts, parser and IAM failures, retained populated peers/reopen/cleanup, while preserving all existing fixtures and runner entry points.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services.go",
-      "sha256": "d4f2d822c4fafaac7db7df062609e3117402d5fd808f935133bc30dac391cb5c",
-      "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/spec.go",
-      "sha256": "30cbb29dfcbc2d9a54c77c55bdee0424961d09312f5977d9b01900a846d970d8",
-      "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
-        }
-      ]
-    },
-    {
       "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "868833cb74d21a2e590837cf7d649a40817906a1ec524281a3bb65caf7243860",
       "disposition": "presentation",
-      "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding.",
-      "models": [],
-      "sha256": "3d839c5184b3bf8db46a27c6645a687182f9002faf5a7bdde2a8bda779a5516b"
+      "reason": "Regenerate only the Service Quotas reference and its operation count from the reviewed definitions; all unrelated served API descriptions remain unchanged.",
+      "models": []
     },
     {
       "path": "internal/server/apidocs/catalog/service-quotas.json",
+      "sha256": "2ed0c971bef876f8eb45212f03b9288308f889f5a7ad184aea637accf61199ae",
       "disposition": "presentation",
-      "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding.",
-      "models": [],
-      "sha256": "4c16a3e116b070f012ebe755d93f992bfdcbed62b7d21f6fa22c4ef3b09dcda2"
+      "reason": "Regenerate only the Service Quotas reference and its operation count from the reviewed definitions; all unrelated served API descriptions remain unchanged.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "002b8bec192bdcbcb99e2f8f0bb7d528e9922c0368e4fc0adbac460bcd061107",
+      "disposition": "formal-infrastructure",
+      "reason": "Append one finite discovery leaf and protect all properties, sensitivity controls and source scopes; preserve every prior registration.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "0d645c310ac1b1a2af1800550992fb5790ad448018d5a12604c87a3a0db8cf57",
+      "disposition": "formal-infrastructure",
+      "reason": "Append one finite discovery leaf and protect all properties, sensitivity controls and source scopes; preserve every prior registration.",
+      "models": []
     },
     {
       "path": "test/e2e/catalog_fixtures/service-quotas.json",
-      "sha256": "4fd277f257ca7f4fc44486a2500cbdb42727e449d34beb3036eeb1c5c7939dc6",
+      "sha256": "d328cc29d848eb08c9bda79965c7550bdfde65966ac43e025750e986185d234b",
       "disposition": "test-support",
-      "reason": "Verify the native applied quota, B2BI profile enforcement, negative responses and isolation through the applicable test entry point.",
+      "reason": "Exercise the real native/SDK read contracts, parser and IAM failures, retained populated peers/reopen/cleanup, while preserving all existing fixtures and runner entry points.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "8bfbaec7d59a76d136b9aa3d57d68e4c5bcef7b1d7b5c9a271fcfc2ad72c6f09",
+      "sha256": "a37355286cc7650be79c4d72ef9d5778e8c9bc18a566b52d2956389a2629ff9c",
       "disposition": "test-support",
-      "reason": "Verify the native applied quota, B2BI profile enforcement, negative responses and isolation through the applicable test entry point.",
+      "reason": "Exercise the real native/SDK read contracts, parser and IAM failures, retained populated peers/reopen/cleanup, while preserving all existing fixtures and runner entry points.",
       "models": []
     },
     {
-      "path": "test/e2e/service_quotas_profiles.py",
-      "sha256": "ec7c54ffc9be15aaf8a1557f90de82a28b5ab93604cba8a89109772bf648a9c4",
+      "path": "test/e2e/service_quotas_discovery.py",
+      "sha256": "ae23eed4b0d83d0feb898b83da484d64ee30702f6bf5df9f95aa22a8a135c55b",
       "disposition": "test-support",
-      "reason": "Verify the native applied quota, B2BI profile enforcement, negative responses and isolation through the applicable test entry point.",
+      "reason": "Exercise the real native/SDK read contracts, parser and IAM failures, retained populated peers/reopen/cleanup, while preserving all existing fixtures and runner entry points.",
       "models": []
     }
   ]

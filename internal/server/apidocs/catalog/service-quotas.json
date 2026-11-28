@@ -19,6 +19,35 @@
     },
     "type": "object"
    },
+   "GetAWSDefaultServiceQuotaRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "QuotaCode": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServiceCode",
+     "QuotaCode"
+    ],
+    "type": "object"
+   },
+   "GetAWSDefaultServiceQuotaResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Quota": {
+      "$ref": "#/components/schemas/ServiceQuota"
+     }
+    },
+    "type": "object"
+   },
    "GetServiceQuotaRequest": {
     "additionalProperties": false,
     "properties": {
@@ -47,6 +76,128 @@
     "properties": {
      "Quota": {
       "$ref": "#/components/schemas/ServiceQuota"
+     }
+    },
+    "type": "object"
+   },
+   "ListAWSDefaultServiceQuotasRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServiceCode"
+    ],
+    "type": "object"
+   },
+   "ListAWSDefaultServiceQuotasResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "Quotas": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceQuota"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListServiceQuotasRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "QuotaAppliedAtLevel": {
+      "enum": [
+       "ACCOUNT",
+       "RESOURCE",
+       "ALL"
+      ],
+      "type": "string"
+     },
+     "QuotaCode": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServiceCode"
+    ],
+    "type": "object"
+   },
+   "ListServiceQuotasResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "Quotas": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceQuota"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListServicesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListServicesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "Services": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceInfo"
+      },
+      "type": "array"
      }
     },
     "type": "object"
@@ -111,6 +262,20 @@
      },
      "PeriodValue": {
       "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ServiceName": {
+      "type": "string"
      }
     },
     "type": "object"
@@ -182,7 +347,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created. Adjustable describes the AWS quota. The simulator serves only account-level reads of this quota. Defaults, quota discovery, usage, resource contexts and increase requests are unsupported.",
+  "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. Discover the B2B Data Interchange Profiles quota (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Its AWS default is five. Applied reads use the total capacity enforced by CreateProfile, including slots already occupied. Lists return at most one item. ListServiceQuotas supports an exact QuotaCode and ACCOUNT, RESOURCE or ALL. Only account-level capacity is configured. Increase requests, resource contexts and usage metrics are unsupported.",
   "title": "Service Quotas (simulator catalog)",
   "version": "2019-06-24"
  },
@@ -199,7 +364,11 @@
       "required": true,
       "schema": {
        "enum": [
-        "ServiceQuotasV20190624.GetServiceQuota"
+        "ServiceQuotasV20190624.GetAWSDefaultServiceQuota",
+        "ServiceQuotasV20190624.GetServiceQuota",
+        "ServiceQuotasV20190624.ListAWSDefaultServiceQuotas",
+        "ServiceQuotasV20190624.ListServiceQuotas",
+        "ServiceQuotasV20190624.ListServices"
        ],
        "type": "string"
       }
@@ -209,12 +378,35 @@
      "content": {
       "application/x-amz-json-1.1": {
        "examples": {
+        "GetAWSDefaultServiceQuota": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.GetAWSDefaultServiceQuota",
+         "value": {
+          "QuotaCode": "L-05F6A9EF",
+          "ServiceCode": "b2bi"
+         }
+        },
         "GetServiceQuota": {
          "summary": "X-Amz-Target: ServiceQuotasV20190624.GetServiceQuota",
          "value": {
           "QuotaCode": "L-05F6A9EF",
           "ServiceCode": "b2bi"
          }
+        },
+        "ListAWSDefaultServiceQuotas": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.ListAWSDefaultServiceQuotas",
+         "value": {
+          "ServiceCode": "b2bi"
+         }
+        },
+        "ListServiceQuotas": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.ListServiceQuotas",
+         "value": {
+          "ServiceCode": "b2bi"
+         }
+        },
+        "ListServices": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.ListServices",
+         "value": {}
         }
        },
        "schema": {
@@ -257,7 +449,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created. Adjustable describes the AWS quota. The simulator serves only account-level reads of this quota. Defaults, quota discovery, usage, resource contexts and increase requests are unsupported.",
+   "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. Discover the B2B Data Interchange Profiles quota (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Its AWS default is five. Applied reads use the total capacity enforced by CreateProfile, including slots already occupied. Lists return at most one item. ListServiceQuotas supports an exact QuotaCode and ACCOUNT, RESOURCE or ALL. Only account-level capacity is configured. Increase requests, resource contexts and usage metrics are unsupported.",
    "name": "Service Quotas"
   }
  ],

@@ -1,8 +1,14 @@
 package catalog
 
-import "slices"
+import (
+	"encoding/json"
+	"slices"
+)
 
-const b2biProfilesQuota = "L-05F6A9EF"
+const (
+	b2biProfilesQuota   = "L-05F6A9EF"
+	b2biProfilesDefault = 5
+)
 
 var serviceQuotas = &Service{
 	Model: "service-quotas", Title: "Service Quotas", IAMPrefix: "servicequotas", Issues: []int{210},
@@ -12,31 +18,102 @@ var serviceQuotas = &Service{
 	},
 	Ops: []Op{
 		{Name: "GetServiceQuota", Kind: Read, Resource: "quota", Fixed: map[string]any{"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota}},
+		{Name: "GetAWSDefaultServiceQuota", Kind: Read, Resource: "quota", Fixed: map[string]any{"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota}},
+		{Name: "ListServices", Kind: List, Resource: "quota"},
+		{Name: "ListServiceQuotas", Kind: List, Resource: "quota", Fixed: map[string]any{"ServiceCode": "b2bi"}},
+		{Name: "ListAWSDefaultServiceQuotas", Kind: List, Resource: "quota", Fixed: map[string]any{"ServiceCode": "b2bi"}},
 	},
 	Bounds: []string{
-		"GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created.",
-		"Adjustable describes the AWS quota. The simulator serves only account-level reads of this quota. Defaults, quota discovery, usage, resource contexts and increase requests are unsupported.",
+		"Discover the B2B Data Interchange Profiles quota (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Its AWS default is five. Applied reads use the total capacity enforced by CreateProfile, including slots already occupied.",
+		"Lists return at most one item. ListServiceQuotas supports an exact QuotaCode and ACCOUNT, RESOURCE or ALL. Only account-level capacity is configured. Increase requests, resource contexts and usage metrics are unsupported.",
 	},
 }
 
-// getServiceQuota projects the live CreateProfile binding without writing a quota row.
-func (q *request) getServiceQuota() (map[string]any, error) {
-	arn := q.formatARN(q.resource(), "", "", nil)
-	if err := q.authorize(arn); err != nil {
+func b2biQuotaRegion(region string) bool {
+	return slices.Contains([]string{"us-east-1", "us-west-2", "eu-west-1"}, region)
+}
+
+func unavailableQuota() error {
+	return &fault{kind: "notfound", message: "The requested service or quota is unavailable in this Region."}
+}
+
+// Service Quotas is JSON, unlike the Query callers that need the shared
+// decoder's string-to-integer conversion. Keep its raw number type intact.
+func validateQuotaJSON(input map[string]any) error {
+	if value, supplied := input["MaxResults"]; supplied {
+		if _, number := value.(json.Number); !number {
+			return invalid("MaxResults must be a JSON integer.")
+		}
+	}
+	return nil
+}
+
+// profileQuota returns the official default or the currently enforced regional capacity.
+// The default is a published property and does not depend on a particular engine configuration.
+func (q *request) profileQuota(applied bool) map[string]any {
+	quota := map[string]any{
+		"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota, "QuotaName": "Profiles",
+		"Value": b2biProfilesDefault, "GlobalQuota": false, "Adjustable": true,
+	}
+	if applied {
+		limit := q.e.b2biProfileLimit()
+		if limit == 0 {
+			return nil
+		}
+		quota["Value"] = limit
+		quota["QuotaAppliedAtLevel"] = "ACCOUNT"
+		quota["QuotaArn"] = "arn:aws:servicequotas:" + q.region + ":" + q.e.cfg.Account + ":b2bi/" + b2biProfilesQuota
+	}
+	return quota
+}
+
+func (q *request) readQuota() (map[string]any, error) {
+	applied := q.op.Name == "GetServiceQuota"
+	resource := "*"
+	if applied {
+		resource = q.formatARN(q.resource(), "", "", nil)
+	}
+	if err := q.authorize(resource); err != nil {
 		return nil, err
 	}
 	if _, ok := q.input["ContextId"]; ok {
 		return nil, invalid("The supported quota applies at account level and does not accept a resource context.")
 	}
-	limit := q.e.b2biProfileLimit()
-	if q.input["ServiceCode"] != "b2bi" || q.input["QuotaCode"] != b2biProfilesQuota || limit == 0 ||
-		!slices.Contains([]string{"us-east-1", "us-west-2", "eu-west-1"}, q.region) {
-		return nil, &fault{kind: "notfound", message: "The requested quota is unavailable in this Region."}
+	if !b2biQuotaRegion(q.region) || q.input["ServiceCode"] != "b2bi" || q.input["QuotaCode"] != b2biProfilesQuota {
+		return nil, unavailableQuota()
 	}
-	return map[string]any{"Quota": map[string]any{
-		"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota, "QuotaName": "Profiles", "QuotaArn": arn,
-		"Value": limit, "GlobalQuota": false, "Adjustable": true, "QuotaAppliedAtLevel": "ACCOUNT",
-	}}, nil
+	quota := q.profileQuota(applied)
+	if quota == nil {
+		return nil, unavailableQuota()
+	}
+	return map[string]any{"Quota": quota}, nil
+}
+
+func (q *request) listQuotas() (map[string]any, error) {
+	if err := q.authorize("*"); err != nil {
+		return nil, err
+	}
+	// No supported response has more than one item, so no continuation token can be valid.
+	if _, supplied := q.input["NextToken"]; supplied {
+		return nil, &fault{kind: "token", code: "InvalidPaginationTokenException", message: "The pagination token is not valid for this list."}
+	}
+	items := []map[string]any{}
+	if q.op.Name == "ListServices" {
+		if b2biQuotaRegion(q.region) {
+			items = append(items, map[string]any{"ServiceCode": "b2bi", "ServiceName": "AWS B2B Data Interchange"})
+		}
+		return map[string]any{"Services": items}, nil
+	}
+	if q.input["ServiceCode"] != "b2bi" || !b2biQuotaRegion(q.region) {
+		return nil, unavailableQuota()
+	}
+	code := q.input["QuotaCode"]
+	if (code == nil || code == b2biProfilesQuota) && q.input["QuotaAppliedAtLevel"] != "RESOURCE" {
+		if quota := q.profileQuota(q.op.Name == "ListServiceQuotas"); quota != nil {
+			items = append(items, quota)
+		}
+	}
+	return map[string]any{"Quotas": items}, nil
 }
 
 func (e *Engine) b2biProfileLimit() int {

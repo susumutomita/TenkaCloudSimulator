@@ -54,8 +54,8 @@ func (q *request) execute() (map[string]any, error) {
 		}
 		return q.create(0)
 	case Read:
-		if q.b.spec.Model == "service-quotas" && q.op.Name == "GetServiceQuota" {
-			return q.getServiceQuota()
+		if q.b.spec.Model == "service-quotas" {
+			return q.readQuota()
 		}
 		if q.b.spec.Model == "resource-groups" {
 			switch q.op.Name {
@@ -67,6 +67,9 @@ func (q *request) execute() (map[string]any, error) {
 		}
 		return q.read()
 	case List:
+		if q.b.spec.Model == "service-quotas" {
+			return q.listQuotas()
+		}
 		if q.isBatchJobDefinition() {
 			return q.describeBatchDefinitions()
 		}

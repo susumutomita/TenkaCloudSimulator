@@ -741,6 +741,9 @@ def handler(event,context):
  def test_service_quotas_reads_applied_b2bi_profile_limit(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_profiles.py'))], check=True, timeout=120)
 
+ def test_service_quotas_discovery_defaults_applied_and_wildcard_iam(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_discovery.py'))], check=True, timeout=120)
+
  def test_named_resource_group_membership_tracks_live_ecr_tags(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_ecr_members.py'))], check=True, timeout=120)
 
