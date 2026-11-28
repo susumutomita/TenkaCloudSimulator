@@ -105,10 +105,17 @@ func randomCredential(bytes int) (string, error) {
 }
 
 func (a *STSAuthority) Issue(input STSSessionRequest) (STSCredentials, error) {
+	return a.IssueContext(context.Background(), input)
+}
+
+func (a *STSAuthority) IssueContext(ctx context.Context, input STSSessionRequest) (STSCredentials, error) {
+	if err := ctx.Err(); err != nil {
+		return STSCredentials{}, err
+	}
 	if input.Principal == "" || input.Principal == core.Administrator || input.RoleID == "" || input.RoleARN == "" || input.SessionName == "" || input.Validate == nil || input.Snapshot == nil || input.Duration < 15*time.Minute || input.Duration > 12*time.Hour {
 		return STSCredentials{}, fmt.Errorf("invalid local role session")
 	}
-	if err := input.Validate(context.Background()); err != nil {
+	if err := input.Validate(ctx); err != nil {
 		return STSCredentials{}, err
 	}
 	key, err := randomCredential(16)
@@ -136,6 +143,10 @@ func (a *STSAuthority) Issue(input STSSessionRequest) (STSCredentials, error) {
 	}
 	credentials := STSCredentials{"TCSIMASIA" + key, secret, token, now.Add(input.Duration)}
 	identity := SDKIdentity{Principal: input.Principal, ARN: "arn:aws:sts::000000000000:assumed-role/" + input.Principal + "/" + input.SessionName, Account: "000000000000", UserID: input.RoleID + ":" + input.SessionName, Expires: credentials.Expiration}
+	// This check under the lock is the issuance decision. Later cancellation does not revoke an issued session.
+	if err := ctx.Err(); err != nil {
+		return STSCredentials{}, err
+	}
 	a.sessions[credentials.AccessKeyID] = sdkSession{credentials, identity, input.Validate, input.Snapshot}
 	return credentials, nil
 }
