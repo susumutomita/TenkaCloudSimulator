@@ -77,6 +77,8 @@ Readers need `resource-groups:ListGroupResources` on the group ARN, along with
 `tag:GetResources`, `cloudformation:DescribeStacks` and `cloudformation:ListStackResources`
 on `*`. AWS lists these three additional permissions for the API. Each membership
 page checks all four against one fresh principal policy snapshot. Queryless groups retain their metadata and tag operations.
+In the Cloudscape service catalog, select **AWS Resource Groups** and open a group to view its saved filter, page through matching repository ARNs, or edit the tag key and value of an existing query. **Refresh query and members** reads current repository tags and permissions again.
+
 Search, explicit member management, CloudFormation queries, service configurations,
 extra tag filters and other resource types remain outside this slice. [AWS supported resource types](https://docs.aws.amazon.com/ARG/latest/userguide/supported-resources.html) ·
 [resource query formats](https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-query.html) ·
