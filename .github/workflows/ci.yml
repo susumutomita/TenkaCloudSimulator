@@ -1,429 +1,72 @@
-name: ci
+name: Route 53 PTR Console and SDK verification
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
-    inputs:
-      s3_paging_trial:
-        description: Run the isolated S3 1,001-part browser check on Ubuntu 22.04
-        type: boolean
-        default: false
-  workflow_call:
 permissions:
   contents: read
 jobs:
-  console-acceptance:
-    name: Japanese service console acceptance
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Build the actual embedded simulator
-        run: make build
-      - name: Install pinned Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python3 -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Check S3 multipart launcher refusals offline
-        timeout-minutes: 6
-        run: /tmp/simulator-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
-      - name: Check native discovery, Japanese operations and desktop/mobile layouts
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/service_locale.py
-          /tmp/simulator-tests/bin/python test/e2e/scalar_aws_json.py
-      - name: Check Secrets disclosure boundaries and actual metadata accessibility
-        run: |
-          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
-          AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
-      - name: Check inline Lambda editor and strict CSP in the real browser
-        run: /tmp/simulator-tests/bin/python test/e2e/lambda_inline_editor.py
-      - name: Retain focused service console evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/lambda-inline-*.png
-            reports/service-locale-*.png
-            reports/scalar-aws-json.json
-            reports/secrets-metadata-*.png
-            reports/secrets-a11y-summary.json
-          if-no-files-found: warn
-          retention-days: 14
-  checks:
-    name: Static checks, builds and audits
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Rebuild the API reference without the excluded color picker
-        run: |
-          npm ci --prefix tools/scalar --ignore-scripts --no-audit --no-fund
-          node tools/scalar/build.mjs
-          python3 tools/scalar/notices.py
-          git diff --exit-code -- internal/server/apidocs third_party/scalar.json third_party/scalar-bundled-packages.json third_party/SCALAR-BUNDLED-NOTICES.txt internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt tools/scalar/bundle-inputs.json tools/scalar/bundle-digests.json third_party/color-picker-removal.json
-      - name: Rebuild official Cloudscape console and original notices
-        run: |
-          npm ci --prefix tools/console --ignore-scripts --no-audit --no-fund
-          node tools/console/build.mjs
-          node --test tools/console/test/gcp-dns*.test.mjs tools/console/test/simpledb-client.test.mjs tools/console/test/ec2-security-groups.test.mjs
-          git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
-          npm audit --prefix tools/console --audit-level=high
-      - name: Check secret description console and preserved disclosure contracts
-        run: node --test tools/console/tests/secret-description.test.mjs tools/console/tests/secrets-manager-locale.test.mjs
-      - name: Check Lambda source draft and deploy boundaries
-        run: node --test tools/console/tests/lambda-*.test.mjs
-      - name: Check App Engine console request, split and URL helpers
-        run: node --test tools/console/tests/gcp-appengine.test.mjs
-      - name: Check immutable release packaging and refusal regressions
-        run: python3 test/ci/release_pipeline.py
-      - name: Check bounded SNS Console and reference request contracts
-        run: node --test test/console/sns-subscriptions.test.mjs test/console/sns-http-reference.test.mjs
-      - name: Check native input and bounded EC2 console regressions
-        run: >-
-          node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
-          tools/console/test/ec2-readonly.test.mjs tools/console/test/ec2-response.test.mjs
-          tools/console/test/ec2-template-preview.test.mjs tools/console/test/ec2-native-subnets.test.mjs
-      - name: Check Go format, vet, modules, embedded assets and script gates
-        run: |
-          make format-check vet verify-assets test-scripts
-          go mod verify
-      - name: Build the static binary and compile all supported targets
-        run: make build cross-check
-      - name: Audit the locked API-reference build dependencies
-        run: npm audit --prefix tools/scalar --audit-level=high
-      - name: Check Go vulnerabilities against the canonical service
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
-  go-test:
-    name: Go race tests (${{ matrix.shard }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - shard: server-a
-            packages: ./internal/server
-            part: 0/2
-          - shard: server-b
-            packages: ./internal/server
-            part: 1/2
-          - shard: aws-a
-            packages: ./internal/aws
-            part: 0/2
-          - shard: aws-b
-            packages: ./internal/aws
-            part: 1/2
-          - shard: workloads
-            packages: ./internal/workload/python ./internal/workload/guesttcp
-          - shard: catalogs
-            packages: ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
-          - shard: rest
-            exclude: ./internal/server ./internal/aws ./internal/workload/python ./internal/workload/guesttcp ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Run this shard under the race detector with full-module coverage
-        shell: bash
-        env:
-          SHARD: ${{ matrix.shard }}
-          PACKAGES: ${{ matrix.packages }}
-          EXCLUDE: ${{ matrix.exclude }}
-          PART: ${{ matrix.part }}
-        run: |
-          mkdir -p reports/shard
-          if [ -n "$PACKAGES" ]; then
-            go list $PACKAGES > reports/shard/packages.txt
-          else
-            go list $EXCLUDE > reports/shard/excluded.txt
-            go list ./... | grep -vxF -f reports/shard/excluded.txt > reports/shard/packages.txt
-          fi
-          packages="$(tr '\n' ' ' < reports/shard/packages.txt)"
-          if [ -n "$PART" ]; then
-            go test -race -coverpkg=./... -list '.*' $packages | { grep -E '^(Test|Example|Fuzz)' || true; } | sort > reports/shard/listed.txt
-            awk -v index_="${PART%/*}" -v count="${PART#*/}" '(NR - 1) % count == index_' reports/shard/listed.txt > reports/shard/tests.txt
-            test -s reports/shard/tests.txt
-            names="$(paste -sd'|' reports/shard/tests.txt)"
-            printf '^(%s)$' "$names" > reports/shard/run.txt
-            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out" GO_TEST_RUN_FILE=reports/shard/run.txt | tee reports/shard/test.log
-            { grep -E '^=== RUN   [^/ ]+$' reports/shard/test.log || true; } | sed 's/^=== RUN   //' | sort -u > reports/shard/ran.txt
-            diff reports/shard/tests.txt reports/shard/ran.txt
-          else
-            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
-          fi
-          if [ -n "$PART" ]; then
-            jq -n --arg index "${PART%/*}" --arg count "${PART#*/}" --rawfile listed reports/shard/listed.txt --rawfile tests reports/shard/tests.txt \
-              '{index: ($index | tonumber), count: ($count | tonumber), listed: ($listed | split("\n") | map(select(length > 0))), tests: ($tests | split("\n") | map(select(length > 0)))}' > reports/shard/part.json
-          else
-            echo null > reports/shard/part.json
-          fi
-          jq -n --arg head "$(git rev-parse HEAD)" --arg profile "coverage-$SHARD.out" --rawfile packages reports/shard/packages.txt --slurpfile part reports/shard/part.json \
-            '{head: $head, profile: $profile, packages: ($packages | split("\n") | map(select(length > 0)))} + (if $part[0] == null then {} else {part: $part[0]} end)' > "reports/shard/$SHARD.json"
-      - name: Retain this shard's coverage and package manifest
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: go-coverage-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/shard/${{ matrix.shard }}.json
-            reports/shard/coverage-${{ matrix.shard }}.out
-          if-no-files-found: error
-          retention-days: 14
-  platform-audit:
-    name: Platform lifecycle and console audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Build the actual embedded simulator
-        run: |
-          make build
-          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/queue-simulator.sha256"
-      - name: Install Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python3 -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Exercise Azure Queue Storage with the official SDK across two simulator processes
-        timeout-minutes: 3
-        run: |
-          /tmp/simulator-tests/bin/pip install --require-hashes --only-binary=:all: --no-deps -r scripts/requirements-azure-queue-test.txt
-          /tmp/simulator-tests/bin/pip check
-          read -r binary_sha _ < "$RUNNER_TEMP/queue-simulator.sha256"
-          /tmp/simulator-tests/bin/python test/e2e/azure_queue_cli.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Prepare pinned axe-core for mandatory browser accessibility checks
-        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
-      - name: Run the actual platform hello-world lifecycle and participant browser
-        run: |
-          git init /tmp/simulator-platform
-          git -C /tmp/simulator-platform remote add origin https://github.com/susumutomita/TenkaCloud.git
-          git -C /tmp/simulator-platform fetch --depth=1 origin f99b3d9a00076a2a5e97f1d4d9b0b20a7e02245c
-          git -C /tmp/simulator-platform checkout --detach FETCH_HEAD
-          git init /tmp/simulator-challenges
-          git -C /tmp/simulator-challenges remote add origin https://github.com/susumutomita/TenkaCloudChallenge.git
-          git -C /tmp/simulator-challenges fetch --depth=1 origin a749b142416770abee3f173673702c55df3856aa
-          git -C /tmp/simulator-challenges checkout --detach FETCH_HEAD
-          npm ci --prefix tools/platform --ignore-scripts --no-audit --no-fund
-          npm audit --prefix tools/platform --audit-level=high
-          node tools/platform/setup.mjs /tmp/simulator-platform
-          python3 scripts/catalog-matrix.py /tmp/simulator-challenges
-          git diff --exit-code -- docs/catalog.md
-          export TENKACLOUD_ROOT=/tmp/simulator-platform CHALLENGE_ROOT=/tmp/simulator-challenges
-          export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
-          "$BUN" test/platform/hello-world.ts
-          /tmp/simulator-tests/bin/python test/platform/browser.py
-      - name: Verify CloudFormation rejection and the SDK application lifecycle
-        run: /tmp/simulator-tests/bin/python test/platform/sdk-lifecycle.py -v
-      - name: Check responsive reflow and the start command's token handling
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/reflow_test.py
-          make test-start PYTHON=/tmp/simulator-tests/bin/python
-      - name: Inspect console flow, keyboard behavior, and accessible contrast
-        run: |
-          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
-          AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
-  ci:
-    name: ci
-    needs: [console-acceptance, checks, go-test, platform-audit]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Require every gate job to succeed
-        env:
-          CONSOLE_ACCEPTANCE: ${{ needs.console-acceptance.result }}
-          CHECKS: ${{ needs.checks.result }}
-          GO_TEST: ${{ needs.go-test.result }}
-          PLATFORM_AUDIT: ${{ needs.platform-audit.result }}
-        run: |
-          echo "console-acceptance=$CONSOLE_ACCEPTANCE checks=$CHECKS go-test=$GO_TEST platform-audit=$PLATFORM_AUDIT"
-          test "$CONSOLE_ACCEPTANCE" = success && test "$CHECKS" = success && test "$GO_TEST" = success && test "$PLATFORM_AUDIT" = success
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - uses: actions/download-artifact@v8.0.2
-        with:
-          pattern: go-coverage-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
-          path: reports/shard
-          merge-multiple: true
-      - name: Merge shard coverage only when every package ran exactly once at this head
-        run: |
-          go list ./... > reports/expected-packages.txt
-          python3 scripts/check-coverage.py merge reports/coverage.out reports/expected-packages.txt "$(git rev-parse HEAD)" reports/shard/*.json
-      - name: Generate coverage views and enforce both 90% floors
-        run: |
-          go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
-          go tool cover -html=reports/coverage.out -o reports/coverage.html
-          python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
-      - name: Retain coverage evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: go-coverage-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/coverage.out
-            reports/coverage.xml
-            reports/coverage.html
-            reports/coverage-summary.md
-          if-no-files-found: error
-          retention-days: 14
-  e2e:
-    name: Real binary, SDK, console and API reference E2E
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+  ptr:
+    name: Route 53 Console and SDK on the exact main revision
     runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    timeout-minutes: 18
+    env:
+      PRODUCT_REVISION: 6eba31db4e017cdb1c591b0c5af1ca4426acc1cf
+      PRODUCT_TREE: 06493f4f34bd78583ba6f02fa5df3700956b0e63
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: verification
+          persist-credentials: false
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ env.PRODUCT_REVISION }}
+          path: product
+          persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
           go-version: '1.26.11'
-          cache: true
-      - name: Install Python SDK and browser tools
-        timeout-minutes: 3
+          cache-dependency-path: product/go.sum
+      - name: Build the clean product and install its pinned SDK and browser
+        working-directory: product
         run: |
-          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
-          "$python" -c 'import sys; assert sys.version_info[:3] == (3, 12, 16)'
-          "$python" -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Prepare pinned axe-core for mandatory browser accessibility checks
-        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
-      - name: Verify real binary, SDK, console, and offline API reference
-        id: conformance
-        run: |
+          test "$(git rev-parse HEAD)" = "$PRODUCT_REVISION"
+          test "$(git rev-parse HEAD^{tree})" = "$PRODUCT_TREE"
           test -z "$(git status --porcelain)"
-          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
-      - name: Identify the binary exercised by the S3 paging fixture
-        if: "!cancelled() && steps.conformance.outcome != 'skipped'"
+          test "$(id -u)" -ne 0
+          make build
+          mkdir -p "$RUNNER_TEMP/ptr-receipt"
+          go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/ptr-receipt/build.txt"
+          grep -F "vcs.revision=$PRODUCT_REVISION" "$RUNNER_TEMP/ptr-receipt/build.txt"
+          grep -F 'vcs.modified=false' "$RUNNER_TEMP/ptr-receipt/build.txt"
+          echo "PRODUCT_ROOT=$PWD" >> "$GITHUB_ENV"
+          echo "PRODUCT_DIGEST=$(sha256sum dist/tenkacloud-simulator | cut -d ' ' -f 1)" >> "$GITHUB_ENV"
+          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv "$RUNNER_TEMP/ptr-tools"
+          "$RUNNER_TEMP/ptr-tools/bin/python" -m pip install -r scripts/requirements-test.txt
+          "$RUNNER_TEMP/ptr-tools/bin/playwright" install --with-deps chromium
+      - name: Exercise the authenticated browser and native API in a private loopback namespace
         run: |
-          mkdir -p reports
-          go version -m dist/tenkacloud-simulator > reports/s3-multipart-paging-build.txt
-          grep -F "vcs.revision=$(git rev-parse HEAD)" reports/s3-multipart-paging-build.txt
-          grep -F 'vcs.modified=false' reports/s3-multipart-paging-build.txt
-          sha256sum dist/tenkacloud-simulator > reports/s3-multipart-paging.sha256
-          digest=$(cut -d ' ' -f 1 reports/s3-multipart-paging.sha256)
-          jq -se --arg digest "$digest" 'length == 1 and (.[0] | .binarySha256 == $digest and .parts == 1001)' reports/s3-multipart-paging.json
-      - name: Retain service console screenshots and safe audit evidence
+          "$RUNNER_TEMP/ptr-tools/bin/python" -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ), "ambient AWS configuration"'
+          umask 077
+          export CASE="$GITHUB_WORKSPACE/verification/.github/verification/route53/ptr_console.py"
+          if ! unshare --user --map-current-user --net --keep-caps sh -eu -c '
+            ip link set lo up
+            exec setpriv --no-new-privs --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$RUNNER_TEMP/ptr-tools/bin/python" -B "$CASE"
+          ' > "$RUNNER_TEMP/ptr-out" 2> "$RUNNER_TEMP/ptr-private-error"; then
+            python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          log = (Path(os.environ['RUNNER_TEMP'])/'ptr-private-error').read_text()
+          print('Trace locations:', re.findall(r'File "[^"\n]*/([A-Za-z0-9_.-]+)", line (\d+)', log)[-8:])
+          print('Failure classes:', re.findall(r'^([\w.]+(?:Error|Exception))[:\n]',log,re.M)[-2:])
+          PY
+            exit 1
+          fi
+          jq -se --arg rev "$PRODUCT_REVISION" --arg digest "$PRODUCT_DIGEST" 'length == 1 and (.[0] | .revision==$rev and .binarySha256==$digest and .allowed==200 and .denied==403 and .browserMutationRequests==2 and .freshNativeReadback and .referenceContract and .boundedDNSAnswer and .siblingsPreserved and .cleaned)' "$RUNNER_TEMP/ptr-out"
+          cp "$RUNNER_TEMP/ptr-out" "$RUNNER_TEMP/ptr-receipt/ptr.json"
+      - name: Save build and verified browser results
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/lambda-inline-*.png
-            reports/service-locale-*.png
-            reports/scalar-aws-json.json
-            reports/s3-multipart-paging.json
-            reports/s3-multipart-paging-build.txt
-            reports/s3-multipart-paging.sha256
-            reports/secrets-metadata-*.png
-            reports/secrets-a11y-summary.json
-            reports/landing-topology/**
-            reports/login-first-native-failure.json
-            reports/login-first-native-observer-status.json
-            reports/login-second-native-clear-failure.json
-            reports/login-second-native-clear-observer-status.json
-            reports/cloudformation-events-*.png
-            reports/participant-console-home-*.png
-            reports/participant-ssm-list-*.png
-            reports/login-paste-*.png
-            reports/language-login-ja-*.png
-          if-no-files-found: warn
-          retention-days: 14
-  s3-multipart-paging-trial:
-    name: Isolated S3 multipart paging on Ubuntu 22.04
-    if: github.event_name == 'workflow_dispatch' && inputs.s3_paging_trial
-    runs-on: ubuntu-22.04
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Build and identify the dispatched simulator
-        run: |
-          test "$(id -u)" -ne 0
-          test "$(uname -m)" = x86_64
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          make build
-          mkdir -p reports/s3-paging-trial
-          go version -m dist/tenkacloud-simulator > reports/s3-paging-trial/build.txt
-          grep -F "vcs.revision=$GITHUB_SHA" reports/s3-paging-trial/build.txt
-          grep -F 'vcs.modified=false' reports/s3-paging-trial/build.txt
-      - name: Prepare pinned SDK and Chromium with the hosted CPython 3.12
-        run: |
-          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/s3-paging-tests
-          /tmp/s3-paging-tests/bin/python -m pip install -r scripts/requirements-test.txt
-          /tmp/s3-paging-tests/bin/playwright install --with-deps chromium
-      - name: Verify isolation refusals and run the native browser fixture
-        env:
-          RECEIPT: reports/s3-paging-trial/paging.json
-        run: |
-          /tmp/s3-paging-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
-          /tmp/s3-paging-tests/bin/python test/e2e/run_s3_multipart_paging.py \
-            --binary "$PWD/dist/tenkacloud-simulator" > "$RECEIPT"
-          digest=$(sha256sum dist/tenkacloud-simulator | cut -d ' ' -f 1)
-          jq -se --arg digest "$digest" '
-            length == 1 and (.[0] |
-            .binarySha256 == $digest and .parts == 1001 and
-            .nativeBrowserListMarkers == [[0,1000],[0,1000],[0,1000],[0,1000]] and
-            .staleReviewNoPost == true and .completePostIncludesAllParts == true and
-            .nativeSizeRefusalPreservedUpload == true and .nativeBrowserPartSave == true and
-            .visibleFinalPartRefresh == true and .nativeAbortAndDelete == true and .realAWS == false)
-          ' "$RECEIPT"
-      - name: Retain the build and paging receipt
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: s3-multipart-paging-${{ github.sha }}
-          path: reports/s3-paging-trial/
+          name: route53-ptr-${{ github.run_id }}
+          path: ${{ runner.temp }}/ptr-receipt/
           if-no-files-found: error
           retention-days: 14
