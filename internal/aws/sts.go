@@ -143,7 +143,7 @@ func (g *Gateway) serveSTS(w http.ResponseWriter, r *http.Request) {
 		denied()
 		return
 	}
-	credentials, err := authority.Issue(STSSessionRequest{Principal: role.RoleName, RoleARN: role.Arn, RoleID: role.RoleID, SessionName: q.Get("RoleSessionName"), Duration: time.Duration(duration) * time.Second, Snapshot: func(ctx context.Context) (core.Policy, error) { return g.stsSessionPolicy(ctx, role) }, Validate: func(ctx context.Context) error {
+	credentials, err := authority.IssueContext(r.Context(), STSSessionRequest{Principal: role.RoleName, RoleARN: role.Arn, RoleID: role.RoleID, SessionName: q.Get("RoleSessionName"), Duration: time.Duration(duration) * time.Second, Snapshot: func(ctx context.Context) (core.Policy, error) { return g.stsSessionPolicy(ctx, role) }, Validate: func(ctx context.Context) error {
 		current, err := g.stsRole(ctx, role.Arn)
 		if err != nil {
 			return err
