@@ -15,6 +15,7 @@ from xml.etree import ElementTree as ET
 import boto3
 import botocore
 from contextlib import closing
+from datetime import datetime
 from botocore.config import Config
 from playwright.sync_api import expect, sync_playwright
 
@@ -98,7 +99,7 @@ def exercise(browser, origin, participant, client, zones, baseline, siblings, wa
         def observe(request):
             if '/2013-04-01/' in request.url:
                 native_requests.append(request)
-                if request.method == 'POST':
+                if request.method not in ('GET', 'HEAD', 'OPTIONS'):
                     writes.append(request)
         page.on('request', observe)
         page.goto(origin + '/_simulator/console/')
@@ -130,7 +131,10 @@ def exercise(browser, origin, participant, client, zones, baseline, siblings, wa
             xml = ET.fromstring(response.body())
             if i == 0:
                 assert response.status == 200 and xml.findtext('.//'+NS+'Status') == 'INSYNC'
-                receipt_id = xml.findtext('.//'+NS+'Id'); assert receipt_id and re.fullmatch('/change/C[A-Z0-9]+', receipt_id)
+                receipt_id = xml.findtext('.//'+NS+'Id')
+                assert receipt_id and re.fullmatch('/change/C[A-Z0-9]+', receipt_id)
+                submitted = datetime.fromisoformat(xml.findtext('.//'+NS+'SubmittedAt').replace('Z', '+00:00'))
+                assert submitted.utcoffset() is not None
                 expect(page.get_by_text(receipt_id, exact=True)).to_be_visible()
                 row = rows.get_by_role('row').filter(has=page.get_by_role('cell', name=rr['Name'], exact=True))
                 for value in ['PTR', str(rr['TTL']), rr['ResourceRecords'][0]['Value']]:
@@ -140,6 +144,12 @@ def exercise(browser, origin, participant, client, zones, baseline, siblings, wa
                 assert len(reads) == 1
                 params = parse_qs(urlsplit(reads[0].url).query)
                 assert params['name'] == [rr['Name']] and params['type'] == ['PTR']
+                readback = reads[0].response()
+                assert readback and readback.status == 200
+                listed = ET.fromstring(readback.body()).find(NS+'ResourceRecordSets/'+NS+'ResourceRecordSet')
+                assert listed is not None and listed.findtext(NS+'Name') == rr['Name']
+                assert listed.findtext(NS+'Type') == 'PTR' and listed.findtext(NS+'TTL') == str(rr['TTL'])
+                assert [e.text for e in listed.iter(NS+'Value')] == [rr['ResourceRecords'][0]['Value']]
                 assert client.get_change(Id=receipt_id)['ChangeInfo']['Status'] == 'INSYNC'
                 assert answer(client, zone, rr) == ('NOERROR', [rr['ResourceRecords'][0]['Value']])
                 assert rr in client.list_resource_record_sets(HostedZoneId=zone)['ResourceRecordSets']
@@ -151,7 +161,11 @@ def exercise(browser, origin, participant, client, zones, baseline, siblings, wa
                 assert client.list_resource_record_sets(HostedZoneId=zone)['ResourceRecordSets'] == baseline[i]
                 assert answer(client, zone, rr) == ('NXDOMAIN', [])
             assert answer(client, zone, siblings[i]) == ('NOERROR', [siblings[i]['ResourceRecords'][0]['Value']])
-        assert len(writes) == 2 and not outside and not page_errors
+        assert [req.method for req in writes] == ['POST', 'POST'] and not outside and not page_errors
+        for i, zone in enumerate(zones):
+            current = client.list_resource_record_sets(HostedZoneId=zone)['ResourceRecordSets']
+            expected = baseline[i] + ([wanted[0]] if i == 0 else [])
+            assert sorted(current, key=lambda r: (r['Name'], r['Type'])) == sorted(expected, key=lambda r: (r['Name'], r['Type']))
     finally:
         context.close()
 
