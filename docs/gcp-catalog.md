@@ -251,8 +251,8 @@ its single permanent application and code deployments are served by the native
 | Issue | Service | Reason |
 | --- | --- | --- |
 | #319 | Batch | The only create method, `jobs.create`, runs a workload |
-| #323 | Google Cloud Universal Ledger | No discovery document in the pinned corpus |
-| #325 | License Manager | No discovery document in the pinned corpus (`licensing.v1` is Workspace license assignment) |
+| #323 | Google Cloud Universal Ledger | The published v1 API lists and gets existing network endpoints. [P0 scope and discovery evidence](coverage-assessment.md#google-cloud-universal-ledger) |
+| #325 | License Manager | The v1 API manages regional license configurations. [P0 scope and service definition](coverage-assessment.md#license-manager) |
 | #330 | Cloud Managed Lustre | No discovery document in the pinned corpus |
 | #331 | Cloud Storage | Served by the native Cloud Storage provider ([guide](gcp-storage.md)), not the catalog |
 | #334 | Cloud Storage for Firebase | `firebasestorage.v1beta` only links Cloud Storage buckets to Firebase; those buckets belong to the native Cloud Storage provider |
@@ -275,7 +275,8 @@ its single permanent application and code deployments are served by the native
 | #387 | Google Device Cloud | No discovery document in the pinned corpus |
 | #389 | BigQuery | Datasets and tables hold row data (`tabledata.insertAll`) and jobs run queries (`jobs.insert`, `jobs.query`) |
 | #391 | Cloud Life Sciences | The only resource method, `pipelines.run`, runs a workload, and operations exist only for runs |
-| #392, #393 | Data Studio, Data Studio Pro | No discovery document in the pinned corpus |
+| #392 | Data Studio (formerly Looker Studio) | The API searches assets and manages their permissions for authorized organizations. [P0 scope and API reference](coverage-assessment.md#data-studio) |
+| #393 | Data Studio Pro | No discovery document in the pinned corpus |
 | #395 | Dataflow | Every resource-creating method runs or launches a pipeline, and the paths use `{projectId}` and `{location}` without AIP resource names |
 | #398 | Earth Engine | No discovery document in the pinned corpus |
 
